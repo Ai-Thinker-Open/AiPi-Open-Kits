@@ -1,0 +1,4 @@
+[submodule "aithinker_Ai-M6X_SDK"]
+	path = aithinker_Ai-M6X_SDK
+	url = https://github.com/Ai-Thinker-Open/aithinker_Ai-M6X_SDK.git
+	branch = release/AiPi_Eyes_SDK
