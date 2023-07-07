@@ -1,6 +1,6 @@
 .vscode
+build
 **/build
 **/_build
 tools/reg_parser/Peripherals/*_reg.h
 tools/reg_parser/InitVals/*_register.c
-
