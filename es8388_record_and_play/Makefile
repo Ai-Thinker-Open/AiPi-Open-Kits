@@ -1,5 +1,5 @@
 SDK_DEMO_PATH ?= .
-BL_SDK_BASE ?= $(SDK_DEMO_PATH)/../bouffalo_sdk
+BL_SDK_BASE ?= $(SDK_DEMO_PATH)/../aithinker_Ai-M6X_SDK
 
 export BL_SDK_BASE
 
