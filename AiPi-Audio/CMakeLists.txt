@@ -8,4 +8,4 @@ sdk_add_include_directories(.)
 target_sources(app PRIVATE bsp_es8388.c)
 sdk_set_main_file(main.c)
 
-project(ES8388)
+project(AiPi-Audio)
