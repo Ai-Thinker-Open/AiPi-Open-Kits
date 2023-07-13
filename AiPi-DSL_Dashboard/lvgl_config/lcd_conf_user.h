@@ -1,6 +1,7 @@
 #ifndef _LCD_CONF_USER_H_
 #define _LCD_CONF_USER_H_
 
+
 /* clang-format off */
 
 /* Select screen Type, Optional:
@@ -335,6 +336,11 @@
     1: enable
 */
 #define ST7796_SPI_COLOR_REVERSAL 0
+
+// #define LCD_ROTATED_NONE
+// #define LCD_ROTATED_90
+// #define LCD_ROTATED_180
+#define LCD_ROTATED_270
 /* spi st7796 config */
 #elif defined LCD_SPI_GC9A01
 
