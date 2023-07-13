@@ -163,11 +163,17 @@ extern "C" {
 	extern int src_home_digital_date_mont_value;
 	extern int src_home_digital_date_day_value;
 	extern int src_home_digital_date_wday_value;
+
 	void ui_init_style(lv_style_t* style);
 	void init_scr_del_flag(lv_ui* ui);
 	void setup_ui(lv_ui* ui);
 	extern lv_ui guider_ui;
+	extern lv_obj_t* g_kb_src_home;
 	void setup_scr_src_home(lv_ui* ui);
+	void shortcuts_scr_set(lv_ui* ui);
+	void SmartCtrl_scr_set(lv_ui* ui);
+	void kb_src_home_event_cb(lv_event_t* e);
+	void ta_src_home_event_cb(lv_event_t* e);
 	LV_IMG_DECLARE(_novoiceclose_alpha_20x20);
 	LV_IMG_DECLARE(_jlcclose_alpha_45x45);
 	LV_IMG_DECLARE(_VSclose_alpha_45x45);
@@ -228,6 +234,18 @@ extern "C" {
 	LV_IMG_DECLARE(_tianqiqing_i_dayu_alpha_20x20);
 	LV_IMG_DECLARE(_diaodeng_s_alpha_80x110);
 
+	LV_IMG_DECLARE(_baiduclose_alpha_35x35);
+	LV_IMG_DECLARE(_gooleclose_alpha_35x35);
+	LV_IMG_DECLARE(_jlcopen_alpha_35x35);
+	LV_IMG_DECLARE(_OBSopen_alpha_35x35);
+	LV_IMG_DECLARE(_VSopen_alpha_35x35);
+	LV_IMG_DECLARE(_OBScloes_alpha_35x35);
+	LV_IMG_DECLARE(_dindclose_alpha_35x35);
+	LV_IMG_DECLARE(_gooleopen_alpha_35x35);
+	LV_IMG_DECLARE(_windopen_alpha_35x35);
+	LV_IMG_DECLARE(_baiduopen_alpha_35x35);
+	LV_IMG_DECLARE(_jlcclose_alpha_35x35);
+	LV_IMG_DECLARE(_VSclose_alpha_35x35);
 #ifdef __cplusplus
 }
 #endif
