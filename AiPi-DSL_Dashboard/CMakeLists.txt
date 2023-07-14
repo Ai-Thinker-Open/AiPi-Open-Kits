@@ -16,6 +16,7 @@ file(GLOB_RECURSE UI "${CMAKE_CURRENT_SOURCE_DIR}/UI/*.c" "${CMAKE_CURRENT_SOURC
 sdk_add_include_directories(main wifi BLE_HID lvgl_config UI UI/generated UI/generated/guider_fonts UI/generated/images UI/custom components)
 
 target_sources(app PRIVATE ${sources} ${UI})
+
 sdk_set_main_file(main/main.c)
 
 project(AiPi-DSL_Dashboard)

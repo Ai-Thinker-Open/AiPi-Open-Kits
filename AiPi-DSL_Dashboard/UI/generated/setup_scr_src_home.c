@@ -634,8 +634,8 @@ void setup_scr_src_home(lv_ui* ui) {
 	{
 		//Write codes src_home_ta_1
 		ui->src_home_ta_1 = lv_textarea_create(ui->config);
-		lv_obj_set_pos(ui->src_home_ta_1, 42+40, 100-25);
-		lv_obj_set_size(ui->src_home_ta_1, 130, 30);
+		lv_obj_set_pos(ui->src_home_ta_1, 42+32, 100-25);
+		lv_obj_set_size(ui->src_home_ta_1, 130+20, 30);
 		lv_obj_set_scrollbar_mode(ui->src_home_ta_1, LV_SCROLLBAR_MODE_OFF);
 
 		//Set style for src_home_ta_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -703,10 +703,10 @@ void setup_scr_src_home(lv_ui* ui) {
 
 		//Write codes src_home_ddlist_1
 		ui->src_home_ddlist_1 = lv_dropdown_create(ui->config);
-		lv_obj_set_pos(ui->src_home_ddlist_1, 42+40, 47-20);
-		lv_obj_set_size(ui->src_home_ddlist_1, 130, 30);
+		lv_obj_set_pos(ui->src_home_ddlist_1, 42+32, 47-20);
+		lv_obj_set_size(ui->src_home_ddlist_1, 130+20, 30);
 		lv_obj_set_scrollbar_mode(ui->src_home_ddlist_1, LV_SCROLLBAR_MODE_OFF);
-		lv_dropdown_set_options(ui->src_home_ddlist_1, "SSID1\nSSID2\nSSID3\nSSID4\nSSID5\nSSID6\nSSID7\nSSID8\nSSID9\nSSID10");
+		lv_dropdown_set_options(ui->src_home_ddlist_1, "FAE@Seahi\nAIOT@FAE\nzhibo_01");
 
 		//Set style for src_home_ddlist_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
 		lv_obj_set_style_radius(ui->src_home_ddlist_1, 3, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -770,7 +770,7 @@ void setup_scr_src_home(lv_ui* ui) {
 
 		//Write codes src_home_label_ssid
 		ui->src_home_label_ssid = lv_label_create(ui->config);
-		lv_obj_set_pos(ui->src_home_label_ssid, -2+40, 55-20);
+		lv_obj_set_pos(ui->src_home_label_ssid, 30, 55-20);
 		lv_obj_set_size(ui->src_home_label_ssid, 48, 15);
 		lv_obj_set_scrollbar_mode(ui->src_home_label_ssid, LV_SCROLLBAR_MODE_OFF);
 		lv_label_set_text(ui->src_home_label_ssid, "SSID:");
@@ -800,7 +800,7 @@ void setup_scr_src_home(lv_ui* ui) {
 
 		//Write codes src_home_label_pass
 		ui->src_home_label_pass = lv_label_create(ui->config);
-		lv_obj_set_pos(ui->src_home_label_pass, -2+40, 108-25);
+		lv_obj_set_pos(ui->src_home_label_pass, 30, 108-25);
 		lv_obj_set_size(ui->src_home_label_pass, 45, 14);
 		lv_obj_set_scrollbar_mode(ui->src_home_label_pass, LV_SCROLLBAR_MODE_OFF);
 		lv_label_set_text(ui->src_home_label_pass, "PASS:");

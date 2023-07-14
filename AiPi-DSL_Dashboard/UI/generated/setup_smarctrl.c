@@ -55,7 +55,7 @@ __attribute__((unused))  void ta_src_home_event_cb(lv_event_t* e)
 void SmartCtrl_scr_set(lv_ui* ui)
 {
     ui->src_home_imgbtn_openL = lv_imgbtn_create(ui->src_home_tabview_1_SmartCtrl);
-    lv_obj_set_pos(ui->src_home_imgbtn_openL, 74, 103);
+    lv_obj_set_pos(ui->src_home_imgbtn_openL, 74, 103-50);
     lv_obj_set_size(ui->src_home_imgbtn_openL, 80, 110);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_openL, LV_SCROLLBAR_MODE_OFF);
 
@@ -107,7 +107,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_confiL
     ui->src_home_imgbtn_confiL = lv_imgbtn_create(ui->src_home_tabview_1_SmartCtrl);
-    lv_obj_set_pos(ui->src_home_imgbtn_confiL, 185, 34);
+    lv_obj_set_pos(ui->src_home_imgbtn_confiL, 185+60, 34);
     lv_obj_set_size(ui->src_home_imgbtn_confiL, 25, 25);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_confiL, LV_SCROLLBAR_MODE_OFF);
 
@@ -155,7 +155,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_18
     ui->src_home_label_18 = lv_label_create(ui->src_home_tabview_1_SmartCtrl);
-    lv_obj_set_pos(ui->src_home_label_18, 178, 54);
+    lv_obj_set_pos(ui->src_home_label_18, 178+60, 54);
     lv_obj_set_size(ui->src_home_label_18, 27, 22);
     lv_obj_set_scrollbar_mode(ui->src_home_label_18, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_18, "点击编辑");
@@ -185,7 +185,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_closeL
     ui->src_home_imgbtn_closeL = lv_imgbtn_create(ui->src_home_tabview_1_SmartCtrl);
-    lv_obj_set_pos(ui->src_home_imgbtn_closeL, 74, 103);
+    lv_obj_set_pos(ui->src_home_imgbtn_closeL, 74, 103-50);
     lv_obj_set_size(ui->src_home_imgbtn_closeL, 80, 110);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_closeL, LV_SCROLLBAR_MODE_OFF);
 
@@ -233,7 +233,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_14
     ui->src_home_label_14 = lv_label_create(ui->src_home_tabview_1_SmartCtrl);
-    lv_obj_set_pos(ui->src_home_label_14, 25, 10);
+    lv_obj_set_pos(ui->src_home_label_14, 25+30, 10);
     lv_obj_set_size(ui->src_home_label_14, 156, 14);
     lv_obj_set_scrollbar_mode(ui->src_home_label_14, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_14, "wx.ai-thinker.com:1833");
@@ -263,7 +263,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_user
     ui->src_home_imgbtn_user = lv_imgbtn_create(ui->src_home_tabview_1_SmartCtrl);
-    lv_obj_set_pos(ui->src_home_imgbtn_user, 191, 6);
+    lv_obj_set_pos(ui->src_home_imgbtn_user, 191+60, 6);
     lv_obj_set_size(ui->src_home_imgbtn_user, 20, 20);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_user, LV_SCROLLBAR_MODE_OFF);
 
@@ -312,11 +312,11 @@ void SmartCtrl_scr_set(lv_ui* ui)
     //Write codes src_home_cont_3
     ui->src_home_cont_3 = lv_obj_create(ui->src_home_tabview_1_SmartCtrl);
     lv_obj_set_pos(ui->src_home_cont_3, 8, 5);
-    lv_obj_set_size(ui->src_home_cont_3, 205, 216);
+    lv_obj_set_size(ui->src_home_cont_3, 205+60, 175);
     lv_obj_set_scrollbar_mode(ui->src_home_cont_3, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_cont_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->src_home_cont_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui->src_home_cont_3, 5, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->src_home_cont_3, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_color(ui->src_home_cont_3, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_dir(ui->src_home_cont_3, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -329,6 +329,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
     lv_obj_set_style_shadow_ofs_y(ui->src_home_cont_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui->src_home_cont_3, lv_color_make(0x47, 0x47, 0x47), LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui->src_home_cont_3, 1, LV_PART_MAIN|LV_STATE_DEFAULT);
+
     lv_obj_set_style_border_opa(ui->src_home_cont_3, 87, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui->src_home_cont_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui->src_home_cont_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -342,7 +343,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
     //Write codes src_home_cont_4
     ui->src_home_cont_4 = lv_obj_create(ui->src_home_cont_3);
     lv_obj_set_pos(ui->src_home_cont_4, 0, 0);
-    lv_obj_set_size(ui->src_home_cont_4, 205, 24);
+    lv_obj_set_size(ui->src_home_cont_4, 205+60, 24);
     lv_obj_set_scrollbar_mode(ui->src_home_cont_4, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_cont_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -367,7 +368,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_10
     ui->src_home_imgbtn_10 = lv_imgbtn_create(ui->src_home_cont_4);
-    lv_obj_set_pos(ui->src_home_imgbtn_10, 172, 0);
+    lv_obj_set_pos(ui->src_home_imgbtn_10, 172+56, 0);
     lv_obj_set_size(ui->src_home_imgbtn_10, 20, 20);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_10, LV_SCROLLBAR_MODE_OFF);
 
@@ -445,7 +446,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_host
     ui->src_home_label_host = lv_label_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_label_host, 6, 38);
+    lv_obj_set_pos(ui->src_home_label_host, 6, 40);
     lv_obj_set_size(ui->src_home_label_host, 29, 12);
     lv_obj_set_scrollbar_mode(ui->src_home_label_host, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_host, "Host:");
@@ -475,7 +476,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_username
     ui->src_home_label_username = lv_label_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_label_username, 3, 82);
+    lv_obj_set_pos(ui->src_home_label_username, 3, 82-10);
     lv_obj_set_size(ui->src_home_label_username, 63, 13);
     lv_obj_set_scrollbar_mode(ui->src_home_label_username, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_username, "UserName:");
@@ -505,7 +506,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_port
     ui->src_home_label_port = lv_label_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_label_port, 129, 40);
+    lv_obj_set_pos(ui->src_home_label_port, 129+60, 40);
     lv_obj_set_size(ui->src_home_label_port, 29, 12);
     lv_obj_set_scrollbar_mode(ui->src_home_label_port, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_port, "Port:");
@@ -535,7 +536,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_passworld
     ui->src_home_label_passworld = lv_label_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_label_passworld, 2, 124);
+    lv_obj_set_pos(ui->src_home_label_passworld, 2, 124-10-5);
     lv_obj_set_size(ui->src_home_label_passworld, 63, 13);
     lv_obj_set_scrollbar_mode(ui->src_home_label_passworld, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_passworld, "Passworld:");
@@ -565,8 +566,8 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_ta_mqHost
     ui->src_home_ta_mqHost = lv_textarea_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_ta_mqHost, 35, 28);
-    lv_obj_set_size(ui->src_home_ta_mqHost, 94, 32);
+    lv_obj_set_pos(ui->src_home_ta_mqHost, 35, 33);
+    lv_obj_set_size(ui->src_home_ta_mqHost, 94+60, 22);
     lv_obj_set_scrollbar_mode(ui->src_home_ta_mqHost, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_ta_mqHost. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -604,7 +605,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_ta_mqPort
     ui->src_home_ta_mqPort = lv_textarea_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_ta_mqPort, 156, 34);
+    lv_obj_set_pos(ui->src_home_ta_mqPort, 156+60, 34);
     lv_obj_set_size(ui->src_home_ta_mqPort, 33, 23);
     lv_obj_set_scrollbar_mode(ui->src_home_ta_mqPort, LV_SCROLLBAR_MODE_OFF);
 
@@ -643,8 +644,8 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_ta_mqUsername
     ui->src_home_ta_mqUsername = lv_textarea_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_ta_mqUsername, 63, 71);
-    lv_obj_set_size(ui->src_home_ta_mqUsername, 128, 32);
+    lv_obj_set_pos(ui->src_home_ta_mqUsername, 63, 71-5);
+    lv_obj_set_size(ui->src_home_ta_mqUsername, 128, 22);
     lv_obj_set_scrollbar_mode(ui->src_home_ta_mqUsername, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_ta_mqUsername. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -682,8 +683,8 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_ta_mqtt_pass
     ui->src_home_ta_mqtt_pass = lv_textarea_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_ta_mqtt_pass, 63, 113);
-    lv_obj_set_size(ui->src_home_ta_mqtt_pass, 128, 32);
+    lv_obj_set_pos(ui->src_home_ta_mqtt_pass, 63, 113-10-3);
+    lv_obj_set_size(ui->src_home_ta_mqtt_pass, 128, 22);
     lv_obj_set_scrollbar_mode(ui->src_home_ta_mqtt_pass, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_ta_mqtt_pass. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -721,7 +722,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_btn_connect_mqtt
     ui->src_home_btn_connect_mqtt = lv_btn_create(ui->src_home_cont_3);
-    lv_obj_set_pos(ui->src_home_btn_connect_mqtt, 73, 151);
+    lv_obj_set_pos(ui->src_home_btn_connect_mqtt, 73+30, 151-15);
     lv_obj_set_size(ui->src_home_btn_connect_mqtt, 51, 26);
     lv_obj_set_scrollbar_mode(ui->src_home_btn_connect_mqtt, LV_SCROLLBAR_MODE_OFF);
 
@@ -750,8 +751,8 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_cont_6
     ui->src_home_cont_6 = lv_obj_create(ui->src_home_tabview_1_SmartCtrl);
-    lv_obj_set_pos(ui->src_home_cont_6, 35, 39);
-    lv_obj_set_size(ui->src_home_cont_6, 152, 226);
+    lv_obj_set_pos(ui->src_home_cont_6, 10, 30);
+    lv_obj_set_size(ui->src_home_cont_6, 152+90, 150);
     lv_obj_set_scrollbar_mode(ui->src_home_cont_6, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_cont_6. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -777,10 +778,9 @@ void SmartCtrl_scr_set(lv_ui* ui)
     //Hidden for widget src_home_cont_6
     lv_obj_add_flag(ui->src_home_cont_6, LV_OBJ_FLAG_HIDDEN);
 
-
     //Write codes src_home_label_15
     ui->src_home_label_15 = lv_label_create(ui->src_home_cont_6);
-    lv_obj_set_pos(ui->src_home_label_15, 2, 19);
+    lv_obj_set_pos(ui->src_home_label_15, 70-36, 19);
     lv_obj_set_size(ui->src_home_label_15, 41, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_15, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_15, "Topic:");
@@ -810,8 +810,8 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_16
     ui->src_home_label_16 = lv_label_create(ui->src_home_cont_6);
-    lv_obj_set_pos(ui->src_home_label_16, 0, 123);
-    lv_obj_set_size(ui->src_home_label_16, 73, 15);
+    lv_obj_set_pos(ui->src_home_label_16, 0, 83);
+    lv_obj_set_size(ui->src_home_label_16, 80, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_16, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_16, "关闭时发送:");
     lv_label_set_long_mode(ui->src_home_label_16, LV_LABEL_LONG_WRAP);
@@ -840,7 +840,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_ta_topic
     ui->src_home_ta_topic = lv_textarea_create(ui->src_home_cont_6);
-    lv_obj_set_pos(ui->src_home_ta_topic, 0, 35);
+    lv_obj_set_pos(ui->src_home_ta_topic, 75, 17);
     lv_obj_set_size(ui->src_home_ta_topic, 142, 20);
     lv_obj_set_scrollbar_mode(ui->src_home_ta_topic, LV_SCROLLBAR_MODE_OFF);
 
@@ -879,8 +879,8 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_ta_msg_close
     ui->src_home_ta_msg_close = lv_textarea_create(ui->src_home_cont_6);
-    lv_obj_set_pos(ui->src_home_ta_msg_close, 1, 141);
-    lv_obj_set_size(ui->src_home_ta_msg_close, 142, 38);
+    lv_obj_set_pos(ui->src_home_ta_msg_close, 75, 50+28);
+    lv_obj_set_size(ui->src_home_ta_msg_close, 142, 30);
     lv_obj_set_scrollbar_mode(ui->src_home_ta_msg_close, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_ta_msg_close. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -911,14 +911,14 @@ void SmartCtrl_scr_set(lv_ui* ui)
     lv_obj_set_style_radius(ui->src_home_ta_msg_close, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->src_home_ta_msg_close, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->src_home_ta_msg_close, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
-    lv_textarea_set_text(ui->src_home_ta_msg_close, "{status:0}");
+    lv_textarea_set_text(ui->src_home_ta_msg_close, "{\"status\":0}");
 
     //use keyboard on src_home_ta_msg_close
     lv_obj_add_event_cb(ui->src_home_ta_msg_close, ta_src_home_event_cb, LV_EVENT_ALL, g_kb_src_home);
 
     //Write codes src_home_btn_topicOK
     ui->src_home_btn_topicOK = lv_btn_create(ui->src_home_cont_6);
-    lv_obj_set_pos(ui->src_home_btn_topicOK, 40, 194);
+    lv_obj_set_pos(ui->src_home_btn_topicOK, 40+50, 115);
     lv_obj_set_size(ui->src_home_btn_topicOK, 60, 24);
     lv_obj_set_scrollbar_mode(ui->src_home_btn_topicOK, LV_SCROLLBAR_MODE_OFF);
 
@@ -947,7 +947,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_17
     ui->src_home_label_17 = lv_label_create(ui->src_home_cont_6);
-    lv_obj_set_pos(ui->src_home_label_17, 23, 3);
+    lv_obj_set_pos(ui->src_home_label_17, 23+50, 3);
     lv_obj_set_size(ui->src_home_label_17, 100, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_17, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_17, "智能灯控制配置");
@@ -977,8 +977,8 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_19
     ui->src_home_label_19 = lv_label_create(ui->src_home_cont_6);
-    lv_obj_set_pos(ui->src_home_label_19, 1, 62);
-    lv_obj_set_size(ui->src_home_label_19, 70, 15);
+    lv_obj_set_pos(ui->src_home_label_19, 0, 55);
+    lv_obj_set_size(ui->src_home_label_19, 80, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_19, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_19, "打开时发送:");
     lv_label_set_long_mode(ui->src_home_label_19, LV_LABEL_LONG_WRAP);
@@ -1007,8 +1007,8 @@ void SmartCtrl_scr_set(lv_ui* ui)
 
     //Write codes src_home_ta_msg_open
     ui->src_home_ta_msg_open = lv_textarea_create(ui->src_home_cont_6);
-    lv_obj_set_pos(ui->src_home_ta_msg_open, 1, 81);
-    lv_obj_set_size(ui->src_home_ta_msg_open, 142, 38);
+    lv_obj_set_pos(ui->src_home_ta_msg_open, 75, 62-20);
+    lv_obj_set_size(ui->src_home_ta_msg_open, 142, 30);
     lv_obj_set_scrollbar_mode(ui->src_home_ta_msg_open, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_ta_msg_open. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -1039,7 +1039,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
     lv_obj_set_style_radius(ui->src_home_ta_msg_open, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->src_home_ta_msg_open, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->src_home_ta_msg_open, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
-    lv_textarea_set_text(ui->src_home_ta_msg_open, "{status:1}");
+    lv_textarea_set_text(ui->src_home_ta_msg_open, "{\"status\":1}");
 
     //use keyboard on src_home_ta_msg_open
     lv_obj_add_event_cb(ui->src_home_ta_msg_open, ta_src_home_event_cb, LV_EVENT_ALL, g_kb_src_home);

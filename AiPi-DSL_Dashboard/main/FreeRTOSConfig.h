@@ -28,17 +28,17 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-/*-----------------------------------------------------------
- * Application specific definitions.
- *
- * These definitions should be adjusted for your particular hardware and
- * application requirements.
- *
- * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
- * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
- *
- * See http://www.freertos.org/a00110.html.
- *----------------------------------------------------------*/
+ /*-----------------------------------------------------------
+  * Application specific definitions.
+  *
+  * These definitions should be adjusted for your particular hardware and
+  * application requirements.
+  *
+  * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
+  * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
+  *
+  * See http://www.freertos.org/a00110.html.
+  *----------------------------------------------------------*/
 #include "stdio.h"
 
 #ifdef BL702
@@ -75,7 +75,7 @@
 #define configUSE_TICKLESS_IDLE                 0
 #define configUSE_POSIX_ERRNO                   1
 
-/* Co-routine definitions. */
+  /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES           0
 #define configMAX_CO_ROUTINE_PRIORITIES (2)
 

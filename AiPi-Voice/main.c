@@ -13,20 +13,19 @@
 #include <semphr.h>
 #include <timers.h>
 
-#define TEMP_BUF_SIZE 10 * 1024
-#define OPEN_ADDR 0x210000//0x210000
+#define TEMP_BUF_SIZE 25 * 1024
+#define OPEN_ADDR 0x210000//0x212000
 #define OPEN_SIZE (140822)
 #define CLOSE_ADDR 0x2e4000
 #define CLOSE_SIZE (145056)
-
-uint16_t temp1[TEMP_BUF_SIZE];
-uint16_t temp2[TEMP_BUF_SIZE];
+uint8_t temp1[TEMP_BUF_SIZE];
+uint8_t temp2[TEMP_BUF_SIZE];
 uint32_t pcm_size = 827212;
 uint32_t pcm_addr = 0;
 uint32_t play_size = 0;
+uint32_t read_size = 0;
 static int tmp_flag = 0;
 uint8_t audac_dma_stop = 0;
-
 
 struct bflb_device_s* audac_dma_hd;
 struct bflb_device_s* audac_hd;
@@ -47,14 +46,23 @@ void audio_dma_callback(void* arg)
     {
         audac_dma_stop = 0;
         bflb_dma_channel_stop(audac_dma_hd);
+        bflb_audac_feature_control(audac_hd, AUDAC_CMD_PLAY_STOP, 0);
     }
     else
     {
+        // if(tmp_flag & 0x01) {
+        //     audac_dma_config(temp2, read_size);
+        // }
+        // else{
+        //     audac_dma_config(temp1, read_size);
+        // }
+        // bflb_dma_channel_start(audac_dma_hd);
         pcm_read();
+        // bflb_dma_channel_stop(audac_dma_hd);
+        // audac_dma_init();
+        // pcm_read();
+        // bflb_dma_channel_start(audac_dma_hd);
     }
-    // bflb_dma_channel_stop(audac_dma_hd);
-    // pcm_read();
-    // bflb_dma_channel_start(audac_dma_hd);
 
 }
 
@@ -116,6 +124,39 @@ void audac_dma_init(void)
     bflb_dma_channel_lli_link_head(audac_dma_hd, lli_pool, dma_lli_cnt);
 }
 
+void audac_dma_config(uint8_t* dataBuf, uint32_t dataBytes)
+{
+    uint32_t dma_lli_cnt;
+    static struct bflb_dma_channel_lli_pool_s lli_pool[20];
+    struct bflb_dma_channel_lli_transfer_s transfers[2];
+    struct bflb_dma_channel_config_s audac_dma_cfg;
+
+    // audac_dma_cfg.direction = DMA_MEMORY_TO_PERIPH;
+    // audac_dma_cfg.src_req = DMA_REQUEST_NONE;
+    // audac_dma_cfg.dst_req = DMA_REQUEST_AUDAC_TX;
+    // audac_dma_cfg.src_addr_inc = DMA_ADDR_INCREMENT_ENABLE;
+    // audac_dma_cfg.dst_addr_inc = DMA_ADDR_INCREMENT_DISABLE;
+    // audac_dma_cfg.src_burst_count = DMA_BURST_INCR8;
+    // audac_dma_cfg.dst_burst_count = DMA_BURST_INCR8;
+    // audac_dma_cfg.src_width = DMA_DATA_WIDTH_8BIT;
+    // audac_dma_cfg.dst_width = DMA_DATA_WIDTH_8BIT;
+
+    // audac_dma_hd = bflb_device_get_by_name("dma0_ch0");
+    // bflb_dma_channel_init(audac_dma_hd, &audac_dma_cfg);
+    // bflb_dma_channel_irq_attach(audac_dma_hd, audio_dma_callback, NULL);
+
+    transfers[0].src_addr = (uint32_t)dataBuf;
+    transfers[0].dst_addr = (uint32_t)DMA_ADDR_AUDAC_TDR;
+    transfers[0].nbytes = dataBytes;
+
+    // transfers[1].src_addr = (uint32_t)temp2;
+    // transfers[1].dst_addr = (uint32_t)DMA_ADDR_AUDAC_TDR;
+    // transfers[1].nbytes = sizeof(temp2);
+
+    // bflb_l1c_dcache_clean_range(temp1, TEMP_BUF_SIZE);
+    dma_lli_cnt = bflb_dma_channel_lli_reload(audac_dma_hd, lli_pool, 20, transfers, 1);
+    bflb_dma_channel_lli_link_head(audac_dma_hd, lli_pool, dma_lli_cnt);
+}
 /* audio dac init */
 static void audac_init(void)
 {
@@ -130,7 +171,7 @@ static void audac_init(void)
 
     struct bflb_audac_volume_config_s audac_volume_cfg = {
         .mute_ramp_en = true,
-        .mute_up_ramp_rate = AUDAC_RAMP_RATE_FS_8,
+        .mute_up_ramp_rate = AUDAC_RAMP_RATE_FS_32,
         .mute_down_ramp_rate = AUDAC_RAMP_RATE_FS_8,
         .volume_update_mode = AUDAC_VOLUME_UPDATE_MODE_RAMP,
         .volume_ramp_rate = AUDAC_RAMP_RATE_FS_128,
@@ -155,19 +196,20 @@ static void audac_init(void)
 int pcm_read(void)
 {
 
-    uint32_t read_size;
 
     if (tmp_flag & 0x01) {
         // audac_dma_init(temp2);
         // bflb_dma_channel_start(audac_dma_hd);
         if ((play_size + sizeof(temp1)) > pcm_size) {
-            // printf("1play_size:%d, read_size:%d\r\n", play_size, pcm_size - play_size);
-            // bflb_flash_read(pcm_addr + play_size, temp1, pcm_size - play_size);
+            read_size = pcm_size - play_size;
+            printf("1play_size:%d, read_size:%d\r\n", play_size, read_size);
+            bflb_flash_read(pcm_addr + play_size, temp1, read_size);
             play_size = 0;
             audac_dma_stop = 1;
             // bflb_dma_channel_stop(audac_dma_hd);
         }
         else {
+            read_size = sizeof(temp1);
             printf("1play_size:%d, read_size:%d\r\n", play_size, sizeof(temp1));
             bflb_flash_read(pcm_addr + play_size, temp1, sizeof(temp1));
             play_size += sizeof(temp1);
@@ -177,13 +219,15 @@ int pcm_read(void)
         // audac_dma_init(temp1);
         // bflb_dma_channel_start(audac_dma_hd);
         if ((play_size + sizeof(temp2)) > pcm_size) {
-            // printf("2play_size:%d, read_size:%d\r\n", play_size, pcm_size - play_size);
-            // bflb_flash_read(pcm_addr + play_size, temp2, pcm_size - play_size);
+            read_size = pcm_size - play_size;
+            printf("2play_size:%d, read_size:%d\r\n", play_size, read_size);
+            bflb_flash_read(pcm_addr + play_size, temp2, read_size);
             play_size = 0;
             audac_dma_stop = 1;
             // bflb_dma_channel_stop(audac_dma_hd);
         }
         else {
+            read_size = sizeof(temp2);
             printf("2play_size:%d, read_size:%d\r\n", play_size, sizeof(temp2));
             bflb_flash_read(pcm_addr + play_size, temp2, sizeof(temp2));
             play_size += sizeof(temp2);
@@ -207,7 +251,10 @@ void play_voice(uint32_t play_addr, uint32_t voice_size)
     bflb_dma_channel_stop(audac_dma_hd);
     audac_dma_init();
     pcm_read();
+    // audac_dma_config(temp1, read_size);
     pcm_read();
+
+    bflb_audac_feature_control(audac_hd, AUDAC_CMD_PLAY_START, 0);
     bflb_dma_channel_start(audac_dma_hd);
     // bflb_audac_feature_control(audac_hd, AUDAC_CMD_PLAY_START, 0);
 }
@@ -240,7 +287,7 @@ int audio_pcm_init(void)
     // bflb_dma_channel_start(audac_dma_hd);
 
     /* audac start */
-    bflb_audac_feature_control(audac_hd, AUDAC_CMD_PLAY_START, 0);
+    // bflb_audac_feature_control(audac_hd, AUDAC_CMD_PLAY_START, 0);
     // bflb_mtimer_delay_ms(1000);
 
     // /* enable mute */

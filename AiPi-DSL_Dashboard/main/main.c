@@ -49,6 +49,7 @@ static int bl61x_get_heap_size(void);
 
 static void bl61x_show_heap_size_task(void* arg)
 {
+
     while (1) {
         printf("[%s:%d]heap_size-------> %d\r\n", DBG_TAG, __LINE__, bl61x_get_heap_size());
         vTaskDelay(3000/portTICK_PERIOD_MS);
@@ -62,7 +63,6 @@ int main(void)
 
     tcpip_init(NULL, NULL);
     wifi_start_firmware_task();
-    // wifi_mgmr_ap_stop();
     //init easyflash
     bflb_mtd_init();
     easyflash_init();
@@ -73,8 +73,10 @@ int main(void)
     lv_port_indev_init();
     setup_ui(&guider_ui);
     custom_init(&guider_ui);
+    events_init(&guider_ui);
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 1, NULL);
     xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 1024, NULL, 2, NULL);
+
 
     vTaskStartScheduler();
     // while (1) {

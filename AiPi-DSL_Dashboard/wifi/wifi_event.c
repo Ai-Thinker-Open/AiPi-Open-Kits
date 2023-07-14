@@ -34,7 +34,7 @@
 
 #define DBG_TAG "WIFI EVENT"
 
-#define WIFI_STACK_SIZE     (1024*2)
+#define WIFI_STACK_SIZE     (1024*4)
 #define TASK_PRIORITY_FW    (16)
 
 static wifi_conf_t conf =
@@ -87,6 +87,8 @@ int wifi_start_firmware_task(void)
  *
  * @param code
 */
+static wifi_mgmr_scan_params_t wifi_scan_config;
+
 void wifi_event_handler(uint32_t code)
 {
 
@@ -101,12 +103,13 @@ void wifi_event_handler(uint32_t code)
         case CODE_WIFI_ON_MGMR_DONE:
         {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_MGMR_DONE", __func__);
+            // wifi_mgmr_sta_scan(&wifi_scan_config);
         }
         break;
         case CODE_WIFI_ON_SCAN_DONE:
         {
-            LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_SCAN_DONE", __func__);
             wifi_mgmr_sta_scanlist();
+            LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_SCAN_DONE SSID numbles:%d", __func__, wifi_mgmr_sta_scanlist_nums_get());
         }
         break;
         case CODE_WIFI_ON_CONNECTED:
@@ -188,15 +191,12 @@ uint8_t wifi_connect(char* ssid, char* passwd)
                 break;
             case CODE_WIFI_ON_GOT_IP:
                 wifi_sta_ip4_addr_get(&ipv4_addr, NULL, NULL, NULL);
-
                 LOG_I("wifi connened %s,IP:%s", ssid, inet_ntoa(ipv4_addr));
                 sprintf(queue_buff, "{\"ip\":{\"IP\":\"%s\"}}", inet_ntoa(ipv4_addr));
-
                 flash_erase_set(SSID_KEY, ssid);
                 flash_erase_set(PASS_KEY, passwd);
                 guider_ui.wifi_stayus = true;
                 xQueueSend(queue, queue_buff, portMAX_DELAY);
-
                 LOG_I("Wating wifi connet OK and get ip OK");
                 return 0;
             default:

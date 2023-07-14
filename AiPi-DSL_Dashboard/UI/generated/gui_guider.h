@@ -233,7 +233,7 @@ extern "C" {
 	LV_IMG_DECLARE(_next0open_alpha_20x20);
 	LV_IMG_DECLARE(_tianqiqing_i_dayu_alpha_20x20);
 	LV_IMG_DECLARE(_diaodeng_s_alpha_80x110);
-
+	LV_IMG_DECLARE(_wifi_alpha_20x20);
 	LV_IMG_DECLARE(_baiduclose_alpha_35x35);
 	LV_IMG_DECLARE(_gooleclose_alpha_35x35);
 	LV_IMG_DECLARE(_jlcopen_alpha_35x35);

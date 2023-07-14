@@ -61,12 +61,10 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_img_set_pivot(ui->src_home_img_BLE, 50, 50);
     lv_img_set_angle(ui->src_home_img_BLE, 0);
 
-
-
     //Write codes src_home_cont_BLE_TEXT
     ui->src_home_cont_BLE_TEXT = lv_obj_create(ui->src_home_tabview_1_Shortcuts);
     lv_obj_set_pos(ui->src_home_cont_BLE_TEXT, 31+30, 32-10);
-    lv_obj_set_size(ui->src_home_cont_BLE_TEXT, 183, 128);
+    lv_obj_set_size(ui->src_home_cont_BLE_TEXT, 183, 30);
     lv_obj_set_scrollbar_mode(ui->src_home_cont_BLE_TEXT, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_cont_BLE_TEXT. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -183,7 +181,7 @@ void shortcuts_scr_set(lv_ui* ui)
     //Write codes src_home_cont_dis
     ui->src_home_cont_dis = lv_obj_create(ui->src_home_tabview_1_Shortcuts);
     lv_obj_set_pos(ui->src_home_cont_dis, 0, 30);
-    lv_obj_set_size(ui->src_home_cont_dis, 290, 180);
+    lv_obj_set_size(ui->src_home_cont_dis, 290, 151);
     lv_obj_set_scrollbar_mode(ui->src_home_cont_dis, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_cont_dis. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -211,8 +209,8 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_1
     ui->src_home_imgbtn_1 = lv_imgbtn_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_imgbtn_1, 30, 50);
-    lv_obj_set_size(ui->src_home_imgbtn_1, 45, 45);
+    lv_obj_set_pos(ui->src_home_imgbtn_1, 30, 0);
+    lv_obj_set_size(ui->src_home_imgbtn_1, 35, 35);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_1, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_imgbtn_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -251,16 +249,16 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_style_img_recolor(ui->src_home_imgbtn_1, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_1, 0, LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_opa(ui->src_home_imgbtn_1, 255, LV_PART_MAIN|LV_STATE_CHECKED);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, &_VSopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, &_VSclose_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_VSopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_VSclose_alpha_45x45, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_1, LV_IMGBTN_STATE_RELEASED, NULL, &_VSopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_1, LV_IMGBTN_STATE_PRESSED, NULL, &_VSclose_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_VSopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_VSclose_alpha_35x35, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_1, LV_OBJ_FLAG_CHECKABLE);
 
     //Write codes src_home_imgbtn_2
     ui->src_home_imgbtn_2 = lv_imgbtn_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_imgbtn_2, 97, 50);
-    lv_obj_set_size(ui->src_home_imgbtn_2, 45, 45);
+    lv_obj_set_pos(ui->src_home_imgbtn_2, 97+30, 0);
+    lv_obj_set_size(ui->src_home_imgbtn_2, 35, 35);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_2, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_imgbtn_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -299,16 +297,16 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_style_img_recolor(ui->src_home_imgbtn_2, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_2, 0, LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_opa(ui->src_home_imgbtn_2, 255, LV_PART_MAIN|LV_STATE_CHECKED);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, &_baiduopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, &_baiduclose_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_baiduopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_baiduclose_alpha_45x45, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_2, LV_IMGBTN_STATE_RELEASED, NULL, &_baiduopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_2, LV_IMGBTN_STATE_PRESSED, NULL, &_baiduclose_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_baiduopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_baiduclose_alpha_35x35, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_2, LV_OBJ_FLAG_CHECKABLE);
 
     //Write codes src_home_imgbtn_3
     ui->src_home_imgbtn_3 = lv_imgbtn_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_imgbtn_3, 160, 50);
-    lv_obj_set_size(ui->src_home_imgbtn_3, 45, 45);
+    lv_obj_set_pos(ui->src_home_imgbtn_3, 160+60, 0);
+    lv_obj_set_size(ui->src_home_imgbtn_3, 35, 35);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_3, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_imgbtn_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -347,16 +345,16 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_style_img_recolor(ui->src_home_imgbtn_3, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_3, 0, LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_opa(ui->src_home_imgbtn_3, 255, LV_PART_MAIN|LV_STATE_CHECKED);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_3, LV_IMGBTN_STATE_RELEASED, NULL, &_gooleopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_3, LV_IMGBTN_STATE_PRESSED, NULL, &_gooleclose_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_3, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_gooleopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_3, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_gooleclose_alpha_45x45, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_3, LV_IMGBTN_STATE_RELEASED, NULL, &_gooleopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_3, LV_IMGBTN_STATE_PRESSED, NULL, &_gooleclose_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_3, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_gooleopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_3, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_gooleclose_alpha_35x35, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_3, LV_OBJ_FLAG_CHECKABLE);
 
     //Write codes src_home_imgbtn_4
     ui->src_home_imgbtn_4 = lv_imgbtn_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_imgbtn_4, 30, 140);
-    lv_obj_set_size(ui->src_home_imgbtn_4, 45, 45);
+    lv_obj_set_pos(ui->src_home_imgbtn_4, 30, 55);
+    lv_obj_set_size(ui->src_home_imgbtn_4, 35, 35);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_4, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_imgbtn_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -395,16 +393,16 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_style_img_recolor(ui->src_home_imgbtn_4, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_4, 0, LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_opa(ui->src_home_imgbtn_4, 255, LV_PART_MAIN|LV_STATE_CHECKED);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_4, LV_IMGBTN_STATE_RELEASED, NULL, &_windopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_4, LV_IMGBTN_STATE_PRESSED, NULL, &_dindclose_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_4, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_windopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_4, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_dindclose_alpha_45x45, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_4, LV_IMGBTN_STATE_RELEASED, NULL, &_windopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_4, LV_IMGBTN_STATE_PRESSED, NULL, &_dindclose_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_4, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_windopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_4, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_dindclose_alpha_35x35, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_4, LV_OBJ_FLAG_CHECKABLE);
 
     //Write codes src_home_imgbtn_5
     ui->src_home_imgbtn_5 = lv_imgbtn_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_imgbtn_5, 160, 140);
-    lv_obj_set_size(ui->src_home_imgbtn_5, 45, 45);
+    lv_obj_set_pos(ui->src_home_imgbtn_5, 160+60, 55);
+    lv_obj_set_size(ui->src_home_imgbtn_5, 35, 35);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_5, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_imgbtn_5. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -443,16 +441,16 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_style_img_recolor(ui->src_home_imgbtn_5, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_5, 0, LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_opa(ui->src_home_imgbtn_5, 255, LV_PART_MAIN|LV_STATE_CHECKED);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_5, LV_IMGBTN_STATE_RELEASED, NULL, &_jlcopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_5, LV_IMGBTN_STATE_PRESSED, NULL, &_jlcclose_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_5, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_jlcopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_5, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_jlcclose_alpha_45x45, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_5, LV_IMGBTN_STATE_RELEASED, NULL, &_jlcopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_5, LV_IMGBTN_STATE_PRESSED, NULL, &_jlcclose_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_5, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_jlcopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_5, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_jlcclose_alpha_35x35, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_5, LV_OBJ_FLAG_CHECKABLE);
 
     //Write codes src_home_imgbtn_6
     ui->src_home_imgbtn_6 = lv_imgbtn_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_imgbtn_6, 97, 140);
-    lv_obj_set_size(ui->src_home_imgbtn_6, 45, 45);
+    lv_obj_set_pos(ui->src_home_imgbtn_6, 97+30, 55);
+    lv_obj_set_size(ui->src_home_imgbtn_6, 35, 35);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_6, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_imgbtn_6. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -491,15 +489,15 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_style_img_recolor(ui->src_home_imgbtn_6, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_6, 0, LV_PART_MAIN|LV_STATE_CHECKED);
     lv_obj_set_style_img_opa(ui->src_home_imgbtn_6, 255, LV_PART_MAIN|LV_STATE_CHECKED);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_6, LV_IMGBTN_STATE_RELEASED, NULL, &_OBSopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_6, LV_IMGBTN_STATE_PRESSED, NULL, &_OBScloes_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_6, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_OBSopen_alpha_45x45, NULL);
-    lv_imgbtn_set_src(ui->src_home_imgbtn_6, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_OBScloes_alpha_45x45, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_6, LV_IMGBTN_STATE_RELEASED, NULL, &_OBSopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_6, LV_IMGBTN_STATE_PRESSED, NULL, &_OBScloes_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_6, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_OBSopen_alpha_35x35, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_6, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_OBScloes_alpha_35x35, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_6, LV_OBJ_FLAG_CHECKABLE);
 
     //Write codes src_home_label_7
     ui->src_home_label_7 = lv_label_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_label_7, 27, 100);
+    lv_obj_set_pos(ui->src_home_label_7, 27, 40);
     lv_obj_set_size(ui->src_home_label_7, 50, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_7, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_7, "Vscode");
@@ -529,7 +527,7 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_8
     ui->src_home_label_8 = lv_label_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_label_8, 95, 100);
+    lv_obj_set_pos(ui->src_home_label_8, 90+30, 40);
     lv_obj_set_size(ui->src_home_label_8, 50, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_8, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_8, "百度网盘");
@@ -559,10 +557,10 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_9
     ui->src_home_label_9 = lv_label_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_label_9, 154, 100);
-    lv_obj_set_size(ui->src_home_label_9, 50, 27);
+    lv_obj_set_pos(ui->src_home_label_9, 154+30, 40);
+    lv_obj_set_size(ui->src_home_label_9, 98, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_9, LV_SCROLLBAR_MODE_OFF);
-    lv_label_set_text(ui->src_home_label_9, "Google\nChrome");
+    lv_label_set_text(ui->src_home_label_9, "Google Chrome");
     lv_label_set_long_mode(ui->src_home_label_9, LV_LABEL_LONG_WRAP);
 
     //Set style for src_home_label_9. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -589,7 +587,7 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_10
     ui->src_home_label_10 = lv_label_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_label_10, 19, 190);
+    lv_obj_set_pos(ui->src_home_label_10, 19, 190-95);
     lv_obj_set_size(ui->src_home_label_10, 68, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_10, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_10, "WindTerm");
@@ -619,8 +617,8 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_11
     ui->src_home_label_11 = lv_label_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_label_11, 92, 190);
-    lv_obj_set_size(ui->src_home_label_11, 55, 29);
+    lv_obj_set_pos(ui->src_home_label_11, 90+10, 190-95);
+    lv_obj_set_size(ui->src_home_label_11, 80, 18);
     lv_obj_set_scrollbar_mode(ui->src_home_label_11, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_11, "OBS Studio");
     lv_label_set_long_mode(ui->src_home_label_11, LV_LABEL_LONG_WRAP);
@@ -649,8 +647,8 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_label_12
     ui->src_home_label_12 = lv_label_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_label_12, 154, 190);
-    lv_obj_set_size(ui->src_home_label_12, 57, 29);
+    lv_obj_set_pos(ui->src_home_label_12, 154+40, 190-95);
+    lv_obj_set_size(ui->src_home_label_12, 81, 18);
     lv_obj_set_scrollbar_mode(ui->src_home_label_12, LV_SCROLLBAR_MODE_OFF);
     lv_label_set_text(ui->src_home_label_12, "立创EDA专业版");
     lv_label_set_long_mode(ui->src_home_label_12, LV_LABEL_LONG_WRAP);
@@ -679,8 +677,8 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_cont_music_ctrl
     ui->src_home_cont_music_ctrl = lv_obj_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_cont_music_ctrl, 15, 217);
-    lv_obj_set_size(ui->src_home_cont_music_ctrl, 177, 39);
+    lv_obj_set_pos(ui->src_home_cont_music_ctrl, 15+25, 122-12);
+    lv_obj_set_size(ui->src_home_cont_music_ctrl, 210, 39);
     lv_obj_set_scrollbar_mode(ui->src_home_cont_music_ctrl, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_cont_music_ctrl. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -705,7 +703,7 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_stop
     ui->src_home_imgbtn_stop = lv_imgbtn_create(ui->src_home_cont_music_ctrl);
-    lv_obj_set_pos(ui->src_home_imgbtn_stop, 71, 2);
+    lv_obj_set_pos(ui->src_home_imgbtn_stop, 88, 3);
     lv_obj_set_size(ui->src_home_imgbtn_stop, 30, 30);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_stop, LV_SCROLLBAR_MODE_OFF);
 
@@ -757,7 +755,7 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_7
     ui->src_home_imgbtn_7 = lv_imgbtn_create(ui->src_home_cont_music_ctrl);
-    lv_obj_set_pos(ui->src_home_imgbtn_7, 148, 9);
+    lv_obj_set_pos(ui->src_home_imgbtn_7, 181, 9);
     lv_obj_set_size(ui->src_home_imgbtn_7, 20, 20);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_7, LV_SCROLLBAR_MODE_OFF);
 
@@ -805,7 +803,7 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_satrt
     ui->src_home_imgbtn_satrt = lv_imgbtn_create(ui->src_home_cont_music_ctrl);
-    lv_obj_set_pos(ui->src_home_imgbtn_satrt, 70, 3);
+    lv_obj_set_pos(ui->src_home_imgbtn_satrt, 88, 3);
     lv_obj_set_size(ui->src_home_imgbtn_satrt, 30, 30);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_satrt, LV_SCROLLBAR_MODE_OFF);
 
@@ -901,8 +899,8 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_slider_voicse
     ui->src_home_slider_voicse = lv_slider_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_slider_voicse, 5, 60);
-    lv_obj_set_size(ui->src_home_slider_voicse, 6, 150);
+    lv_obj_set_pos(ui->src_home_slider_voicse, 5, 60-34);
+    lv_obj_set_size(ui->src_home_slider_voicse, 6, 150-34);
     lv_obj_set_scrollbar_mode(ui->src_home_slider_voicse, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_slider_voicse. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -939,7 +937,7 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_voice
     ui->src_home_imgbtn_voice = lv_imgbtn_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_imgbtn_voice, 0, 34);
+    lv_obj_set_pos(ui->src_home_imgbtn_voice, 0, 0);
     lv_obj_set_size(ui->src_home_imgbtn_voice, 20, 20);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_voice, LV_SCROLLBAR_MODE_OFF);
 
@@ -987,7 +985,7 @@ void shortcuts_scr_set(lv_ui* ui)
 
     //Write codes src_home_imgbtn_novoice
     ui->src_home_imgbtn_novoice = lv_imgbtn_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_imgbtn_novoice, 0, 34);
+    lv_obj_set_pos(ui->src_home_imgbtn_novoice, 0, 0);
     lv_obj_set_size(ui->src_home_imgbtn_novoice, 20, 20);
     lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_novoice, LV_SCROLLBAR_MODE_OFF);
 
