@@ -17,6 +17,7 @@ int src_home_digital_date_yesr_value = 1970;
 int src_home_digital_date_mont_value = 7;
 int src_home_digital_date_day_value = 11;
 int src_home_digital_date_wday_value = 2;
+char* week_day[7] = { "日","一","二","三","四","五","六" };
 
 void src_home_digital_clock_1_timer(lv_timer_t* timer)
 {
@@ -24,6 +25,8 @@ void src_home_digital_clock_1_timer(lv_timer_t* timer)
 	if (lv_obj_is_valid(guider_ui.src_home_digital_clock_1))
 	{
 		lv_dclock_set_text_fmt(guider_ui.src_home_digital_clock_1, "%02d:%02d:%02d", src_home_digital_clock_1_hour_value, src_home_digital_clock_1_min_value, src_home_digital_clock_1_sec_value);
+		lv_label_set_text_fmt(guider_ui.src_home_label_date, "%04d年%02d月%02d日", src_home_digital_date_yesr_value, src_home_digital_date_mont_value, src_home_digital_date_day_value);
+		lv_label_set_text_fmt(guider_ui.src_home_label_wday, "星期%s", week_day[src_home_digital_date_wday_value]);
 	}
 }
 
@@ -237,7 +240,7 @@ void setup_scr_src_home(lv_ui* ui) {
 		lv_obj_set_pos(ui->src_home_label_dizhi, 100, 100+28);
 		lv_obj_set_size(ui->src_home_label_dizhi, 100, 16);
 		lv_obj_set_scrollbar_mode(ui->src_home_label_dizhi, LV_SCROLLBAR_MODE_OFF);
-		lv_label_set_text(ui->src_home_label_dizhi, "齐齐哈尔市");
+		lv_label_set_text(ui->src_home_label_dizhi, "深圳市");
 		lv_label_set_long_mode(ui->src_home_label_dizhi, LV_LABEL_LONG_WRAP);
 
 		//Set style for src_home_label_dizhi. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -602,7 +605,7 @@ void setup_scr_src_home(lv_ui* ui) {
 		//Write codes src_home_label_date
 		ui->src_home_label_date = lv_label_create(ui->src_home_cont_2);
 		lv_obj_set_pos(ui->src_home_label_date, 26, 5);
-		lv_obj_set_size(ui->src_home_label_date, 80, 10);
+		lv_obj_set_size(ui->src_home_label_date, 87, 10);
 		lv_obj_set_scrollbar_mode(ui->src_home_label_date, LV_SCROLLBAR_MODE_OFF);
 		lv_label_set_text(ui->src_home_label_date, "1970年7月10日");
 		lv_label_set_long_mode(ui->src_home_label_date, LV_LABEL_LONG_WRAP);
@@ -666,7 +669,7 @@ void setup_scr_src_home(lv_ui* ui) {
 		lv_obj_set_style_radius(ui->src_home_ta_1, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_color(ui->src_home_ta_1, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(ui->src_home_ta_1, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
-		lv_textarea_set_text(ui->src_home_ta_1, "ASD");
+		// lv_textarea_set_text(ui->src_home_ta_1, "ASD");
 
 		//use keyboard on src_home_ta_1
 		lv_obj_add_event_cb(ui->src_home_ta_1, ta_src_home_event_cb, LV_EVENT_ALL, g_kb_src_home);
