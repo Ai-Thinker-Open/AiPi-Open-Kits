@@ -64,7 +64,7 @@ void shortcuts_scr_set(lv_ui* ui)
     //Write codes src_home_cont_BLE_TEXT
     ui->src_home_cont_BLE_TEXT = lv_obj_create(ui->src_home_tabview_1_Shortcuts);
     lv_obj_set_pos(ui->src_home_cont_BLE_TEXT, 31+30, 32-10);
-    lv_obj_set_size(ui->src_home_cont_BLE_TEXT, 183, 30);
+    lv_obj_set_size(ui->src_home_cont_BLE_TEXT, 183, 130);
     lv_obj_set_scrollbar_mode(ui->src_home_cont_BLE_TEXT, LV_SCROLLBAR_MODE_OFF);
 
     //Set style for src_home_cont_BLE_TEXT. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -87,7 +87,7 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_style_pad_top(ui->src_home_cont_BLE_TEXT, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_pad_bottom(ui->src_home_cont_BLE_TEXT, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 
-    lv_obj_add_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
+    // lv_obj_add_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
     //Write codes src_home_label_4
     ui->src_home_label_4 = lv_label_create(ui->src_home_cont_BLE_TEXT);
     lv_obj_set_pos(ui->src_home_label_4, 24, 88);
@@ -205,7 +205,7 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_style_pad_bottom(ui->src_home_cont_dis, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 
     //Hidden for widget src_home_cont_dis
-    // lv_obj_add_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
 
     //Write codes src_home_imgbtn_1
     ui->src_home_imgbtn_1 = lv_imgbtn_create(ui->src_home_cont_dis);
