@@ -34,7 +34,7 @@
 #include "custom.h"
 #include "wifi_event.h"
 #include "lv_user_config.h"
-
+#include "ble_hid_dev.h"
 /**********   user define   *************/
 #define DBG_TAG "MIAN"
 
@@ -60,7 +60,6 @@ static void bl61x_show_heap_size_task(void* arg)
 int main(void)
 {
     board_init();
-
     tcpip_init(NULL, NULL);
     wifi_start_firmware_task();
     //init easyflash
@@ -76,8 +75,8 @@ int main(void)
     events_init(&guider_ui);
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 1, NULL);
     xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 1024, NULL, 2, NULL);
-
-
+    // vTaskDelay(500/portTICK_RATE_MS);
+    xTaskCreate(ble_hid_task, "ble_hid_task", 1024*2, NULL, 6, NULL);
     vTaskStartScheduler();
     // while (1) {
 

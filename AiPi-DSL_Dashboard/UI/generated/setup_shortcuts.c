@@ -21,7 +21,7 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_obj_set_pos(ui->src_home_label_BLEConter, 63+30, 10);
     lv_obj_set_size(ui->src_home_label_BLEConter, 111, 15);
     lv_obj_set_scrollbar_mode(ui->src_home_label_BLEConter, LV_SCROLLBAR_MODE_OFF);
-    lv_label_set_text(ui->src_home_label_BLEConter, "BLE:Connecting");
+    lv_label_set_text(ui->src_home_label_BLEConter, "BLE:Disconnect");
     lv_label_set_long_mode(ui->src_home_label_BLEConter, LV_LABEL_LONG_WRAP);
 
     //Set style for src_home_label_BLEConter. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT

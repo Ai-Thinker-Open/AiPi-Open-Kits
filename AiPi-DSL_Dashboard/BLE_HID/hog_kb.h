@@ -19,14 +19,52 @@
 #define LEFT_SHIFT_KEY_MASK          (1 << 1)
 #define LEFT_ALT_KEY_MASK            (1 << 2)
 #define LEFT_GUI_KEY_MASK            (1 << 3)
+
+
 #define RIGHT_CONTROL_KEY_MASK       (1 << 4)
 #define RIGHT_SHIFT_KEY_MASK         (1 << 5)
 #define RIGHT_ALT_KEY_MASK           (1 << 6)
 #define RIGHT_GUI_KEY_MASK           (1 << 7)
 
+typedef enum {
+    KEY_NUMBLE_A = 0X04,
+    KEY_NUMBLE_B,
+    KEY_NUMBLE_C,
+    KEY_NUMBLE_D,
+    KEY_NUMBLE_E,
+    KEY_NUMBLE_F,
+    KEY_NUMBLE_G,
+    KEY_NUMBLE_H,
+    KEY_NUMBLE_I,
+    KEY_NUMBLE_J,
+    KEY_NUMBLE_K,
+    KEY_NUMBLE_L,
+    KEY_NUMBLE_M,
+    KEY_NUMBLE_N,
+    KEY_NUMBLE_O,
+    KEY_NUMBLE_P,
+    KEY_NUMBLE_Q,
+    KEY_NUMBLE_R,
+    KEY_NUMBLE_S,
+    KEY_NUMBLE_T,
+    KEY_NUMBLE_U,
+    KEY_NUMBLE_V,
+    KEY_NUMBLE_W,
+    KEY_NUMBLE_X,
+    KEY_NUMBLE_Y,
+    KEY_NUMBLE_Z,
+    //vloume
+    KEY_NUMBLE_LOV_MUTE = 0X7F,
+    KEY_NUMBLE_LOV_UP = 0X80,
+    KEY_NUMBLE_LOV_DOWN,
+    //
+
+}key_numble_t;
+
+
 typedef uint8_t key_mask_t;
 
 void hog_kb_init(void);
-int hog_send_keyboard_value(struct bt_conn *conn, key_mask_t special_key_mask, uint8_t *keyboard_cmd, uint8_t num_key);
+int hog_send_keyboard_value(struct bt_conn* conn, key_mask_t special_key_mask, uint8_t* keyboard_cmd, uint8_t num_key);
 
 #endif

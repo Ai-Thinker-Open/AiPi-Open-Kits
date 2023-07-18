@@ -13,12 +13,14 @@
 #include "lvgl.h"
 #include "log.h"
 
+#include "ble_hid_dev.h"
+
 #define DBG_TAG "LV EVENT"
 
 TimerHandle_t loading_time;
 
 extern xQueueHandle queue;
-
+extern QueueHandle_t ble_hid_queue;
 static void loading_timer_cb(TimerHandle_t timer)
 {
 	int	time_cout = (int)pvTimerGetTimerID(timer);
@@ -190,12 +192,14 @@ static void src_home_imgbtn_satrt_event_handler(lv_event_t* e)
 static void src_home_imgbtn_voice_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
+	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_VOL_MUTE;
 	switch (code)
 	{
 		case LV_EVENT_CLICKED:
 		{
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_novoice, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
 		break;
 		default:
@@ -206,12 +210,14 @@ static void src_home_imgbtn_voice_event_handler(lv_event_t* e)
 static void src_home_imgbtn_novoice_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
+
 	switch (code)
 	{
 		case LV_EVENT_CLICKED:
 		{
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_novoice, LV_OBJ_FLAG_HIDDEN);
+
 		}
 		break;
 		default:
@@ -277,25 +283,35 @@ static void src_home_img_loding_event_handler(lv_event_t* e)
 	}
 }
 
-// static void src_home_ddlist_1_event_handler(lv_event_t* e)
-// {
-// 	lv_event_code_t code = lv_event_get_code(e);
-// 	lv_ui* ui = lv_event_get_user_data(e);
-// 	char* buff = pvPortMalloc(64);
-// 	memset(buff, 0, 64);
-// 	switch (code)
-// 	{
-// 		case LV_EVENT_VALUE_CHANGED:
-// 		{
-// 			lv_dropdown_get_selected_str(ui->src_home_ddlist_1, buff, 64);
-// 			LOG_I("dropdown is :%s", buff);
-// 		};
-// 		break;
-// 		default:
-// 			break;
-// 	}
-// 	vPortFree(buff);
-// }
+static void src_home_imgbtn_dashboard(lv_event_t* e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	hid_key_num_t hid_key_num = (hid_key_num_t)lv_event_get_user_data(e);
+	switch (code) {
+		case LV_EVENT_CLICKED:
+		{
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+		}
+		break;
+
+		case LV_EVENT_CANCEL:
+		{
+			switch (hid_key_num) {
+				case HID_KEY_NUMBLE_VOL_CHENG:
+				{
+
+				}
+				break;
+				default:
+					break;
+			}
+		}
+		break;
+		default:
+			break;
+	}
+}
+
 
 void events_init_src_home(lv_ui* ui)
 {
@@ -313,6 +329,16 @@ void events_init_src_home(lv_ui* ui)
 	lv_obj_add_event_cb(ui->src_home_img_wifi, src_home_img_wifi_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_btn_connect, src_home_btn_connect_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_img_loding, src_home_img_loding_event_handler, LV_EVENT_ALL, ui);
-	// lv_obj_add_event_cb(ui->src_home_ddlist_1, src_home_ddlist_1_event_handler, LV_EVENT_ALL, ui);
+	//快捷按键
+	lv_obj_add_event_cb(ui->src_home_imgbtn_1, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_A);
+	lv_obj_add_event_cb(ui->src_home_imgbtn_2, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_B);
+	lv_obj_add_event_cb(ui->src_home_imgbtn_3, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_C);
+	lv_obj_add_event_cb(ui->src_home_imgbtn_4, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_D);
+	lv_obj_add_event_cb(ui->src_home_imgbtn_5, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_F);
+	lv_obj_add_event_cb(ui->src_home_imgbtn_6, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_E);
+	// lv_obj_add_event_cb(ui->src_home_imgbtn_8, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_E);
+	// lv_obj_add_event_cb(ui->src_home_imgbtn_novoice, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_VOL_MUTE);
 
+	// lv_obj_add_event_cb(ui->src_home_slider_voicse, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_VOL_CHENG);
+	// lv_slider_set_value(ui->src_home_slider_voicse, 60, false);
 }

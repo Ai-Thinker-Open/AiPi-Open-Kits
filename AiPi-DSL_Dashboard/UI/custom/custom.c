@@ -12,6 +12,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "timers.h"
 #include <stdio.h>
 #include "lvgl.h"
 #include "log.h"
@@ -20,8 +21,8 @@
 #include "easyflash.h"
 #include "wifi_event.h"
 #include "https_client.h"
-
 #include "gui_guider.h"
+#include "ble_hid_dev.h"
   /*********************
    *      DEFINES
    *********************/
@@ -34,6 +35,7 @@ xQueueHandle queue;
  *  STATIC PROTOTYPES
  **********************/
 TaskHandle_t https_Handle;
+TimerHandle_t http_timers;
 weather_t weathers[4] = { 0 };
 /**
  * @brief cjson__analysis_type
@@ -48,6 +50,7 @@ static char* cjson__analysis_ip(char* cjson_data);
 static void cjson_get_weather(char* weather_data);
 char* compare_wea_output_img_100x100(const char* weather_data);
 char* compare_wea_output_img_20x20(const char* weather_data);
+static ble_status_t cjson_analysis_ble_status(char* ble_status_data);
 /**
  * @brief queue_receive_task
  *
@@ -55,7 +58,7 @@ char* compare_wea_output_img_20x20(const char* weather_data);
 */
 static void queue_receive_task(void* arg)
 {
-
+    ble_status_t ble_status = BLE_STATUS_DATA_ERR;
     char* queue_buff = NULL;
     char* ssid = NULL;
     char* password = NULL;
@@ -78,16 +81,20 @@ static void queue_receive_task(void* arg)
         memset(queue_buff, 0, 1024*2);
 
         xQueueReceive(queue, queue_buff, portMAX_DELAY);
+
         switch (cjson__analysis_type(queue_buff))
         {
             case 1:
+            {
                 ssid = cjson_analysis_ssid(queue_buff);
                 password = cjson_analysis_password(queue_buff);
                 LOG_I("ssid=%s password:%s", ssid, password);
                 wifi_connect(ssid, password);
-                break;
-                //接收ip地址
+            }
+            break;
+            //接收ip地址
             case 2:
+            {
                 ipv4_addr = cjson__analysis_ip(queue_buff);
                 LOG_I(" ipv4 addr=%s", ipv4_addr);
                 memset(queue_buff, 0, 1024*2);
@@ -114,9 +121,12 @@ static void queue_receive_task(void* arg)
                 if (https_Handle!=NULL) {
                     vTaskDelete(https_Handle);
                 }
-                xTaskCreate(https_get_weather_task, "https task", 1024*6, NULL, 4, &https_Handle);
-                break;
+                xTaskCreate(https_get_weather_task, "https task", 1024*2, NULL, 4, &https_Handle);
+
+            }
+            break;
             case 3:
+            {
                 cjson_get_weather(queue_buff);
                 //今天天气
                 lv_img_set_src(ui->src_home_img_1, compare_wea_output_img_100x100(weathers[0].wea)); //天气图片
@@ -132,12 +142,64 @@ static void queue_receive_task(void* arg)
                 //大后天天气
                 lv_img_set_src(ui->src_home_img_day3, compare_wea_output_img_20x20(weathers[3].wea));
                 lv_label_set_text_fmt(ui->src_home_day3_temp, "%*.2s°", 2, weathers[3].tem_day);
-                break;
+            }
+            break;
+            //BLE 状态
+            case 4:
+            {
+                ble_status = cjson_analysis_ble_status(queue_buff);
+                switch (ble_status) {
+                    case BLE_STATUS_ENABLE:
+                    {
+                        LOG_I("BLE status is Enable,wating connect");
+                        lv_label_set_text(ui->src_home_label_BLEConter, "BLE:opened");
+                    }
+                    break;
+                    case BLE_STATUS_CONNECT:
+                    {
+                        LOG_I("BLE Connect OK");
+                        lv_label_set_text(ui->src_home_label_BLEConter, "BLE:Connected");
+                        lv_img_set_src(ui->src_home_img_BLE, &_BLE_ok_alpha_20x20);
+                        lv_obj_add_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
+                        lv_obj_clear_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
+                    }
+                    break;
+                    case BLE_STATUS_DISCONNECT:
+                    {
+                        LOG_F("BLE disconnect!");
+                        lv_label_set_text(ui->src_home_label_BLEConter, "BLE:opnened");
+                        lv_img_set_src(ui->src_home_img_BLE, &_BLE_no_alpha_20x20);
+                        lv_obj_add_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
+                        lv_obj_clear_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
+                    }
+                    break;
+                    default:
+                        break;
+                }
+            }
+            break;
             default:
                 break;
         }
+
+
         vPortFree(queue_buff);
     }
+}
+/**
+ * @brief http_hour_requst_time
+ *        定时1小时 更新时间及天气情况
+ * @param arg
+*/
+static uint16_t timers_http = 0;
+static void http_hour_requst_time(TimerHandle_t timer)
+{
+    if (timers_http>=1*100*60*60) {
+        LOG_I("Timed to http update,start https request");
+        vTaskResume(https_Handle);
+    }
+    else
+        timers_http++;
 }
 /**********************
  *  STATIC VARIABLES
@@ -150,8 +212,10 @@ static void queue_receive_task(void* arg)
 void custom_init(lv_ui* ui)
 {
     /* Add your codes here */
-    queue = xQueueCreate(1, 1024*2);
-    xTaskCreate(queue_receive_task, "queue_receive_task", 1024*4, ui, 3, NULL);
+    queue = xQueueCreate(2, 1024*2);
+    xTaskCreate(queue_receive_task, "queue_receive_task", 1024*2, ui, 3, NULL);
+    http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(10000), pdTRUE, 0, http_hour_requst_time);
+
 }
 
 static int cjson__analysis_type(char* json_data)
@@ -178,6 +242,12 @@ static int cjson__analysis_type(char* json_data)
     if (weather) {
         cJSON_Delete(root);
         return 3;
+    }
+
+    cJSON* BLE_STA = cJSON_GetObjectItem(root, "BLE_HID");
+    if (BLE_STA) {
+        cJSON_Delete(root);
+        return 4;
     }
 
     cJSON_Delete(root);
@@ -381,6 +451,36 @@ char* compare_wea_output_img_20x20(const char* weather_data)
     if (strncmp(weather, "爆雨", 4)==0) return &_tianqiqing_i_baoyu_alpha_20x20;
     if (strncmp(weather, "雷雨", 4)==0) return &_tianqiqing_i_leiyu_alpha_20x20;
     if (strncmp(weather, "多云", 4)==0) return &_tianqiqing_i_duoyun_alpha_20x20;
+}
+
+/**
+ * @brief cjson_analysis_ble_status
+ *      获取BLE 的状态
+ * @param ble_status_data
+ * @return le_status_t
+*/
+static ble_status_t cjson_analysis_ble_status(char* ble_status_data)
+{
+    ble_status_t ble_status;
+    cJSON* root = cJSON_Parse(ble_status_data);
+    if (root==NULL) {
+        LOG_E("%s is not json", ble_status_data);
+        ble_status = BLE_STATUS_DATA_ERR;
+        goto __exit;
+    }
+
+    cJSON* BLE_root = cJSON_GetObjectItem(root, "BLE_HID");
+    if (BLE_root ==NULL) {
+        LOG_E("BLE HID is NULL");
+        ble_status = BLE_STATUS_DATA_ERR;
+        cJSON_Delete(root);
+        goto __exit;
+    }
+    cJSON* hid_status = cJSON_GetObjectItem(BLE_root, "status");
+    ble_status = hid_status->valueint;
+    cJSON_Delete(root);
+__exit:
+    return  ble_status;
 }
 /**
  * @brief

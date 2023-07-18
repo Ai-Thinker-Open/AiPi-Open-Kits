@@ -10,9 +10,6 @@
 #include "hog_kb.h"
 #include "log.h"
 
-
-#define GBD_TAG "BLE_HID"
-
 enum {
     HIDS_REMOTE_WAKE = BIT(0),
     HIDS_NORMALLY_CONNECTABLE = BIT(1),
@@ -48,6 +45,7 @@ static struct hids_report input = {
 
 static uint8_t hid_input_ccc;
 static uint8_t ctrl_point;
+
 static uint8_t report_map[] =
 {
     0x05, 0x01,       // Usage Page (Generic Desktop)
@@ -91,6 +89,34 @@ static uint8_t report_map[] =
     // 0x75, 0x08,       //   Report Size (8 bit)
     // 0x95, 0x02,       //   Report Count (2)
     // 0xB1, 0x02,       //   Feature (Data, Variable, Absolute)
+
+    0x09, 0xEA,         //      (Volume Down)
+    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
+
+    0x09, 0xE9,         //      (Volume Up)
+    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
+
+    0x09, 0xCB,         //      (Tracking Decrement)
+    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
+
+    0x09, 0xCA,         //      (tracking Increment)
+    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
+
+    0x09, 0xB6,         //      (Scan Previous Track)
+    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
+
+    0x09, 0xB5,         //      (Scan Next Track)
+    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
+
+    0x09, 0xB1,         //      (Pause)
+    0x8, 0x06,         //      Input (Data,Value,Relative,Bit Field)
+
+    0x09, 0xB0,         //      (Play)
+    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
+
+    0x75, 0x01,         //      Report Size (1)
+    0x95, 0x06,         //      Report Count (6)
+    0x81, 0x07,         //      Input (Data,Value,Relative,Bit Field)
 
     0xC0              // End Collection (Application)
 };
@@ -164,8 +190,10 @@ static struct bt_gatt_attr attrs[] = {
                    BT_GATT_CHRC_READ | BT_GATT_CHRC_NOTIFY,
                    BT_GATT_PERM_READ,
                    read_input_report, NULL, NULL),
+
     BT_GATT_CCC(input_ccc_changed,
             BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+
     BT_GATT_DESCRIPTOR(BT_UUID_HIDS_REPORT_REF, BT_GATT_PERM_READ,
                read_report, NULL, &input),
 

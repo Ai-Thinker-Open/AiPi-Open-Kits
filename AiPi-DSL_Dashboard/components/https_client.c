@@ -14,6 +14,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "timers.h"
 #include "custom.h"
 #include <sys/socket.h>
 #include <lwip/api.h>
@@ -36,6 +37,8 @@
 
 // #define REQUEST_HTTPS
 #define REQUEST_HTTP
+
+extern TimerHandle_t http_timers;
 
 #ifdef REQUEST_HTTPS
 
@@ -445,6 +448,8 @@ void https_get_weather_task(void* arg)
     sprintf(queue_buff, "{\"weather\":%s}", buff);
     xQueueSend(queue, queue_buff, portMAX_DELAY);
     vPortFree(buff);
+    xTimerStart(http_timers, portMAX_DELAY);
+    LOG_I("Time start 1 hour times ....");
     vTaskSuspend(https_Handle);
     while (1) {
         //请求一次错误的响应，只获取时间

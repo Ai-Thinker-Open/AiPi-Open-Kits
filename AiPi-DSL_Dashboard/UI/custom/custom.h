@@ -40,6 +40,8 @@ extern "C" {
         char tem_day[2];
     } weather_t;
 
+
+
     void custom_init(lv_ui* ui);
     void flash_erase_set(char* key, char* value);
     char* flash_get_data(char* key, uint32_t len);
