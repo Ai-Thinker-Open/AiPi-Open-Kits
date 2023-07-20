@@ -149,6 +149,8 @@ extern "C" {
 		lv_obj_t* src_home_ta_msg_open;
 		lv_obj_t* src_home_cont_5;
 		lv_obj_t* src_home_img_loding;
+		lv_obj_t* src_home_btn_scan;
+		lv_obj_t* src_home_btn_scan_label;
 		char ssid[32];
 		char password[64];
 		bool wifi_stayus;

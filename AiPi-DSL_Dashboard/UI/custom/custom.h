@@ -40,7 +40,14 @@ extern "C" {
         char tem_day[2];
     } weather_t;
 
-
+    typedef enum {
+        CUSTOM_EVENT_NONE = 0,
+        CUSTOM_EVENT_WIFI_SCAN,
+        CUSTOM_EVENT_GET_WIFI,
+        CUSTOM_EVENT_GOT_IP,
+        CUSTOM_EVENT_GET_WEATHER,
+        CUSTOM_EVENT_GET_BLE,
+    }custom_event_t;
 
     void custom_init(lv_ui* ui);
     void flash_erase_set(char* key, char* value);

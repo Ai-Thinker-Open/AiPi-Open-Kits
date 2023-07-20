@@ -311,7 +311,33 @@ static void src_home_imgbtn_dashboard(lv_event_t* e)
 			break;
 	}
 }
+/**
+ * @brief 启动搜索
+ *
+ * @param e
+*/
+static void src_home_imgbtn_scan_event_handler(lv_event_t* e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	char* scan_msg = pvPortMalloc(128);
+	memset(scan_msg, 0, 128);
 
+	switch (code)
+	{
+		case LV_EVENT_CLICKED:
+		{
+			LOG_I("btn_scan CLICKED");
+			lv_obj_clear_flag(guider_ui.src_home_cont_5, LV_OBJ_FLAG_HIDDEN);
+			xTimerStart(loading_time, 100/portTICK_PERIOD_MS);
+			sprintf(scan_msg, "{\"wifi_scan\":{\"status\":1}}");
+			xQueueSend(queue, scan_msg, portMAX_DELAY);
+		}
+		break;
+		default:
+			break;
+	}
+	vPortFree(scan_msg);
+}
 
 void events_init_src_home(lv_ui* ui)
 {
@@ -329,6 +355,8 @@ void events_init_src_home(lv_ui* ui)
 	lv_obj_add_event_cb(ui->src_home_img_wifi, src_home_img_wifi_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_btn_connect, src_home_btn_connect_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_img_loding, src_home_img_loding_event_handler, LV_EVENT_ALL, ui);
+	//搜索
+	lv_obj_add_event_cb(ui->src_home_btn_scan, src_home_imgbtn_scan_event_handler, LV_EVENT_ALL, ui);
 	//快捷按键
 	lv_obj_add_event_cb(ui->src_home_imgbtn_1, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_A);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_2, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_B);
@@ -336,9 +364,6 @@ void events_init_src_home(lv_ui* ui)
 	lv_obj_add_event_cb(ui->src_home_imgbtn_4, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_D);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_5, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_F);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_6, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_E);
-	// lv_obj_add_event_cb(ui->src_home_imgbtn_8, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_E);
-	// lv_obj_add_event_cb(ui->src_home_imgbtn_novoice, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_VOL_MUTE);
 
-	// lv_obj_add_event_cb(ui->src_home_slider_voicse, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_VOL_CHENG);
-	// lv_slider_set_value(ui->src_home_slider_voicse, 60, false);
+
 }

@@ -87,7 +87,7 @@ int wifi_start_firmware_task(void)
  *
  * @param code
 */
-static wifi_mgmr_scan_params_t wifi_scan_config;
+
 
 void wifi_event_handler(uint32_t code)
 {
@@ -103,12 +103,12 @@ void wifi_event_handler(uint32_t code)
         case CODE_WIFI_ON_MGMR_DONE:
         {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_MGMR_DONE", __func__);
-            // wifi_mgmr_sta_scan(&wifi_scan_config);
+
         }
         break;
         case CODE_WIFI_ON_SCAN_DONE:
         {
-            wifi_mgmr_sta_scanlist();
+            // wifi_mgmr_sta_scanlist();
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_SCAN_DONE SSID numbles:%d", __func__, wifi_mgmr_sta_scanlist_nums_get());
         }
         break;
@@ -181,10 +181,22 @@ uint8_t wifi_connect(char* ssid, char* passwd)
 
         vTaskDelay(100/portTICK_PERIOD_MS);
         switch (sta_ConnectStatus) {
+            case CODE_WIFI_ON_MGMR_DONE:
+                // vTaskDelay(2000);
+                // LOG_I("wifi_mgmr_sta_scan:%d", wifi_mgmr_sta_scan(wifi_scan_config));
+                vPortFree(queue_buff);
+                return 3;
+            case CODE_WIFI_ON_SCAN_DONE:
 
+                // LOG_I("WIFI STA SCAN DONE %s", wifi_scan_config[0].ssid_array);
+
+                vPortFree(queue_buff);
+                return 2;
             case CODE_WIFI_ON_DISCONNECT:	//连接失败（超过了重连次数还没有连接成功的状态）
+
                 wifi_sta_disconnect();
                 guider_ui.wifi_stayus = false;
+                vPortFree(queue_buff);
                 return 4;
             case CODE_WIFI_ON_CONNECTED:	//连接成功(表示wifi sta状态的时候表示同时获取IP(DHCP)成功，或者使用静态IP)
                 // LOG_I("Wating wifi connet OK");
@@ -198,6 +210,7 @@ uint8_t wifi_connect(char* ssid, char* passwd)
                 guider_ui.wifi_stayus = true;
                 xQueueSend(queue, queue_buff, portMAX_DELAY);
                 LOG_I("Wating wifi connet OK and get ip OK");
+                vPortFree(queue_buff);
                 return 0;
             default:
                 //等待连接成功
@@ -206,5 +219,7 @@ uint8_t wifi_connect(char* ssid, char* passwd)
 
     }
     vPortFree(queue_buff);
+
+
     return 14; //连接超时
 }

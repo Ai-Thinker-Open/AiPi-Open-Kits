@@ -23,6 +23,9 @@
 #include "https_client.h"
 #include "gui_guider.h"
 #include "ble_hid_dev.h"
+
+#include "wifi_mgmr_ext.h"
+#include "wifi_mgmr.h"
   /*********************
    *      DEFINES
    *********************/
@@ -43,7 +46,7 @@ weather_t weathers[4] = { 0 };
  * @param json_data
  * @return int
 */
-static int cjson__analysis_type(char* json_data);
+static custom_event_t cjson__analysis_type(char* json_data);
 static char* cjson_analysis_ssid(char* json_data);
 static char* cjson_analysis_password(char* json_data);
 static char* cjson__analysis_ip(char* cjson_data);
@@ -51,11 +54,13 @@ static void cjson_get_weather(char* weather_data);
 char* compare_wea_output_img_100x100(const char* weather_data);
 char* compare_wea_output_img_20x20(const char* weather_data);
 static ble_status_t cjson_analysis_ble_status(char* ble_status_data);
+static int cjson_analysis_wifi_scan(char* json_data, char* ssid_arry[64]);
 /**
  * @brief queue_receive_task
  *
  * @param arg
 */
+static wifi_mgmr_scan_params_t wifi_scan_config[32];
 static void queue_receive_task(void* arg)
 {
     ble_status_t ble_status = BLE_STATUS_DATA_ERR;
@@ -64,6 +69,7 @@ static void queue_receive_task(void* arg)
     char* password = NULL;
     char* ipv4_addr = NULL;
     lv_ui* ui = (lv_ui*)arg;
+
 
     ssid = flash_get_data(SSID_KEY, 32);
     password = flash_get_data(PASS_KEY, 32);
@@ -84,7 +90,14 @@ static void queue_receive_task(void* arg)
 
         switch (cjson__analysis_type(queue_buff))
         {
-            case 1:
+            //扫描
+            case CUSTOM_EVENT_WIFI_SCAN:
+            {
+                cjson_analysis_wifi_scan(queue_buff, NULL);
+            }
+            break;
+            //WiFi
+            case CUSTOM_EVENT_GET_WIFI:
             {
                 ssid = cjson_analysis_ssid(queue_buff);
                 password = cjson_analysis_password(queue_buff);
@@ -93,7 +106,7 @@ static void queue_receive_task(void* arg)
             }
             break;
             //接收ip地址
-            case 2:
+            case CUSTOM_EVENT_GOT_IP:
             {
                 ipv4_addr = cjson__analysis_ip(queue_buff);
                 LOG_I(" ipv4 addr=%s", ipv4_addr);
@@ -125,7 +138,7 @@ static void queue_receive_task(void* arg)
 
             }
             break;
-            case 3:
+            case CUSTOM_EVENT_GET_WEATHER:
             {
                 cjson_get_weather(queue_buff);
                 //今天天气
@@ -145,7 +158,7 @@ static void queue_receive_task(void* arg)
             }
             break;
             //BLE 状态
-            case 4:
+            case CUSTOM_EVENT_GET_BLE:
             {
                 ble_status = cjson_analysis_ble_status(queue_buff);
                 switch (ble_status) {
@@ -194,12 +207,14 @@ static void queue_receive_task(void* arg)
 static uint16_t timers_http = 0;
 static void http_hour_requst_time(TimerHandle_t timer)
 {
-    if (timers_http>=1*100*60*60) {
+    if (timers_http>=60*60) {
         LOG_I("Timed to http update,start https request");
         vTaskResume(https_Handle);
     }
-    else
+    else {
         timers_http++;
+    }
+
 }
 /**********************
  *  STATIC VARIABLES
@@ -214,40 +229,46 @@ void custom_init(lv_ui* ui)
     /* Add your codes here */
     queue = xQueueCreate(2, 1024*2);
     xTaskCreate(queue_receive_task, "queue_receive_task", 1024*2, ui, 3, NULL);
-    http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(10000), pdTRUE, 0, http_hour_requst_time);
+    http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
 
 }
 
-static int cjson__analysis_type(char* json_data)
+static custom_event_t cjson__analysis_type(char* json_data)
 {
 
     cJSON* root = cJSON_Parse(json_data);
 
     if (root==NULL) {
         LOG_E("\"%s\"is not json", json_data);
-        return 0;
+        return CUSTOM_EVENT_NONE;
     }
     cJSON* wifi = cJSON_GetObjectItem(root, "WiFi");
     if (wifi) {
         cJSON_Delete(root);
-        return 1;
+        return CUSTOM_EVENT_GET_WIFI;
     }
     cJSON* ip = cJSON_GetObjectItem(root, "ip");
     if (ip) {
         cJSON_Delete(root);
-        return 2;
+        return CUSTOM_EVENT_GOT_IP;
     }
 
     cJSON* weather = cJSON_GetObjectItem(root, "weather");
     if (weather) {
         cJSON_Delete(root);
-        return 3;
+        return  CUSTOM_EVENT_GET_WEATHER;
     }
 
     cJSON* BLE_STA = cJSON_GetObjectItem(root, "BLE_HID");
     if (BLE_STA) {
         cJSON_Delete(root);
-        return 4;
+        return CUSTOM_EVENT_GET_BLE;
+    }
+
+    cJSON* WIFI_SCAN = cJSON_GetObjectItem(root, "wifi_scan");
+    if (WIFI_SCAN) {
+        cJSON_Delete(root);
+        return CUSTOM_EVENT_WIFI_SCAN;
     }
 
     cJSON_Delete(root);
@@ -432,6 +453,7 @@ char* compare_wea_output_img_100x100(const char* weather_data)
     if (strncmp(weather, "多云", 4)==0) return &_tianqiduoyun_alpha_100x100;
     if (strncmp(weather, "中雨转雷阵雨", 12)==0) return &_tianqizhongyu_alpha_100x100;
     if (strncmp(weather, "雷阵雨", 6)==0) return &_tianqiyeleiyu_alpha_100x100;
+    if (strncmp(weather, "阴转多云", 8)==0) return &_tianqiduoyun_alpha_100x100;
 }
 /**
  * @brief
@@ -451,6 +473,8 @@ char* compare_wea_output_img_20x20(const char* weather_data)
     if (strncmp(weather, "爆雨", 4)==0) return &_tianqiqing_i_baoyu_alpha_20x20;
     if (strncmp(weather, "雷雨", 4)==0) return &_tianqiqing_i_leiyu_alpha_20x20;
     if (strncmp(weather, "多云", 4)==0) return &_tianqiqing_i_duoyun_alpha_20x20;
+    if (strncmp(weather, "阴转多云", 8)==0) return &_tianqiqing_i_duoyun_alpha_20x20;
+    if (strncmp(weather, "多云转阴", 8)==0) return &_tianqiqing_i_duoyun_alpha_20x20;
 }
 
 /**
@@ -481,6 +505,44 @@ static ble_status_t cjson_analysis_ble_status(char* ble_status_data)
     cJSON_Delete(root);
 __exit:
     return  ble_status;
+}
+/**
+ * @brief cjson_analysis_wifi_scan
+ *
+ * @param json_data
+ * @param ssid_arry SSID list
+ * @return int
+*/
+static int cjson_analysis_wifi_scan(char* json_data, char* ssid_arry[64])
+{
+    if (json_data==NULL) {
+        return -1;
+    }
+
+    cJSON* root = cJSON_Parse(json_data);
+    if (root==NULL) {
+        LOG_E("<%s> is't JSON");
+        return -1;
+    }
+    cJSON* root_scan = cJSON_GetObjectItem(root, "wifi_scan");
+    cJSON* scan_status = cJSON_GetObjectItem(root_scan, "status");
+
+    switch (scan_status->valueint)
+    {
+        case 1:
+        {
+            LOG_I("scan_status is start");
+            cJSON_Delete(root);
+            return scan_status->valueint;
+        }
+        /* code */
+        break;
+
+        default:
+            break;
+    }
+
+    return 0;
 }
 /**
  * @brief

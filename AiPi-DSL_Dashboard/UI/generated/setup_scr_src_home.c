@@ -800,6 +800,34 @@ void setup_scr_src_home(lv_ui* ui) {
 		lv_obj_set_style_pad_right(ui->src_home_label_ssid, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(ui->src_home_label_ssid, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(ui->src_home_label_ssid, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+		//Write codes src_home_btn_scan
+		ui->src_home_btn_scan = lv_btn_create(ui->config);
+		lv_obj_set_pos(ui->src_home_btn_scan, 179+50, 28);
+		lv_obj_set_size(ui->src_home_btn_scan, 50, 30);
+		lv_obj_set_scrollbar_mode(ui->src_home_btn_scan, LV_SCROLLBAR_MODE_OFF);
+
+		//Set style for src_home_btn_scan. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+		lv_obj_set_style_radius(ui->src_home_btn_scan, 10, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_color(ui->src_home_btn_scan, lv_color_make(0x08, 0x24, 0x39), LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_grad_color(ui->src_home_btn_scan, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_grad_dir(ui->src_home_btn_scan, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(ui->src_home_btn_scan, 220, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_shadow_width(ui->src_home_btn_scan, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_shadow_color(ui->src_home_btn_scan, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_shadow_opa(ui->src_home_btn_scan, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_shadow_spread(ui->src_home_btn_scan, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_shadow_ofs_x(ui->src_home_btn_scan, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_shadow_ofs_y(ui->src_home_btn_scan, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_border_color(ui->src_home_btn_scan, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(ui->src_home_btn_scan, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_border_opa(ui->src_home_btn_scan, 5, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(ui->src_home_btn_scan, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(ui->src_home_btn_scan, &lv_font_simhei_14, LV_PART_MAIN|LV_STATE_DEFAULT);
+		lv_obj_set_style_text_align(ui->src_home_btn_scan, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
+		ui->src_home_btn_scan_label = lv_label_create(ui->src_home_btn_scan);
+		lv_label_set_text(ui->src_home_btn_scan_label, "搜索");
+		lv_obj_set_style_pad_all(ui->src_home_btn_scan, 0, LV_STATE_DEFAULT);
+		lv_obj_align(ui->src_home_btn_scan_label, LV_ALIGN_CENTER, 0, 0);
 
 		//Write codes src_home_label_pass
 		ui->src_home_label_pass = lv_label_create(ui->config);
