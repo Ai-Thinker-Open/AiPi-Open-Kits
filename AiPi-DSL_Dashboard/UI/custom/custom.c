@@ -50,7 +50,7 @@ static custom_event_t cjson__analysis_type(char* json_data);
 static char* cjson_analysis_ssid(char* json_data);
 static char* cjson_analysis_password(char* json_data);
 static char* cjson__analysis_ip(char* cjson_data);
-static void cjson_get_weather(char* weather_data);
+static int cjson_get_weather(char* weather_data);
 char* compare_wea_output_img_100x100(const char* weather_data);
 char* compare_wea_output_img_20x20(const char* weather_data);
 static ble_status_t cjson_analysis_ble_status(char* ble_status_data);
@@ -140,21 +140,24 @@ static void queue_receive_task(void* arg)
             break;
             case CUSTOM_EVENT_GET_WEATHER:
             {
-                cjson_get_weather(queue_buff);
-                //今天天气
-                lv_img_set_src(ui->src_home_img_1, compare_wea_output_img_100x100(weathers[0].wea)); //天气图片
-                lv_label_set_text(ui->src_home_label_dizhi, weathers[0].city);//地址
-                lv_label_set_text(ui->src_home_label_waether, weathers[0].wea);
-                lv_label_set_text_fmt(ui->src_home_label_temp, "%*.2s℃", 2, weathers[0].tem_day);
-                //明天天气
-                lv_img_set_src(ui->src_home_img_day1, compare_wea_output_img_20x20(weathers[1].wea));
-                lv_label_set_text_fmt(ui->src_home_day1_temp, "%*.2s°", 2, weathers[1].tem_day);
-                //后天天气
-                lv_img_set_src(ui->src_home_img_day2, compare_wea_output_img_20x20(weathers[2].wea));
-                lv_label_set_text_fmt(ui->src_home_day2_temp, "%*.2s°", 2, weathers[2].tem_day);
-                //大后天天气
-                lv_img_set_src(ui->src_home_img_day3, compare_wea_output_img_20x20(weathers[3].wea));
-                lv_label_set_text_fmt(ui->src_home_day3_temp, "%*.2s°", 2, weathers[3].tem_day);
+                if (!cjson_get_weather(queue_buff)) {
+                    //今天天气
+
+                    lv_img_set_src(ui->src_home_img_1, compare_wea_output_img_100x100(weathers[0].wea)); //天气图片
+                    lv_label_set_text(ui->src_home_label_dizhi, weathers[0].city);//地址
+                    lv_label_set_text(ui->src_home_label_waether, weathers[0].wea);
+                    lv_label_set_text_fmt(ui->src_home_label_temp, "%*.2s℃", 2, weathers[0].tem_day);
+                    //明天天气
+                    lv_img_set_src(ui->src_home_img_day1, compare_wea_output_img_20x20(weathers[1].wea));
+                    lv_label_set_text_fmt(ui->src_home_day1_temp, "%*.2s°", 2, weathers[1].tem_day);
+                    //后天天气
+                    lv_img_set_src(ui->src_home_img_day2, compare_wea_output_img_20x20(weathers[2].wea));
+                    lv_label_set_text_fmt(ui->src_home_day2_temp, "%*.2s°", 2, weathers[2].tem_day);
+                    //大后天天气
+                    lv_img_set_src(ui->src_home_img_day3, compare_wea_output_img_20x20(weathers[3].wea));
+                    lv_label_set_text_fmt(ui->src_home_day3_temp, "%*.2s°", 2, weathers[3].tem_day);
+                }
+
             }
             break;
             //BLE 状态
@@ -351,7 +354,7 @@ static char* cjson__analysis_ip(char* cjson_data)
  *
  * @param weather_data
 */
-static void cjson_get_weather(char* weather_data)
+static int cjson_get_weather(char* weather_data)
 {
     for (size_t i = 0; i < strlen(weather_data); i++)
     {
@@ -361,49 +364,58 @@ static void cjson_get_weather(char* weather_data)
 
     cJSON* root = cJSON_Parse(weather_data);
     if (root==NULL) {
-        printf("[%s] is not json\r\n", __func__);
-        return NULL;
+        LOG_E("[%s] is not json\r\n", __func__);
+        return -1;
     }
     cJSON* weather_cjson = cJSON_GetObjectItem(root, "weather");
+    cJSON* errcode = cJSON_GetObjectItem(weather_cjson, "errcode");
+    if (errcode!=NULL) {
+
+        cJSON* errmsg = cJSON_GetObjectItem(weather_cjson, "errmsg");
+        LOG_E("errcode=%d:%s", errcode->valueint, errmsg->valuestring);
+        cJSON_Delete(root);
+        return  -1;;
+    }
+
     cJSON* city_cjsno = cJSON_GetObjectItem(weather_cjson, "city");//城市名称
     if (city_cjsno ==NULL) {
 
-        printf("[city_cjsno ] is not json\r\n");
+        LOG_E("[city_cjsno ] is not json\r\n");
         cJSON_Delete(root);
-        return NULL;
+        return -1;;
     }
     cJSON* wea_data = cJSON_GetObjectItem(weather_cjson, "data");
     if (wea_data ==NULL) {
 
-        printf("[wea_data] is not json\r\n");
+        LOG_E("[wea_data] is not json\r\n");
         cJSON_Delete(root);
-        return NULL;
+        return -1;;
     }
     cJSON* wea_today = cJSON_GetArrayItem(wea_data, 0);//今天天气
     if (wea_today==NULL) {
 
-        printf("[wea_today] is not json\r\n");
+        LOG_E("[wea_today] is not json\r\n");
         cJSON_Delete(root);
-        return NULL;
+        return -1;;
     }
     cJSON* wea_tomorrow = cJSON_GetArrayItem(wea_data, 1);
     if (wea_tomorrow==NULL) {
-        printf("[wea_tomorrow] is not json\r\n");
+        LOG_E("[wea_tomorrow] is not json\r\n");
         cJSON_Delete(root);
-        return NULL;
+        return -1;;
     }
     cJSON* wea_acquired = cJSON_GetArrayItem(wea_data, 2);
     if (wea_acquired==NULL) {
-        printf("[wea_acquired] is not json\r\n");
+        LOG_E("[wea_acquired] is not json\r\n");
 
         cJSON_Delete(root);
-        return NULL;
+        return-1;;
     }
     cJSON* wea_today3 = cJSON_GetArrayItem(wea_data, 3);
     if (wea_today3==NULL) {
-        printf("[wea_today3] is not json\r\n");
+        LOG_E("[wea_today3] is not json\r\n");
         cJSON_Delete(root);
-        return NULL;
+        return -1;;
     }
     //解析今天天气
     cJSON* today_wea = cJSON_GetObjectItem(wea_today, "wea");
@@ -432,6 +444,8 @@ static void cjson_get_weather(char* weather_data)
     memcpy(weathers[3].tem_day, today3_tem->valuestring, strlen(today3_tem->valuestring));
 
     cJSON_Delete(root);
+    return 0;
+
 }
 
 /**

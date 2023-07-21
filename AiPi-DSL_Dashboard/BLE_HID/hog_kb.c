@@ -90,34 +90,6 @@ static uint8_t report_map[] =
     // 0x95, 0x02,       //   Report Count (2)
     // 0xB1, 0x02,       //   Feature (Data, Variable, Absolute)
 
-    0x09, 0xEA,         //      (Volume Down)
-    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
-
-    0x09, 0xE9,         //      (Volume Up)
-    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
-
-    0x09, 0xCB,         //      (Tracking Decrement)
-    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
-
-    0x09, 0xCA,         //      (tracking Increment)
-    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
-
-    0x09, 0xB6,         //      (Scan Previous Track)
-    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
-
-    0x09, 0xB5,         //      (Scan Next Track)
-    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
-
-    0x09, 0xB1,         //      (Pause)
-    0x8, 0x06,         //      Input (Data,Value,Relative,Bit Field)
-
-    0x09, 0xB0,         //      (Play)
-    0x81, 0x06,         //      Input (Data,Value,Relative,Bit Field)
-
-    0x75, 0x01,         //      Report Size (1)
-    0x95, 0x06,         //      Report Count (6)
-    0x81, 0x07,         //      Input (Data,Value,Relative,Bit Field)
-
     0xC0              // End Collection (Application)
 };
 
