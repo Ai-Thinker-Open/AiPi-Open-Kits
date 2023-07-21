@@ -336,6 +336,11 @@
     1: enable
 */
 #define GC9A01_SPI_COLOR_REVERSAL 0
+
+#define LCD_ROTATED_NONE
+// #define LCD_ROTATED_90
+// #define LCD_ROTATED_180
+// #define LCD_ROTATED_270
 #endif
 
 /********** DBI peripheral configuration ***********/

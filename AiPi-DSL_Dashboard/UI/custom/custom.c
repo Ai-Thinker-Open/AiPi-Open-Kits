@@ -210,6 +210,7 @@ static void http_hour_requst_time(TimerHandle_t timer)
     if (timers_http>=60*60) {
         LOG_I("Timed to http update,start https request");
         vTaskResume(https_Handle);
+        timers_http = 0;
     }
     else {
         timers_http++;

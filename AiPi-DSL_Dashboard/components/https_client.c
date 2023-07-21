@@ -35,6 +35,7 @@
 #include "mbedtls/debug.h"
 #include "log.h"
 
+#include "https_client.h"
 // #define REQUEST_HTTPS
 #define REQUEST_HTTP
 
@@ -444,7 +445,7 @@ void https_get_weather_task(void* arg)
     char* queue_buff = pvPortMalloc(1024*2);
     memset(queue_buff, 0, 1024*2);
     //
-    char* buff = https_get_data(https_get_request("v0.yiketianqi.com", "free/week?unescape=1&appid=17769781&appsecret=5IbudTJx"));
+    char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
     sprintf(queue_buff, "{\"weather\":%s}", buff);
     xQueueSend(queue, queue_buff, portMAX_DELAY);
     vPortFree(buff);
@@ -453,7 +454,7 @@ void https_get_weather_task(void* arg)
     vTaskSuspend(https_Handle);
     while (1) {
         //请求一次错误的响应，只获取时间
-        char* buff = https_get_data(https_get_request("v0.yiketianqi.com", "/free/week?unescape=1&appid=17769781&appsecret=5IbudTJx"));
+        char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
         memset(queue_buff, 0, 1024*2);
         sprintf(queue_buff, "{\"weather\":%s}", buff);
         xQueueSend(queue, queue_buff, portMAX_DELAY);

@@ -14,6 +14,9 @@
 extern "C" {
 #endif
 
+#define HTTP_HOST "v0.yiketianqi.com"
+#define HTTP_PATH "free/week?unescape=1&appid=17769781&appsecret=5IbudTJx"
+
     char* https_get_request(const char* host, const char* https_url);
     void https_get_weather_task(void* arg);
     char* compare_wea_output_img_100x100(const char* weather_data);
