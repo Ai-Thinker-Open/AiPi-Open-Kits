@@ -29,15 +29,17 @@
 #include "mbedtls/md5.h"
 #include "mbedtls/debug.h"
 #include "log.h"
+#include "https_client.h"
+
+#define DBG_TAG "HTTPS"
+
+// #define REQUEST_HTTPS
+#define REQUEST_HTTP
+
+#ifdef REQUEST_HTTPS
+
 #define DBG_TAG "HTTPS"
 #define WEB_PORT "443"
-
-extern TaskHandle_t https_Handle;
-extern xQueueHandle queue;
-static const char* REQUEST = "GET " "%s" " HTTP/1.0"
-"Host: " "%s" ""
-"User-Agent: Eyes "
-"";
 
 static const uint8_t* CERTIFICATE_FILENAME = { "-----BEGIN CERTIFICATE-----\r\n"
                                                     "MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/\n"
@@ -67,6 +69,22 @@ static const uint8_t* CERTIFICATE_FILENAME = { "-----BEGIN CERTIFICATE-----\r\n"
                                                     "KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==\n"
                                                     "-----END CERTIFICATE-----\r\n"
 };
+
+#elif defined REQUEST_HTTP
+
+#define DBG_TAG "HTTP"
+#define WEB_PORT "80"
+int sock_client = -1;
+static struct sockaddr_in dest;
+#endif
+
+extern TaskHandle_t https_Handle;
+extern xQueueHandle queue;
+
+static const char* REQUEST = "GET " "/%s" " HTTP/1.0\r\n"
+"Host: " "%s" ":" WEB_PORT "\r\n"
+"User-Agent: AiPi-DSL_Dashboard\r\n"
+"\r\n";
 /**
  * @brief https get request
  *
@@ -81,6 +99,8 @@ char* https_get_request(const char* host, const char* https_url)
     int ret, flags, len;
     buff = pvPortMalloc(2*1024);
     memset(buff, 0, 2*1024);
+#ifdef REQUEST_HTTPS
+
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctr_drbg;
     mbedtls_ssl_context ssl;
@@ -272,6 +292,56 @@ exit:
 
     static int request_count;
     LOG_I("Completed %d requests", ++request_count);
+
+#elif defined  REQUEST_HTTP
+    struct in_addr addr;
+
+#ifdef LWIP_DNS
+    netconn_gethostbyname(host, &addr);
+    LOG_I("Host:%s, Server ip Address : %s:%s", host, ip_ntoa(&addr), WEB_PORT);
+#endif
+    //Crate tcp socket
+    sock_client = socket(AF_INET, SOCK_STREAM, 0);
+    if (ret<0) {
+        LOG_E("Failed to allocate socket.");
+        goto __exit;
+    }
+    LOG_I("allocated socket");
+
+    dest.sin_family = AF_INET;
+    dest.sin_port = htons(atoi(WEB_PORT));
+    dest.sin_addr = addr;
+    //connect http server
+    ret = connect(sock_client, (struct sockaddr*)&dest, sizeof(dest));
+    if (ret!=0) {
+        LOG_E("... socket connect failed errno=%d", errno);
+        close(sock_client);
+        goto __exit;
+    }
+    LOG_I("HTTP client connect server success!");
+
+    //send request
+    memset(https_request_handle, 0, 256);
+    sprintf(https_request_handle, REQUEST, https_url, host);
+    ret = write(sock_client, https_request_handle, strlen(https_request_handle));
+    if (ret< 0) {
+        LOG_E("HTTP send Handler failed error=%d", ret);
+        close(sock_client);
+        goto __exit;
+    }
+    LOG_I("request send OK", ret);
+    LOG_F("Handler byte=%d\r\n%s", ret, https_request_handle);
+
+
+    flags = read(sock_client, buff, 1024*2);
+    LOG_F("\r\n%s", buff);
+
+    shutdown(sock_client, SHUT_RDWR);
+    close(sock_client);
+
+#endif
+__exit:
+
     vPortFree(https_request_handle);
     return buff;
 }
@@ -367,14 +437,14 @@ void https_get_weather_task(void* arg)
     char* queue_buff = pvPortMalloc(1024*2);
     memset(queue_buff, 0, 1024*2);
     //
-    char* buff = https_get_data(https_get_request("v0.yiketianqi.com", "https://v0.yiketianqi.com/free/week?unescape=1&appid=17769781&appsecret=5IbudTJx"));
+    char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
     // sprintf(queue_buff, "{\"weather\":%s}", buff);
     // xQueueSend(queue, queue_buff, portMAX_DELAY);
     vPortFree(buff);
     vTaskSuspend(https_Handle);
     while (1) {
         //请求一次错误的响应，只获取时间
-        char* buff = https_get_data(https_get_request("v0.yiketianqi.com", "https://v0.yiketianqi.com/free/week?unescape=1&appid=&appsecret="));
+        char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
         memset(queue_buff, 0, 1024*2);
         // sprintf(queue_buff, "{\"weather\":%s}", buff);
 

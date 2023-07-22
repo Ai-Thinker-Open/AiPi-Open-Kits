@@ -364,6 +364,7 @@ static void ble_hid_dev_send(hid_key_num_t key_num)
             break;
     }
 }
+
 /**
  * @brief HID 任务
  *

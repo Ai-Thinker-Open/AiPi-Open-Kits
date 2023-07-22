@@ -28,43 +28,61 @@
 #include "mbedtls/error.h"
 #include "mbedtls/md5.h"
 #include "mbedtls/debug.h"
+#include "log.h"
+#include "https_client.h"
 
+// #define REQUEST_HTTPS
+#define REQUEST_HTTP
+
+#ifdef REQUEST_HTTPS
+
+#define DBG_TAG "HTTPS"
 #define WEB_PORT "443"
+
+static const uint8_t* CERTIFICATE_FILENAME = { "-----BEGIN CERTIFICATE-----\r\n"
+                                                    "MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/\n"
+                                                    "MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n"
+                                                    "DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\n"
+                                                    "SjELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUxldCdzIEVuY3J5cHQxIzAhBgNVBAMT\n"
+                                                    "GkxldCdzIEVuY3J5cHQgQXV0aG9yaXR5IFgzMIIBIjANBgkqhkiG9w0BAQEFAAOC\n"
+                                                    "AQ8AMIIBCgKCAQEAnNMM8FrlLke3cl03g7NoYzDq1zUmGSXhvb418XCSL7e4S0EF\n"
+                                                    "q6meNQhY7LEqxGiHC6PjdeTm86dicbp5gWAf15Gan/PQeGdxyGkOlZHP/uaZ6WA8\n"
+                                                    "SMx+yk13EiSdRxta67nsHjcAHJyse6cF6s5K671B5TaYucv9bTyWaN8jKkKQDIZ0\n"
+                                                    "Z8h/pZq4UmEUEz9l6YKHy9v6Dlb2honzhT+Xhq+w3Brvaw2VFn3EK6BlspkENnWA\n"
+                                                    "a6xK8xuQSXgvopZPKiAlKQTGdMDQMc2PMTiVFrqoM7hD8bEfwzB/onkxEz0tNvjj\n"
+                                                    "/PIzark5McWvxI0NHWQWM6r6hCm21AvA2H3DkwIDAQABo4IBfTCCAXkwEgYDVR0T\n"
+                                                    "AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAYYwfwYIKwYBBQUHAQEEczBxMDIG\n"
+                                                    "CCsGAQUFBzABhiZodHRwOi8vaXNyZy50cnVzdGlkLm9jc3AuaWRlbnRydXN0LmNv\n"
+                                                    "bTA7BggrBgEFBQcwAoYvaHR0cDovL2FwcHMuaWRlbnRydXN0LmNvbS9yb290cy9k\n"
+                                                    "c3Ryb290Y2F4My5wN2MwHwYDVR0jBBgwFoAUxKexpHsscfrb4UuQdf/EFWCFiRAw\n"
+                                                    "VAYDVR0gBE0wSzAIBgZngQwBAgEwPwYLKwYBBAGC3xMBAQEwMDAuBggrBgEFBQcC\n"
+                                                    "ARYiaHR0cDovL2Nwcy5yb290LXgxLmxldHNlbmNyeXB0Lm9yZzA8BgNVHR8ENTAz\n"
+                                                    "MDGgL6AthitodHRwOi8vY3JsLmlkZW50cnVzdC5jb20vRFNUUk9PVENBWDNDUkwu\n"
+                                                    "Y3JsMB0GA1UdDgQWBBSoSmpjBH3duubRObemRWXv86jsoTANBgkqhkiG9w0BAQsF\n"
+                                                    "AAOCAQEA3TPXEfNjWDjdGBX7CVW+dla5cEilaUcne8IkCJLxWh9KEik3JHRRHGJo\n"
+                                                    "uM2VcGfl96S8TihRzZvoroed6ti6WqEBmtzw3Wodatg+VyOeph4EYpr/1wXKtx8/\n"
+                                                    "wApIvJSwtmVi4MFU5aMqrSDE6ea73Mj2tcMyo5jMd6jmeWUHK8so/joWUoHOUgwu\n"
+                                                    "X4Po1QYz+3dszkDqMp4fklxBwXRsW10KXzPMTZ+sOPAveyxindmjkW8lGy+QsRlG\n"
+                                                    "PfZ+G6Z6h7mjem0Y+iWlkYcV4PIWL1iwBi8saCbGS5jN2p8M+X+Q7UNKEkROb3N6\n"
+                                                    "KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==\n"
+                                                    "-----END CERTIFICATE-----\r\n"
+};
+
+#elif defined REQUEST_HTTP
+
+#define DBG_TAG "HTTP"
+#define WEB_PORT "80"
+int sock_client = -1;
+static struct sockaddr_in dest;
+#endif
 
 extern TaskHandle_t https_Handle;
 extern xQueueHandle queue;
-static const char* REQUEST = "GET " "%s" " HTTP/1.0\r\n"
-"Host: " "%s" "\r\n"
-"User-Agent: Eyes \r\n"
-"\r\n";
 
-static const uint8_t CERTIFICATE_FILENAME[] = { "-----BEGIN CERTIFICATE-----\r\n"
-                                                    "MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/\r\n"
-                                                    "MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\r\n"
-                                                    "DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\r\n"
-                                                    "SjELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUxldCdzIEVuY3J5cHQxIzAhBgNVBAMT\r\n"
-                                                    "GkxldCdzIEVuY3J5cHQgQXV0aG9yaXR5IFgzMIIBIjANBgkqhkiG9w0BAQEFAAOC\r\n"
-                                                    "AQ8AMIIBCgKCAQEAnNMM8FrlLke3cl03g7NoYzDq1zUmGSXhvb418XCSL7e4S0EF\r\n"
-                                                    "q6meNQhY7LEqxGiHC6PjdeTm86dicbp5gWAf15Gan/PQeGdxyGkOlZHP/uaZ6WA8\r\n"
-                                                    "SMx+yk13EiSdRxta67nsHjcAHJyse6cF6s5K671B5TaYucv9bTyWaN8jKkKQDIZ0\r\n"
-                                                    "Z8h/pZq4UmEUEz9l6YKHy9v6Dlb2honzhT+Xhq+w3Brvaw2VFn3EK6BlspkENnWA\r\n"
-                                                    "a6xK8xuQSXgvopZPKiAlKQTGdMDQMc2PMTiVFrqoM7hD8bEfwzB/onkxEz0tNvjj\r\n"
-                                                    "/PIzark5McWvxI0NHWQWM6r6hCm21AvA2H3DkwIDAQABo4IBfTCCAXkwEgYDVR0T\r\n"
-                                                    "AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAYYwfwYIKwYBBQUHAQEEczBxMDIG\r\n"
-                                                    "CCsGAQUFBzABhiZodHRwOi8vaXNyZy50cnVzdGlkLm9jc3AuaWRlbnRydXN0LmNv\r\n"
-                                                    "bTA7BggrBgEFBQcwAoYvaHR0cDovL2FwcHMuaWRlbnRydXN0LmNvbS9yb290cy9k\r\n"
-                                                    "c3Ryb290Y2F4My5wN2MwHwYDVR0jBBgwFoAUxKexpHsscfrb4UuQdf/EFWCFiRAw\r\n"
-                                                    "VAYDVR0gBE0wSzAIBgZngQwBAgEwPwYLKwYBBAGC3xMBAQEwMDAuBggrBgEFBQcC\r\n"
-                                                    "ARYiaHR0cDovL2Nwcy5yb290LXgxLmxldHNlbmNyeXB0Lm9yZzA8BgNVHR8ENTAz\r\n"
-                                                    "MDGgL6AthitodHRwOi8vY3JsLmlkZW50cnVzdC5jb20vRFNUUk9PVENBWDNDUkwu\r\n"
-                                                    "Y3JsMB0GA1UdDgQWBBSoSmpjBH3duubRObemRWXv86jsoTANBgkqhkiG9w0BAQsF\r\n"
-                                                    "AAOCAQEA3TPXEfNjWDjdGBX7CVW+dla5cEilaUcne8IkCJLxWh9KEik3JHRRHGJo\r\n"
-                                                    "uM2VcGfl96S8TihRzZvoroed6ti6WqEBmtzw3Wodatg+VyOeph4EYpr/1wXKtx8/\r\n"
-                                                    "wApIvJSwtmVi4MFU5aMqrSDE6ea73Mj2tcMyo5jMd6jmeWUHK8so/joWUoHOUgwu\r\n"
-                                                    "X4Po1QYz+3dszkDqMp4fklxBwXRsW10KXzPMTZ+sOPAveyxindmjkW8lGy+QsRlG\r\n"
-                                                    "PfZ+G6Z6h7mjem0Y+iWlkYcV4PIWL1iwBi8saCbGS5jN2p8M+X+Q7UNKEkROb3N6\r\n"
-                                                    "KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==\r\n"
-                                                    "-----END CERTIFICATE-----\r\n" };
+static const char* REQUEST = "GET " "/%s" " HTTP/1.0\r\n"
+"Host: " "%s" ":" WEB_PORT "\r\n"
+"User-Agent: AiPi-DSL_Dashboard\r\n"
+"\r\n";
 /**
  * @brief https get request
  *
@@ -79,6 +97,8 @@ char* https_get_request(const char* host, const char* https_url)
     int ret, flags, len;
     buff = pvPortMalloc(2*1024);
     memset(buff, 0, 2*1024);
+#ifdef REQUEST_HTTPS
+
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctr_drbg;
     mbedtls_ssl_context ssl;
@@ -89,7 +109,7 @@ char* https_get_request(const char* host, const char* https_url)
     mbedtls_ssl_init(&ssl);
     mbedtls_x509_crt_init(&cacert);
     mbedtls_ctr_drbg_init(&ctr_drbg);
-    printf("Seeding the random number generator\r\n");
+    LOG_I("Seeding the random number generator");
 
     mbedtls_ssl_config_init(&conf);
 
@@ -97,11 +117,11 @@ char* https_get_request(const char* host, const char* https_url)
     if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
         NULL, 0)) != 0)
     {
-        printf("mbedtls_ctr_drbg_seed returned %d\r\n", ret);
+        LOG_I("mbedtls_ctr_drbg_seed returned %d", ret);
         abort();
     }
 
-    printf("Loading the CA root certificate...\r\n");
+    LOG_I("Loading the CA root certificate...");
 
     ret = mbedtls_x509_crt_parse(&cacert,
                                  CERTIFICATE_FILENAME,
@@ -109,27 +129,27 @@ char* https_get_request(const char* host, const char* https_url)
 
     if (ret < 0)
     {
-        printf("mbedtls_x509_crt_parse returned -0x%x\n\n", -ret);
+        LOG_E("mbedtls_x509_crt_parse returned -0x%x\n\n", -ret);
         abort();
     }
 
-    printf("Setting hostname for TLS session...\r\n");
+    LOG_I("Setting hostname for TLS session...");
 
     /* Hostname set here should match CN in server certificate */
     if ((ret = mbedtls_ssl_set_hostname(&ssl, host)) != 0)
     {
-        printf("mbedtls_ssl_set_hostname returned -0x%x\r\n", -ret);
+        LOG_E("mbedtls_ssl_set_hostname returned -0x%x", -ret);
         abort();
     }
 
-    printf("Setting up the SSL/TLS structure...\r\n");
+    LOG_I("Setting up the SSL/TLS structure...");
 
     if ((ret = mbedtls_ssl_config_defaults(&conf,
         MBEDTLS_SSL_IS_CLIENT,
         MBEDTLS_SSL_TRANSPORT_STREAM,
         MBEDTLS_SSL_PRESET_DEFAULT)) != 0)
     {
-        printf("mbedtls_ssl_config_defaults returned %d\r\n", ret);
+        LOG_E("mbedtls_ssl_config_defaults returned %d", ret);
         goto exit;
     }
 
@@ -144,57 +164,57 @@ char* https_get_request(const char* host, const char* https_url)
 
     if ((ret = mbedtls_ssl_setup(&ssl, &conf)) != 0)
     {
-        printf("mbedtls_ssl_setup returned -0x%x\r\n", -ret);
+        LOG_E("mbedtls_ssl_setup returned -0x%x", -ret);
         goto exit;
     }
 
     mbedtls_net_init(&server_fd);
 
-    printf("Connecting to %s:%s...\r\n", host, WEB_PORT);
-    printf("");
+    LOG_I("Connecting to %s:%s...", host, WEB_PORT);
+    LOG_I("");
     if ((ret = mbedtls_net_connect(&server_fd, host,
         WEB_PORT, MBEDTLS_NET_PROTO_TCP)) != 0)
     {
-        printf("mbedtls_net_connect returned -%x\r\n", -ret);
+        LOG_E("mbedtls_net_connect returned -%x", -ret);
         goto exit;
     }
 
-    printf("Connected.\r\n");
+    LOG_I("Connected.");
 
     mbedtls_ssl_set_bio(&ssl, &server_fd, mbedtls_net_send, mbedtls_net_recv, NULL);
 
-    printf("Performing the SSL/TLS handshake...\r\n");
+    LOG_I("Performing the SSL/TLS handshake...");
 
     while ((ret = mbedtls_ssl_handshake(&ssl)) != 0)
     {
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE)
         {
-            printf("mbedtls_ssl_handshake returned -0x%x\r\n", -ret);
+            LOG_E("mbedtls_ssl_handshake returned -0x%x", -ret);
             goto exit;
         }
     }
 
-    printf("Verifying peer X.509 certificate...\r\n");
+    LOG_I("Verifying peer X.509 certificate...");
 
     if ((flags = mbedtls_ssl_get_verify_result(&ssl)) != 0)
     {
         /* In real life, we probably want to close connection if ret != 0 */
-        printf("Failed to verify peer certificate!\r\n");
+        LOG_E("Failed to verify peer certificate!");
         bzero(buff, sizeof(buff));
         mbedtls_x509_crt_verify_info(buff, sizeof(buff), "  ! ", flags);
-        printf("verification info: %s\r\n", buff);
+        LOG_E("verification info: %s", buff);
 
     }
     else
     {
-        printf("Certificate verified.\r\n");
+        LOG_I("Certificate verified.");
     }
 
-    printf("Cipher suite is %s", mbedtls_ssl_get_ciphersuite(&ssl));
+    LOG_I("Cipher suite is %s", mbedtls_ssl_get_ciphersuite(&ssl));
 
-    printf("Writing HTTP request:\r\n");
+    LOG_I("Writing HTTP request:");
     sprintf(https_request_handle, REQUEST, https_url, host);
-    printf("%s\r\n", https_request_handle);
+    LOG_I("%s", https_request_handle);
     size_t written_bytes = 0;
     do
     {
@@ -204,17 +224,17 @@ char* https_get_request(const char* host, const char* https_url)
                                 strlen(https_request_handle) - written_bytes);
         if (ret >= 0)
         {
-            printf("%d bytes written\r\n", ret);
+            LOG_I("%d bytes written", ret);
             written_bytes += ret;
         }
         else if (ret != MBEDTLS_ERR_SSL_WANT_WRITE && ret != MBEDTLS_ERR_SSL_WANT_READ)
         {
-            printf("mbedtls_ssl_write returned -0x%x\r\n", -ret);
+            LOG_E("mbedtls_ssl_write returned -0x%x", -ret);
             goto exit;
         }
     } while (written_bytes < strlen(REQUEST));
 
-    printf("Reading HTTP response...\r\n");
+    LOG_I("Reading HTTP response...");
     len = 0;
     do
     {
@@ -233,20 +253,20 @@ char* https_get_request(const char* host, const char* https_url)
 
         if (ret < 0)
         {
-            printf("mbedtls_ssl_read returned -0x%x\r\n", -ret);
+            LOG_E("mbedtls_ssl_read returned -0x%x", -ret);
             break;
         }
 
         if (ret == 0)
         {
-            printf("connection closed\r\n");
+            LOG_I("connection closed");
             break;
         }
         len += ret;
         /* Print response directly to stdout as it is read */
         // for (int i = 0; i < len; i++)
         // {
-        //     printf("%c", buff[i]);
+        //     LOG_I("%c", buff[i]);
         // }
         // strcat(buff, buff_s);
         strncat(buff, buff_s, ret);
@@ -254,7 +274,7 @@ char* https_get_request(const char* host, const char* https_url)
     } while (1);
 
     mbedtls_ssl_close_notify(&ssl);
-    printf("https read len :%d\n\r", len);
+    LOG_I("https read len :%d", len);
 exit:
     mbedtls_ssl_session_reset(&ssl);
     mbedtls_net_free(&server_fd);
@@ -262,14 +282,64 @@ exit:
     if (ret != 0)
     {
         mbedtls_strerror(ret, buff, 100);
-        printf("Last error was: -0x%x - %s\r\n", -ret, buff);
+        LOG_E("Last error was: -0x%x - %s", -ret, buff);
         return NULL;
     }
 
-    printf("\r\n"); // JSON output doesn't have a newline at end
+    LOG_I(""); // JSON output doesn't have a newline at end
 
     static int request_count;
-    printf("Completed %d requests\r\n", ++request_count);
+    LOG_I("Completed %d requests", ++request_count);
+
+#elif defined  REQUEST_HTTP
+    struct in_addr addr;
+
+#ifdef LWIP_DNS
+    netconn_gethostbyname(host, &addr);
+    LOG_I("Host:%s, Server ip Address : %s:%s", host, ip_ntoa(&addr), WEB_PORT);
+#endif
+    //Crate tcp socket
+    sock_client = socket(AF_INET, SOCK_STREAM, 0);
+    if (ret<0) {
+        LOG_E("Failed to allocate socket.");
+        goto __exit;
+    }
+    LOG_I("allocated socket");
+
+    dest.sin_family = AF_INET;
+    dest.sin_port = htons(atoi(WEB_PORT));
+    dest.sin_addr = addr;
+    //connect http server
+    ret = connect(sock_client, (struct sockaddr*)&dest, sizeof(dest));
+    if (ret!=0) {
+        LOG_E("... socket connect failed errno=%d", errno);
+        close(sock_client);
+        goto __exit;
+    }
+    LOG_I("HTTP client connect server success!");
+
+    //send request
+    memset(https_request_handle, 0, 256);
+    sprintf(https_request_handle, REQUEST, https_url, host);
+    ret = write(sock_client, https_request_handle, strlen(https_request_handle));
+    if (ret< 0) {
+        LOG_E("HTTP send Handler failed error=%d", ret);
+        close(sock_client);
+        goto __exit;
+    }
+    LOG_I("request send OK", ret);
+    LOG_F("Handler byte=%d\r\n%s", ret, https_request_handle);
+
+
+    flags = read(sock_client, buff, 1024*2);
+    LOG_F("\r\n%s", buff);
+
+    shutdown(sock_client, SHUT_RDWR);
+    close(sock_client);
+
+#endif
+__exit:
+
     vPortFree(https_request_handle);
     return buff;
 }
@@ -364,13 +434,13 @@ void https_get_weather_task(void* arg)
 {
     char* queue_buff = pvPortMalloc(1024*2);
     memset(queue_buff, 0, 1024*2);
-    char* buff = https_get_data(https_get_request("v0.yiketianqi.com", "https://v0.yiketianqi.com/free/week?unescape=1&appid=17769781&appsecret=5IbudTJx"));
+    char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
     sprintf(queue_buff, "{\"weather\":%s}", buff);
     xQueueSend(queue, queue_buff, portMAX_DELAY);
     vPortFree(buff);
     vTaskSuspend(https_Handle);
     while (1) {
-        char* buff = https_get_data(https_get_request("v0.yiketianqi.com", "https://v0.yiketianqi.com/free/week?unescape=1&appid=17769781&appsecret=5IbudTJx"));
+        char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
         memset(queue_buff, 0, 1024*2);
         sprintf(queue_buff, "{\"weather\":%s}", buff);
 

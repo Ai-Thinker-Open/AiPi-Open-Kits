@@ -4,7 +4,7 @@ include(proj.conf)
 
 find_package(bouffalo_sdk REQUIRED HINTS $ENV{BL_SDK_BASE})
 
-file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/lvgl_config/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/wifi/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/UI/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/components/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/BLE_HID/*.c")
+file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/lvgl_config/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/wifi/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/mqtt/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/UI/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/components/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/BLE_HID/*.c")
 
 file(GLOB_RECURSE UI "${CMAKE_CURRENT_SOURCE_DIR}/UI/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/UI/generated/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/UI/generated/guider_fonts/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/UI/generated/images/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/UI/custom/*.c")
 

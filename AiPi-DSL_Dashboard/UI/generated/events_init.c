@@ -329,8 +329,8 @@ static void src_home_imgbtn_scan_event_handler(lv_event_t* e)
 			LOG_I("btn_scan CLICKED");
 			lv_obj_clear_flag(guider_ui.src_home_cont_5, LV_OBJ_FLAG_HIDDEN);
 			xTimerStart(loading_time, 100/portTICK_PERIOD_MS);
-			sprintf(scan_msg, "{\"wifi_scan\":{\"status\":1}}");
-			xQueueSend(queue, scan_msg, portMAX_DELAY);
+			// sprintf(scan_msg, "{\"wifi_scan\":{\"status\":1}}");
+			// xQueueSend(queue, scan_msg, portMAX_DELAY);
 		}
 		break;
 		default:
