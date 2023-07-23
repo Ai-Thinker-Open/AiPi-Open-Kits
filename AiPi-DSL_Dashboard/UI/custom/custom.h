@@ -52,6 +52,7 @@ extern "C" {
     void custom_init(lv_ui* ui);
     void flash_erase_set(char* key, char* value);
     char* flash_get_data(char* key, uint32_t len);
+    void queue_receive_ble_task(void* arg);
 #ifdef __cplusplus
 }
 #endif

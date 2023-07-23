@@ -60,6 +60,7 @@ void setup_scr_src_home(lv_ui* ui) {
 	ui->src_home_tabview_1_Shortcuts = lv_tabview_add_tab(ui->src_home_tabview_1, "Shortcuts");
 	//SmartCtrl
 	ui->src_home_tabview_1_SmartCtrl = lv_tabview_add_tab(ui->src_home_tabview_1, "SmartCtrl");
+
 	//Set style for src_home_tabview_1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
 	lv_obj_set_style_radius(ui->src_home_tabview_1, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_color(ui->src_home_tabview_1, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);

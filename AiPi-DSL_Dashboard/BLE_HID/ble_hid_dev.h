@@ -44,4 +44,5 @@ typedef  enum {
 }hid_key_num_t;
 
 void ble_hid_task(void* arg);
+
 #endif

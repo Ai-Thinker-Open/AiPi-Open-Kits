@@ -34,6 +34,8 @@
     *      TYPEDEFS
     **********************/
 xQueueHandle queue;
+
+extern xQueueHandle ble_queue;
 /**********************
  *  STATIC PROTOTYPES
  **********************/
@@ -54,23 +56,24 @@ static int cjson_get_weather(char* weather_data);
 char* compare_wea_output_img_100x100(const char* weather_data);
 char* compare_wea_output_img_20x20(const char* weather_data);
 static ble_status_t cjson_analysis_ble_status(char* ble_status_data);
-static int cjson_analysis_wifi_scan(char* json_data, char* ssid_arry[64]);
+static int cjson_analysis_wifi_scan(char* json_data);
 /**
  * @brief queue_receive_task
  *
  * @param arg
 */
-static wifi_mgmr_scan_params_t wifi_scan_config[32];
+
+static wifi_mgmr_scan_item_t wifi_aps[32];
 static void queue_receive_task(void* arg)
 {
     ble_status_t ble_status = BLE_STATUS_DATA_ERR;
+    static wifi_mgmr_scan_params_t wifi_scan_config;
     char* queue_buff = NULL;
+    char* ssid_list = NULL;
     char* ssid = NULL;
     char* password = NULL;
     char* ipv4_addr = NULL;
     lv_ui* ui = (lv_ui*)arg;
-
-
     ssid = flash_get_data(SSID_KEY, 32);
     password = flash_get_data(PASS_KEY, 32);
     if (ssid!=NULL)
@@ -93,7 +96,37 @@ static void queue_receive_task(void* arg)
             //扫描
             case CUSTOM_EVENT_WIFI_SCAN:
             {
-                cjson_analysis_wifi_scan(queue_buff, NULL);
+                ssid_list = pvPortMalloc(256);
+                memset(ssid_list, 0, 256);
+                switch (cjson_analysis_wifi_scan(queue_buff))
+                {
+                    case 0:
+                    {
+                        wifi_mgmr_sta_scanlist_dump(wifi_aps, wifi_mgmr_sta_scanlist_nums_get());
+                        sprintf(ssid_list, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", wifi_aps[0].ssid,
+                        wifi_aps[1].ssid,
+                        wifi_aps[2].ssid,
+                        wifi_aps[3].ssid,
+                        wifi_aps[4].ssid,
+                        wifi_aps[5].ssid,
+                        wifi_aps[6].ssid,
+                        wifi_aps[7].ssid,
+                        wifi_aps[8].ssid,
+                        wifi_aps[9].ssid,
+                        wifi_aps[10].ssid);
+                        lv_dropdown_set_options(ui->src_home_ddlist_1, ssid_list);
+                        lv_event_send(ui->src_home_img_loding, LV_EVENT_CLICKED, NULL);
+                        vPortFree(ssid_list);
+                    }
+                    break;
+                    case 1:
+                    {
+                        wifi_mgmr_sta_scan(&wifi_scan_config);
+                    }
+                    break;
+                    default:
+                        break;
+                }
             }
             break;
             //WiFi
@@ -160,7 +193,58 @@ static void queue_receive_task(void* arg)
 
             }
             break;
-            //BLE 状态
+            // //BLE 状态
+            // case CUSTOM_EVENT_GET_BLE:
+            // {
+            //     ble_status = cjson_analysis_ble_status(queue_buff);
+            //     switch (ble_status) {
+            //         case BLE_STATUS_ENABLE:
+            //         {
+            //             LOG_I("BLE status is Enable,wating connect");
+            //             lv_label_set_text(ui->src_home_label_BLEConter, "BLE:opened");
+            //         }
+            //         break;
+            //         case BLE_STATUS_CONNECT:
+            //         {
+            //             LOG_I("BLE Connect OK");
+            //             lv_label_set_text(ui->src_home_label_BLEConter, "BLE:Connected");
+            //             lv_img_set_src(ui->src_home_img_BLE, &_BLE_ok_alpha_20x20);
+            //             lv_obj_add_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
+            //             lv_obj_clear_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
+            //         }
+            //         break;
+            //         case BLE_STATUS_DISCONNECT:
+            //         {
+            //             LOG_F("BLE disconnect!");
+            //             lv_label_set_text(ui->src_home_label_BLEConter, "BLE:opnened");
+            //             lv_img_set_src(ui->src_home_img_BLE, &_BLE_no_alpha_20x20);
+            //             lv_obj_add_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
+            //             lv_obj_clear_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
+            //         }
+            //         break;
+            //         default:
+            //             break;
+            //     }
+            // }
+            // break;
+            default:
+                break;
+        }
+        vPortFree(queue_buff);
+    }
+}
+
+void queue_receive_ble_task(void* arg)
+{
+    char* queue_buff = NULL;
+    ble_status_t ble_status = BLE_STATUS_DATA_ERR;
+    lv_ui* ui = (lv_ui*)arg;
+    while (1)
+    {
+        queue_buff = pvPortMalloc(1024*2);
+        memset(queue_buff, 0, 1024*2);
+        xQueueReceive(ble_queue, queue_buff, portMAX_DELAY);
+        switch (cjson__analysis_type(queue_buff)) {
             case CUSTOM_EVENT_GET_BLE:
             {
                 ble_status = cjson_analysis_ble_status(queue_buff);
@@ -197,9 +281,6 @@ static void queue_receive_task(void* arg)
             default:
                 break;
         }
-
-
-        vPortFree(queue_buff);
     }
 }
 /**
@@ -231,7 +312,7 @@ static void http_hour_requst_time(TimerHandle_t timer)
 void custom_init(lv_ui* ui)
 {
     /* Add your codes here */
-    queue = xQueueCreate(2, 1024*2);
+    queue = xQueueCreate(1, 1024*2);
     xTaskCreate(queue_receive_task, "queue_receive_task", 1024*2, ui, 3, NULL);
     http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
 
@@ -528,7 +609,7 @@ __exit:
  * @param ssid_arry SSID list
  * @return int
 */
-static int cjson_analysis_wifi_scan(char* json_data, char* ssid_arry[64])
+static int cjson_analysis_wifi_scan(char* json_data)
 {
     if (json_data==NULL) {
         return -1;
@@ -547,12 +628,19 @@ static int cjson_analysis_wifi_scan(char* json_data, char* ssid_arry[64])
         case 1:
         {
             LOG_I("scan_status is start");
+
             cJSON_Delete(root);
             return scan_status->valueint;
         }
         /* code */
         break;
-
+        case 0:
+        {
+            LOG_I("scan_status is done");
+            cJSON_Delete(root);
+            return scan_status->valueint;
+        }
+        break;
         default:
             break;
     }

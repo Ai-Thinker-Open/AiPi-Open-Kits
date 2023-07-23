@@ -29,11 +29,13 @@
 #include "hog_kb.h"
 #include "log.h"
 #include "ble_hid_dev.h"
+#include "custom.h"
 #define GBD_TAG "BLE HID"
 
 #define BLE_DEV_NAME "AiPi-Dashboard"
 
 QueueHandle_t ble_hid_queue;
+xQueueHandle ble_queue;
 extern xQueueHandle queue;
 static struct bt_le_adv_param adv_param;
 static char adv_name[] = BLE_DEV_NAME;
@@ -70,7 +72,7 @@ static void _connected(struct bt_conn* conn, u8_t err)
     // bt_conn_set_security(conn, BT_SECURITY_L3);
     sprintf(ble_status_msg, "{\"BLE_HID\":{\"status\":%d}}", BLE_STATUS_CONNECT);
 
-    xQueueSend(queue, ble_status_msg, portMAX_DELAY);
+    xQueueSend(ble_queue, ble_status_msg, portMAX_DELAY);
     vPortFree(ble_status_msg);
     return;
 }
@@ -98,7 +100,7 @@ static void _disconnected(struct bt_conn* conn, u8_t reason)
     }
     sprintf(ble_status_msg, "{\"BLE_HID\":{\"status\":%d}}", BLE_STATUS_DISCONNECT);
 
-    xQueueSend(queue, ble_status_msg, portMAX_DELAY);
+    xQueueSend(ble_queue, ble_status_msg, portMAX_DELAY);
     vPortFree(ble_status_msg);
 }
 /**
@@ -170,7 +172,7 @@ static void bt_enable_cb(int err)
         sprintf(ble_status_msg, "{\"BLE_HID\":{\"status\":%d,\"MAC\":\"%02x:%02x:%02x:%02x:%02x:%02x\"}}", BLE_STATUS_ENABLE,
         bt_addr.a.val[5], bt_addr.a.val[4], bt_addr.a.val[3], bt_addr.a.val[2], bt_addr.a.val[1], bt_addr.a.val[0]);
 
-        xQueueSend(queue, ble_status_msg, portMAX_DELAY);
+        xQueueSend(ble_queue, ble_status_msg, portMAX_DELAY);
     }
     vPortFree(ble_status_msg);
 }
@@ -372,6 +374,9 @@ static void ble_hid_dev_send(hid_key_num_t key_num)
 */
 void ble_hid_task(void* arg)
 {
+    ble_queue = xQueueCreate(1, 512);
+    xTaskCreate(queue_receive_ble_task, "queue_ble_task", 1024, arg, 7, NULL);
+    vTaskDelay(1000/portTICK_RATE_MS);
     hid_key_num_t kb_num;
     btblecontroller_em_config();
     ble_init();

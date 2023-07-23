@@ -93,6 +93,7 @@ void wifi_event_handler(uint32_t code)
 {
 
     sta_ConnectStatus = code;
+
     switch (code) {
         case CODE_WIFI_ON_INIT_DONE:
         {
@@ -108,8 +109,13 @@ void wifi_event_handler(uint32_t code)
         break;
         case CODE_WIFI_ON_SCAN_DONE:
         {
-            // wifi_mgmr_sta_scanlist();
+            char* scan_msg = pvPortMalloc(128);
+            wifi_mgmr_sta_scanlist();
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_SCAN_DONE SSID numbles:%d", __func__, wifi_mgmr_sta_scanlist_nums_get());
+            sprintf(scan_msg, "{\"wifi_scan\":{\"status\":0}}");
+            // xQueueSend(queue, scan_msg, );
+            xQueueSendFromISR(queue, scan_msg, pdTRUE);
+            vPortFree(scan_msg);
         }
         break;
         case CODE_WIFI_ON_CONNECTED:

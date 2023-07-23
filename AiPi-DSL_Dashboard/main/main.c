@@ -75,8 +75,8 @@ int main(void)
     events_init(&guider_ui);
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 1, NULL);
     xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 1024, NULL, 2, NULL);
-    // vTaskDelay(500/portTICK_RATE_MS);
-    xTaskCreate(ble_hid_task, "ble_hid_task", 1024*2, NULL, 6, NULL);
+
+    xTaskCreate(ble_hid_task, "ble_hid_task", 1024*2, (void*)&guider_ui, 6, NULL);
     vTaskStartScheduler();
     // while (1) {
 
