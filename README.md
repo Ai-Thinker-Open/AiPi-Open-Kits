@@ -2,7 +2,7 @@
 
 |开发板     | 概述 | 详细介绍|
 | :----:    |:----: |:----: |
-| Ai-Pi_Eeys| 小安派-Eyes-Sx出场固件源码| [点击查看](Ai-Pi_Eeys_weather/README.md) |
+| Ai-Pi_Eeys| 小安派-Eyes-Sx出场固件源码| [点击查看](Ai-Pi_Eeys/README.md) |
 
 
 
