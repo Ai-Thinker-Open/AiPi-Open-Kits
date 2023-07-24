@@ -1035,4 +1035,7 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_imgbtn_set_src(ui->src_home_imgbtn_novoice, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_novoiceclose_alpha_20x20, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_novoice, LV_OBJ_FLAG_CHECKABLE);
 
+    lv_obj_add_flag(ui->src_home_slider_voicse, LV_OBJ_FLAG_CHECKABLE);
+    lv_obj_add_flag(ui->src_home_imgbtn_voice, LV_OBJ_FLAG_CHECKABLE);
+    lv_obj_add_flag(ui->src_home_cont_music_ctrl, LV_OBJ_FLAG_CHECKABLE);
 }
