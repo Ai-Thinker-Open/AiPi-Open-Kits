@@ -14,7 +14,7 @@
 #include "log.h"
 
 #include "ble_hid_dev.h"
-
+#include "user_mqtt.h"
 #define DBG_TAG "LV EVENT"
 
 TimerHandle_t loading_time;
@@ -52,6 +52,8 @@ static void src_home_imgbtn_openL_event_handler(lv_event_t* e)
 		{
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_openL, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_closeL, LV_OBJ_FLAG_HIDDEN);
+
+			mqtt_app_publish(lv_textarea_get_text(guider_ui.src_home_ta_topic), lv_textarea_get_text(guider_ui.src_home_ta_msg_close), 0);
 		}
 		break;
 		default:
@@ -88,6 +90,7 @@ static void src_home_imgbtn_closeL_event_handler(lv_event_t* e)
 		{
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_closeL, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_openL, LV_OBJ_FLAG_HIDDEN);
+			mqtt_app_publish(lv_textarea_get_text(guider_ui.src_home_ta_topic), lv_textarea_get_text(guider_ui.src_home_ta_msg_open), 0);
 		}
 		break;
 		default:
@@ -135,6 +138,13 @@ static void src_home_btn_connect_mqtt_event_handler(lv_event_t* e)
 			LOG_I("btn_connect_mqtt CLICKED");
 			lv_obj_clear_flag(guider_ui.src_home_cont_5, LV_OBJ_FLAG_HIDDEN);
 			xTimerStart(loading_time, 100/portTICK_PERIOD_MS);
+
+			if (!mqtt_start_connect(lv_textarea_get_text(guider_ui.src_home_ta_mqHost), atoi(lv_textarea_get_text(guider_ui.src_home_ta_mqPort)), lv_textarea_get_text(guider_ui.src_home_ta_mqUsername), lv_textarea_get_text(guider_ui.src_home_ta_mqPort))) {
+				lv_event_send(guider_ui.src_home_img_loding, LV_EVENT_CLICKED, NULL);
+				lv_event_send(guider_ui.src_home_imgbtn_10, LV_EVENT_CLICKED, NULL);
+				lv_label_set_text_fmt(guider_ui.src_home_label_14, "%s:%s", lv_textarea_get_text(guider_ui.src_home_ta_mqHost), lv_textarea_get_text(guider_ui.src_home_ta_mqPort));
+			}
+
 		}
 		break;
 		default:
@@ -150,6 +160,8 @@ static void src_home_btn_topicOK_event_handler(lv_event_t* e)
 		case LV_EVENT_CLICKED:
 		{
 			lv_obj_add_flag(guider_ui.src_home_cont_6, LV_OBJ_FLAG_HIDDEN);
+			mqtt_app_subscribe("sub", 0);
+
 		}
 		break;
 		default:

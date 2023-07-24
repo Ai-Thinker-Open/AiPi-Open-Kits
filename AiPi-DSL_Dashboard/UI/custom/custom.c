@@ -26,6 +26,8 @@
 
 #include "wifi_mgmr_ext.h"
 #include "wifi_mgmr.h"
+
+
   /*********************
    *      DEFINES
    *********************/
@@ -103,17 +105,15 @@ static void queue_receive_task(void* arg)
                     case 0:
                     {
                         wifi_mgmr_sta_scanlist_dump(wifi_aps, wifi_mgmr_sta_scanlist_nums_get());
-                        sprintf(ssid_list, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", wifi_aps[0].ssid,
-                        wifi_aps[1].ssid,
-                        wifi_aps[2].ssid,
-                        wifi_aps[3].ssid,
-                        wifi_aps[4].ssid,
-                        wifi_aps[5].ssid,
-                        wifi_aps[6].ssid,
-                        wifi_aps[7].ssid,
-                        wifi_aps[8].ssid,
-                        wifi_aps[9].ssid,
-                        wifi_aps[10].ssid);
+                        // if(wifi_mgmr_sta_scanlist_nums_get())
+                        for (size_t i = 0; i < wifi_mgmr_sta_scanlist_nums_get(); i++)
+                        {
+                            //进行字符串拼接
+                            strcat(ssid_list, wifi_aps[i].ssid);
+                            if (wifi_mgmr_sta_scanlist_nums_get()-i != 1) {
+                                strcat(ssid_list, "\n");
+                            }
+                        }
                         lv_dropdown_set_options(ui->src_home_ddlist_1, ssid_list);
                         lv_event_send(ui->src_home_img_loding, LV_EVENT_CLICKED, NULL);
                         vPortFree(ssid_list);
@@ -154,11 +154,20 @@ static void queue_receive_task(void* arg)
                     lv_img_set_src(ui->src_home_img_wifi, &_wifi_alpha_20x20);
                 else
                     lv_img_set_src(ui->src_home_img_wifi, &_no_internet_alpha_20x20);
+
                 // lv_label_set_text(ui->WiFi_config_label_10, queue_buff);
                 lv_event_send(ui->src_home_img_loding, LV_EVENT_CLICKED, NULL);
                 lv_textarea_set_text(ui->src_home_ta_1, ui->password);
                 lv_label_set_text(ui->src_home_label_ip, queue_buff);
-                lv_dropdown_set_selected(ui->src_home_ddlist_1, 1);
+
+                lv_dropdown_add_option(ui->src_home_ddlist_1, ui->ssid, lv_dropdown_get_option_cnt(ui->src_home_ddlist_1)+1);
+
+                if (lv_dropdown_get_option_index(ui->src_home_ddlist_1, ui->ssid)>=0) {
+                    lv_dropdown_set_selected(ui->src_home_ddlist_1, lv_dropdown_get_option_index(ui->src_home_ddlist_1, ui->ssid));
+                }
+                else {
+                    lv_dropdown_set_selected(ui->src_home_ddlist_1, 0);
+                }
 
                 vPortFree(ssid);
                 vPortFree(password);
@@ -315,7 +324,7 @@ void custom_init(lv_ui* ui)
     queue = xQueueCreate(1, 1024*2);
     xTaskCreate(queue_receive_task, "queue_receive_task", 1024*2, ui, 3, NULL);
     http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
-
+    mqtt_client_init();
 }
 
 static custom_event_t cjson__analysis_type(char* json_data)

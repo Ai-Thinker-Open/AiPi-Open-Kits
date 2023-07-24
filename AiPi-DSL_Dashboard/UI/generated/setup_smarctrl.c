@@ -598,7 +598,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
     lv_obj_set_style_radius(ui->src_home_ta_mqHost, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->src_home_ta_mqHost, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui->src_home_ta_mqHost, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
-    lv_textarea_set_text(ui->src_home_ta_mqHost, "wx.ai-thinker.com");
+    lv_textarea_set_text(ui->src_home_ta_mqHost, "broker.emqx.io");
 
     //use keyboard on src_home_ta_mqHost
     lv_obj_add_event_cb(ui->src_home_ta_mqHost, ta_src_home_event_cb, LV_EVENT_ALL, g_kb_src_home);

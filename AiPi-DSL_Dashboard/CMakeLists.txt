@@ -13,7 +13,7 @@ file(GLOB_RECURSE UI "${CMAKE_CURRENT_SOURCE_DIR}/UI/*.c" "${CMAKE_CURRENT_SOURC
 # sdk_add_compile_definitions(-DCONFIG_EASYFLASH4)
 
 # sdk_add_compile_definitions(-DBL616_DHCP_DEBUG)
-sdk_add_include_directories(main wifi BLE_HID lvgl_config UI UI/generated UI/generated/guider_fonts UI/generated/images UI/custom components)
+sdk_add_include_directories(main wifi BLE_HID lvgl_config UI UI/generated UI/generated/guider_fonts UI/generated/images UI/custom components mqtt)
 
 target_sources(app PRIVATE ${sources} ${UI})
 
