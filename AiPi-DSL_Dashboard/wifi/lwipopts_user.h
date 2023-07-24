@@ -142,4 +142,6 @@ extern int* __errno(void);
 #define SNTP_SERVER_DNS 1
 #define SNTP_SET_SYSTEM_TIME //sntp_set_time
 #define SNTP_SET_SYSTEM_TIME_NTP sntp_set_time
+
+#define LWIP_MQTT 1
 #endif /* LWIP_HDR_LWIPOPTS_H__ */

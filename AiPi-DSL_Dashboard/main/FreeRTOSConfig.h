@@ -121,8 +121,8 @@ void vAssertCalled(void);
 #if (configUSE_TICKLESS_IDLE != 0)
 void vApplicationSleep(uint32_t xExpectedIdleTime);
 #define portSUPPRESS_TICKS_AND_SLEEP(xExpectedIdleTime) vApplicationSleep(xExpectedIdleTime)
-#endif
-
+#endif 
+#define CONFIG_BT_DEVICE_APPEARANCE  0x03c1
 // #define portUSING_MPU_WRAPPERS
 
 #endif /* FREERTOS_CONFIG_H */
