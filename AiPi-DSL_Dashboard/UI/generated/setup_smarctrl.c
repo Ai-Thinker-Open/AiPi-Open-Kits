@@ -236,7 +236,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
     lv_obj_set_pos(ui->src_home_label_14, 25+30, 10);
     lv_obj_set_size(ui->src_home_label_14, 156, 14);
     lv_obj_set_scrollbar_mode(ui->src_home_label_14, LV_SCROLLBAR_MODE_OFF);
-    lv_label_set_text(ui->src_home_label_14, "wx.ai-thinker.com:1833");
+    lv_label_set_text(ui->src_home_label_14, "mqtt diconnect");
     lv_label_set_long_mode(ui->src_home_label_14, LV_LABEL_LONG_WRAP);
 
     //Set style for src_home_label_14. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -251,7 +251,7 @@ void SmartCtrl_scr_set(lv_ui* ui)
     lv_obj_set_style_shadow_spread(ui->src_home_label_14, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_ofs_x(ui->src_home_label_14, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_ofs_y(ui->src_home_label_14, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(ui->src_home_label_14, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui->src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->src_home_label_14, &lv_font_montserratMedium_12, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(ui->src_home_label_14, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
     lv_obj_set_style_text_line_space(ui->src_home_label_14, 0, LV_PART_MAIN|LV_STATE_DEFAULT);

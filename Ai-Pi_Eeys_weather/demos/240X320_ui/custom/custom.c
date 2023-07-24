@@ -23,6 +23,9 @@
 #include "bflb_timestamp.h"
 #include "easyflash.h"
 #include "https_client.h"
+
+#include "log.h"
+#define GBD_TAG "CUSTOM"
   /*********************
    *      DEFINES
    *********************/
@@ -30,7 +33,7 @@
 uint8_t wifi_connect(char* ssid, char* passwd);
 TaskHandle_t https_Handle;
 weather_t weathers[4] = { 0 };
-
+TimerHandle_t http_timers;
 void sntp_set_time(uint32_t sntp_time, uint32_t fac);
 /**********************
  *      TYPEDEFS
@@ -371,17 +374,29 @@ static void queue_task(void* arg)
 /**********************
  *  STATIC VARIABLES
  **********************/
+static uint16_t timers_http = 0;
+static void http_hour_requst_time(TimerHandle_t timer)
+{
+    if (timers_http>=60*60) {
+        LOG_I("Timed to http update,start https request");
+        vTaskResume(https_Handle);
+        timers_http = 0;
+    }
+    else {
+        timers_http++;
+    }
 
- /**
-  * Create a demo application
-  */
+}
+/**
+ * Create a demo application
+ */
 
 void custom_init(lv_ui* ui)
 {
     /* Add your codes here */
     queue = xQueueCreate(1, 1024*2);
     xTaskCreate(queue_task, "queue task", 1024*6, ui, 2, NULL);
-
+    http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
 }
 /**
  * @brief 设置时间
@@ -406,8 +421,7 @@ void sntp_set_time(uint32_t sntp_time, uint32_t fac)
     cont_4_lable_1_month = time_s.mon;
     cont_4_lable_1_day = time_s.mday;
     cont_4_lable_1_wday = time_s.wday;
-    if (https_Handle!=NULL)
-        vTaskResume(https_Handle);
+
     printf(" %d/%d/%d.week%d-%02d:%02d:%02d\r\n", time_s.year, time_s.mon, time_s.mday, time_s.wday, cont_4_digital_clock_1_hour_value, cont_4_digital_clock_1_min_value, cont_4_digital_clock_1_sec_value);
 
 }

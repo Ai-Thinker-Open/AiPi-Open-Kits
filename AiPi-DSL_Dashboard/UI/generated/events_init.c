@@ -53,7 +53,11 @@ static void src_home_imgbtn_openL_event_handler(lv_event_t* e)
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_openL, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_closeL, LV_OBJ_FLAG_HIDDEN);
 
-			mqtt_app_publish(lv_textarea_get_text(guider_ui.src_home_ta_topic), lv_textarea_get_text(guider_ui.src_home_ta_msg_close), 0);
+			if (mqtt_app_publish(lv_textarea_get_text(guider_ui.src_home_ta_topic), lv_textarea_get_text(guider_ui.src_home_ta_msg_close), 0)!=0)
+			{
+				lv_label_set_text(guider_ui.src_home_label_14, "mqtt disconnect");
+				lv_obj_set_style_text_color(guider_ui.src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+			}
 		}
 		break;
 		default:
@@ -90,7 +94,11 @@ static void src_home_imgbtn_closeL_event_handler(lv_event_t* e)
 		{
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_closeL, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_openL, LV_OBJ_FLAG_HIDDEN);
-			mqtt_app_publish(lv_textarea_get_text(guider_ui.src_home_ta_topic), lv_textarea_get_text(guider_ui.src_home_ta_msg_open), 0);
+			if (mqtt_app_publish(lv_textarea_get_text(guider_ui.src_home_ta_topic), lv_textarea_get_text(guider_ui.src_home_ta_msg_open), 0)!=0)
+			{
+				lv_label_set_text(guider_ui.src_home_label_14, "mqtt disconnect");
+				lv_obj_set_style_text_color(guider_ui.src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+			}
 		}
 		break;
 		default:
@@ -143,6 +151,11 @@ static void src_home_btn_connect_mqtt_event_handler(lv_event_t* e)
 				lv_event_send(guider_ui.src_home_img_loding, LV_EVENT_CLICKED, NULL);
 				lv_event_send(guider_ui.src_home_imgbtn_10, LV_EVENT_CLICKED, NULL);
 				lv_label_set_text_fmt(guider_ui.src_home_label_14, "%s:%s", lv_textarea_get_text(guider_ui.src_home_ta_mqHost), lv_textarea_get_text(guider_ui.src_home_ta_mqPort));
+				lv_obj_set_style_text_color(guider_ui.src_home_label_14, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+			}
+			else {
+				lv_label_set_text(guider_ui.src_home_label_14, "mqtt disconnect");
+				lv_obj_set_style_text_color(guider_ui.src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
 			}
 
 		}
@@ -161,7 +174,6 @@ static void src_home_btn_topicOK_event_handler(lv_event_t* e)
 		{
 			lv_obj_add_flag(guider_ui.src_home_cont_6, LV_OBJ_FLAG_HIDDEN);
 			mqtt_app_subscribe("sub", 0);
-
 		}
 		break;
 		default:

@@ -14,6 +14,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "timers.h"
 #include "custom.h"
 #include <sys/socket.h>
 #include <lwip/api.h>
@@ -78,7 +79,7 @@ static struct sockaddr_in dest;
 
 extern TaskHandle_t https_Handle;
 extern xQueueHandle queue;
-
+extern TimerHandle_t http_timers;
 static const char* REQUEST = "GET " "/%s" " HTTP/1.0\r\n"
 "Host: " "%s" ":" WEB_PORT "\r\n"
 "User-Agent: AiPi-DSL_Dashboard\r\n"
@@ -437,6 +438,7 @@ void https_get_weather_task(void* arg)
     char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
     sprintf(queue_buff, "{\"weather\":%s}", buff);
     xQueueSend(queue, queue_buff, portMAX_DELAY);
+    xTimerStart(http_timers, portMAX_DELAY);
     vPortFree(buff);
     vTaskSuspend(https_Handle);
     while (1) {

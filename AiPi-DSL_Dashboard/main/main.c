@@ -51,7 +51,7 @@ static void bl61x_show_heap_size_task(void* arg)
 {
 
     while (1) {
-        printf("[%s:%d]heap_size-------> %d\r\n", DBG_TAG, __LINE__, bl61x_get_heap_size());
+        LOG_F("[%s:%d]heap_size-------> %d", DBG_TAG, __LINE__, bl61x_get_heap_size());
         vTaskDelay(3000/portTICK_PERIOD_MS);
     }
 }
@@ -75,7 +75,6 @@ int main(void)
     events_init(&guider_ui);
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 1, NULL);
     xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 1024, NULL, 2, NULL);
-
     xTaskCreate(ble_hid_task, "ble_hid_task", 1024*2, (void*)&guider_ui, 6, NULL);
     vTaskStartScheduler();
     // while (1) {

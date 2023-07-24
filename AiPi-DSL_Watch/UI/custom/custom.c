@@ -12,6 +12,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "timers.h"
 #include <stdio.h>
 #include "lvgl.h"
 #include "log.h"
@@ -32,6 +33,7 @@ xQueueHandle queue;
  *  STATIC PROTOTYPES
  **********************/
 TaskHandle_t https_Handle;
+TimerHandle_t http_timers;
 /**
  * @brief cjson__analysis_type
  *
@@ -121,16 +123,35 @@ static void queue_receive_task(void* arg)
 /**********************
  *  STATIC VARIABLES
  **********************/
-
  /**
-  * Create a demo application
-  */
+  * @brief http_hour_requst_time
+  *        定时1小时 更新时间及天气情况
+  * @param arg
+ */
+static uint16_t timers_http = 0;
+static void http_hour_requst_time(TimerHandle_t timer)
+{
+    if (timers_http>=60*60) {
+        LOG_I("Timed to http update,start https request");
+        vTaskResume(https_Handle);
+        timers_http = 0;
+    }
+    else {
+        timers_http++;
+    }
+
+}
+/**
+ * Create a demo application
+ */
 
 void custom_init(lv_ui* ui)
 {
     /* Add your codes here */
     queue = xQueueCreate(1, 1024*2);
     xTaskCreate(queue_receive_task, "queue_receive_task", 1024*4, ui, 3, NULL);
+    http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
+
 }
 
 static int cjson__analysis_type(char* json_data)

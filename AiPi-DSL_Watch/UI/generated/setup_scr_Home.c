@@ -29,9 +29,13 @@ void Home_digital_clock_1_timer(lv_timer_t* timer)
 	clock_count_24(&Home_digital_clock_1_hour_value, &Home_digital_clock_1_min_value, &Home_digital_clock_1_sec_value);
 	if (lv_obj_is_valid(guider_ui.Home_digital_clock_1))
 	{
-		if((Home_digital_clock_1_hour_value-hour_type)>=1) vTaskResume(https_Handle);
 		lv_dclock_set_text_fmt(guider_ui.Home_digital_clock_1, "%02d:%02d:%02d", Home_digital_clock_1_hour_value, Home_digital_clock_1_min_value, Home_digital_clock_1_sec_value);
-		lv_img_set_angle(guider_ui.Home_img_hour, (Home_digital_clock_1_hour_value/2)*30*10);
+		if (Home_digital_clock_1_hour_value>12) {
+			lv_img_set_angle(guider_ui.Home_img_hour, (Home_digital_clock_1_hour_value-12)*30*10);
+		}
+		else
+			lv_img_set_angle(guider_ui.Home_img_hour, (Home_digital_clock_1_hour_value)*30*10);
+
 		lv_img_set_angle(guider_ui.Home_img_min, Home_digital_clock_1_min_value*6*10);
 		lv_img_set_angle(guider_ui.Home_img_sec, Home_digital_clock_1_sec_value*6*10);
 

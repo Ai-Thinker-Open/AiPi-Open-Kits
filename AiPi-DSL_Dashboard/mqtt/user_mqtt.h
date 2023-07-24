@@ -13,6 +13,13 @@
 
 #define MQTT_CLIENT_ID "AiPi-DSL_Dashboard"
 
+typedef struct {
+    char* host;
+    int port;
+    char* user_name;
+    char* pass;
+}user_mqtt_client_t;
+
 void mqtt_client_init(void);
 int mqtt_start_connect(char* host, uint16_t port, char* user_name, char* pass);
 int mqtt_app_subscribe(char* topic, int qos);

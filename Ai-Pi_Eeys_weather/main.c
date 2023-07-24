@@ -97,7 +97,7 @@ extern int audio_init(void);
 extern int audio_pcm_init(void);
 extern void play_voice_open(void);
 extern void play_voice_close(void);
-
+static int bl61x_get_heap_size(void);
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -302,6 +302,15 @@ void lwip_sntp_init(void)
     printf("getservername:%s\r\n", sntp_getservername(0));
 }
 
+static void bl61x_show_heap_size_task(void* arg)
+{
+
+    while (1) {
+        LOG_F("[%s:%d]heap_size-------> %d\r\n", DBG_TAG, __LINE__, bl61x_get_heap_size());
+        vTaskDelay(3000/portTICK_PERIOD_MS);
+    }
+}
+
 lv_ui guider_ui;
 
 int main(void)
@@ -335,7 +344,9 @@ int main(void)
     custom_init(&guider_ui);
     printf("lvgl success\r\n");
     xTaskCreate(lvgl_task, (char*)"lvgl", LVGL_STACK_SIZE, NULL, LVGL_TASK_PRIORITY, &lvgl_TaskHandle);
+    xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 1024, NULL, 2, NULL);
     // printf("HeapSize:%d\r\n",xPortGetFreeHeapSize());
+
     vTaskStartScheduler();
 
     // while (1) {
@@ -347,4 +358,18 @@ int main(void)
         // printf("\r\n[%s] heap size ------------------- %d\r\n", __func__, xPortGetFreeHeapSize());
         vTaskDelay(5000/portTICK_RATE_MS);
     }
+}
+static int bl61x_get_heap_size(void)
+{
+    struct meminfo info1 = { 0 };
+    struct meminfo info2 = { 0 };
+    uint32_t total_free_size = 0;
+    // return xPortGetFreeHeapSize();
+
+    bflb_mem_usage(KMEM_HEAP, &info1);
+    bflb_mem_usage(PMEM_HEAP, &info2);
+
+    total_free_size = info1.free_size + info2.free_size;
+
+    return total_free_size;
 }
