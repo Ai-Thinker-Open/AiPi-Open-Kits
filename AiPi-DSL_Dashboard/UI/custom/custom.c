@@ -202,40 +202,7 @@ static void queue_receive_task(void* arg)
 
             }
             break;
-            // //BLE 状态
-            // case CUSTOM_EVENT_GET_BLE:
-            // {
-            //     ble_status = cjson_analysis_ble_status(queue_buff);
-            //     switch (ble_status) {
-            //         case BLE_STATUS_ENABLE:
-            //         {
-            //             LOG_I("BLE status is Enable,wating connect");
-            //             lv_label_set_text(ui->src_home_label_BLEConter, "BLE:opened");
-            //         }
-            //         break;
-            //         case BLE_STATUS_CONNECT:
-            //         {
-            //             LOG_I("BLE Connect OK");
-            //             lv_label_set_text(ui->src_home_label_BLEConter, "BLE:Connected");
-            //             lv_img_set_src(ui->src_home_img_BLE, &_BLE_ok_alpha_20x20);
-            //             lv_obj_add_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
-            //             lv_obj_clear_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
-            //         }
-            //         break;
-            //         case BLE_STATUS_DISCONNECT:
-            //         {
-            //             LOG_F("BLE disconnect!");
-            //             lv_label_set_text(ui->src_home_label_BLEConter, "BLE:opnened");
-            //             lv_img_set_src(ui->src_home_img_BLE, &_BLE_no_alpha_20x20);
-            //             lv_obj_add_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
-            //             lv_obj_clear_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
-            //         }
-            //         break;
-            //         default:
-            //             break;
-            //     }
-            // }
-            // break;
+
             default:
                 break;
         }
