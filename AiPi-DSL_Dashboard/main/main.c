@@ -35,6 +35,7 @@
 #include "wifi_event.h"
 #include "lv_user_config.h"
 #include "ble_hid_dev.h"
+#include "voice_uart.h"
 /**********   user define   *************/
 #define DBG_TAG "MIAN"
 
@@ -67,6 +68,7 @@ int main(void)
     easyflash_init();
     /* lvgl init */
     lv_log_register_print_cb(lv_log_print_g_cb);
+    xTaskCreate(voice_uart_task, "uart task", 1024, (void*)&guider_ui, 10, NULL);
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();

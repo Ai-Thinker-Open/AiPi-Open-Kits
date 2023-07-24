@@ -11,5 +11,5 @@
 #ifndef VOICE_UART_H
 #define VOICE_UART_H
 
-
+void voice_uart_task(void* arg);
 #endif
