@@ -96,11 +96,11 @@ static void src_home_imgbtn_closeL_event_handler(lv_event_t* e)
 			lv_obj_add_flag(ui->src_home_imgbtn_closeL, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(ui->src_home_imgbtn_openL, LV_OBJ_FLAG_HIDDEN);
 
-			// if (mqtt_app_publish(lv_textarea_get_text(ui->src_home_ta_topic), lv_textarea_get_text(ui->src_home_ta_msg_open), 0)!=0)
-			// {
-			// 	lv_label_set_text(ui->src_home_label_14, "mqtt disconnect");
-			// 	lv_obj_set_style_text_color(ui->src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
-			// }
+			if (mqtt_app_publish(lv_textarea_get_text(ui->src_home_ta_topic), lv_textarea_get_text(ui->src_home_ta_msg_open), 0)!=0)
+			{
+				lv_label_set_text(ui->src_home_label_14, "mqtt disconnect");
+				lv_obj_set_style_text_color(ui->src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+			}
 		}
 		break;
 		default:

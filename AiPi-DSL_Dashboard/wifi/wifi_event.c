@@ -114,7 +114,8 @@ void wifi_event_handler(uint32_t code)
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_SCAN_DONE SSID numbles:%d", __func__, wifi_mgmr_sta_scanlist_nums_get());
             sprintf(scan_msg, "{\"wifi_scan\":{\"status\":0}}");
             // xQueueSend(queue, scan_msg, );
-            xQueueSendFromISR(queue, scan_msg, pdTRUE);
+            if (wifi_mgmr_sta_scanlist_nums_get()>0)
+                xQueueSendFromISR(queue, scan_msg, pdTRUE);
             vPortFree(scan_msg);
         }
         break;
