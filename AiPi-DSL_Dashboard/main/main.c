@@ -68,13 +68,14 @@ int main(void)
     easyflash_init();
     /* lvgl init */
     lv_log_register_print_cb(lv_log_print_g_cb);
-    xTaskCreate(voice_uart_task, "uart task", 1024, (void*)&guider_ui, 10, NULL);
+    xTaskCreate(voice_uart_task, "uart task", 1024*2, NULL, 10, NULL);
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();
     setup_ui(&guider_ui);
     custom_init(&guider_ui);
     events_init(&guider_ui);
+
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 1, NULL);
     xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 1024, NULL, 2, NULL);
     xTaskCreate(ble_hid_task, "ble_hid_task", 1024*2, (void*)&guider_ui, 6, NULL);

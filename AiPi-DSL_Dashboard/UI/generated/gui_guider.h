@@ -155,6 +155,8 @@ extern "C" {
 		char password[64];
 		bool wifi_stayus;
 		bool screen_type;
+		bool ble_status;
+		bool mqtt_connect_status;
 	}lv_ui;
 
 

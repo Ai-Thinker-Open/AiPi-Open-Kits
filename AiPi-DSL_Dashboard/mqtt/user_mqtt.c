@@ -18,11 +18,13 @@
 #include "custom.h"
 #include "user_mqtt.h"
 #include <lwip/inet.h>
+#include "bflb_uart.h"
+#include "voice_uart.h"
 #define GBD_TAG "MQTT"
 
 static mqtt_client_t* AiPi_client;
-
-
+extern lv_ui guider_ui;
+static  user_mqtt_client_t  user_mqtt_client;
 static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connection_status_t status);
 static void mqtt_request_cb(void* arg, err_t err);
 /**
@@ -62,18 +64,17 @@ int mqtt_start_connect(char* host, uint16_t port, char* user_name, char* pass)
     {
         mqtt_disconnect(AiPi_client);
     }
-
-    user_mqtt_client_t user_mqtt_client = {
-        .host = host,
-        .port = port,
-        .user_name = user_name,
-        .pass = pass
-    };
-
-    return mqtt_client_connect(AiPi_client, &addr, port, mqtt_event_connect_cb, (void*)&user_mqtt_client, &mqtt_client_info);
+    strcpy(user_mqtt_client.host, host);
+    strcpy(user_mqtt_client.pass, pass);
+    strcpy(user_mqtt_client.user_name, user_name);
+    user_mqtt_client.port = port;
+    return mqtt_client_connect(AiPi_client, &addr, port, mqtt_event_connect_cb, NULL, &mqtt_client_info);
 }
 
-
+void mqtt_app_diconnect(void)
+{
+    mqtt_disconnect(AiPi_client);
+}
 /**
  * @brief mqtt_app_subscribe
  *
@@ -83,11 +84,16 @@ int mqtt_start_connect(char* host, uint16_t port, char* user_name, char* pass)
 */
 int mqtt_app_subscribe(char* topic, int qos)
 {
+    static struct bflb_device_s* uartx;
+    uartx = bflb_device_get_by_name("uart1");
     if (mqtt_client_is_connected(AiPi_client))
     {
         return mqtt_subscribe(AiPi_client, topic, qos, mqtt_request_cb, NULL);
     }
-    else LOG_E("MQTT clien is no connect");
+    else {
+        LOG_E("MQTT clien is no connect");
+
+    }
 }
 /**
  * @brief  mqtt_app_publish
@@ -99,23 +105,31 @@ int mqtt_app_subscribe(char* topic, int qos)
 */
 int mqtt_app_publish(char* topic, char* payload, int qos)
 {
+    static struct bflb_device_s* uartx;
+    uartx = bflb_device_get_by_name("uart1");
     if (mqtt_client_is_connected(AiPi_client))
     {
         return mqtt_publish(AiPi_client, topic, payload, strlen(payload), qos, 0, mqtt_request_cb, NULL);
     }
     else LOG_E("MQTT clien is no connect");
+
     return -1;
 }
 
 static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connection_status_t status)
 {
-    user_mqtt_client_t* user_mqtt_client = (user_mqtt_client_t*)arg;
+
+
+    static struct bflb_device_s* uartx;
+    uartx = bflb_device_get_by_name("uart1");
     switch (status)
     {
         //connect OK
         case MQTT_CONNECT_ACCEPTED:
         {
             LOG_I("MQTT event MQTT_CONNECT_ACCEPTED");
+            bflb_uart_put(uartx, user_data[UART_CMD_CONNECT_SERVER_OK].uart_data.data, 4);
+            guider_ui.mqtt_connect_status = true;
         }
         break;
         /** Refused protocol version */
@@ -141,17 +155,18 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
             /** Disconnected */
         case MQTT_CONNECT_DISCONNECTED:
         {
+            guider_ui.mqtt_connect_status = false;
             LOG_I("MQTT event MQTT_CONNECT_DISCONNECTED");
             struct in_addr addr;
 
-            netconn_gethostbyname(user_mqtt_client->host, &addr);
+            netconn_gethostbyname(user_mqtt_client.host, &addr);
             struct mqtt_connect_client_info_t mqtt_client_info = {
                .client_id = MQTT_CLIENT_ID,
-               .client_pass = user_mqtt_client->pass,
-               .client_user = user_mqtt_client->user_name,
+               .client_pass = user_mqtt_client.pass,
+               .client_user = user_mqtt_client.user_name,
                .keep_alive = 120,
             };
-            mqtt_client_connect(AiPi_client, &addr, user_mqtt_client->port, mqtt_event_connect_cb, (void*)&user_mqtt_client, &mqtt_client_info);
+            mqtt_client_connect(AiPi_client, &addr, user_mqtt_client.port, mqtt_event_connect_cb, NULL, &mqtt_client_info);
         }
         break;
         /** Timeout */

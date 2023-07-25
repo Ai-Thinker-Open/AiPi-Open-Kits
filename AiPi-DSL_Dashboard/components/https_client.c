@@ -36,6 +36,7 @@
 #include "log.h"
 
 #include "https_client.h"
+#include "user_mqtt.h"
 // #define REQUEST_HTTPS
 #define REQUEST_HTTP
 
@@ -442,23 +443,29 @@ static char* https_get_data(const char* https_request_data)
 
 void https_get_weather_task(void* arg)
 {
-    char* queue_buff = pvPortMalloc(1024*2);
+    char* queue_buff = NULL;
+    queue_buff = pvPortMalloc(1024*2);
     memset(queue_buff, 0, 1024*2);
     //
     char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
     sprintf(queue_buff, "{\"weather\":%s}", buff);
     xQueueSend(queue, queue_buff, portMAX_DELAY);
     vPortFree(buff);
+    vPortFree(queue_buff);
     xTimerStart(http_timers, portMAX_DELAY);
     LOG_I("Time start 1 hour times ....");
     vTaskSuspend(https_Handle);
+
     while (1) {
+        mqtt_app_diconnect();
+        queue_buff = pvPortMalloc(1024*2);
         //请求一次错误的响应，只获取时间
         char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
         memset(queue_buff, 0, 1024*2);
         sprintf(queue_buff, "{\"weather\":%s}", buff);
         xQueueSend(queue, queue_buff, portMAX_DELAY);
         vPortFree(buff);
+        vPortFree(queue_buff);
         vTaskSuspend(https_Handle);
         vTaskDelay(50/portTICK_RATE_MS);
     }

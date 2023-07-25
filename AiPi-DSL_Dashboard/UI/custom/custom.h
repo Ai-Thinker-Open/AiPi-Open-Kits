@@ -47,6 +47,7 @@ extern "C" {
         CUSTOM_EVENT_GOT_IP,
         CUSTOM_EVENT_GET_WEATHER,
         CUSTOM_EVENT_GET_BLE,
+        CUSTOM_EVENT_UART_CMD,
     }custom_event_t;
 
     void custom_init(lv_ui* ui);

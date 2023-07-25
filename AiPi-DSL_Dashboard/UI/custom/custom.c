@@ -23,10 +23,10 @@
 #include "https_client.h"
 #include "gui_guider.h"
 #include "ble_hid_dev.h"
-
+#include "bflb_uart.h"
 #include "wifi_mgmr_ext.h"
 #include "wifi_mgmr.h"
-
+#include "voice_uart.h"
 
   /*********************
    *      DEFINES
@@ -38,6 +38,8 @@
 xQueueHandle queue;
 
 extern xQueueHandle ble_queue;
+extern QueueHandle_t ble_hid_queue;
+extern uart_rx_cmd_t uart_cmd;
 /**********************
  *  STATIC PROTOTYPES
  **********************/
@@ -59,6 +61,7 @@ char* compare_wea_output_img_100x100(const char* weather_data);
 char* compare_wea_output_img_20x20(const char* weather_data);
 static ble_status_t cjson_analysis_ble_status(char* ble_status_data);
 static int cjson_analysis_wifi_scan(char* json_data);
+static int cjson_analysis_uart_cmd(char* json_data);
 /**
  * @brief queue_receive_task
  *
@@ -76,6 +79,9 @@ static void queue_receive_task(void* arg)
     char* password = NULL;
     char* ipv4_addr = NULL;
     lv_ui* ui = (lv_ui*)arg;
+    static struct bflb_device_s* uartx;
+    uartx = bflb_device_get_by_name("uart1");
+
     ssid = flash_get_data(SSID_KEY, 32);
     password = flash_get_data(PASS_KEY, 32);
     if (ssid!=NULL)
@@ -91,121 +97,221 @@ static void queue_receive_task(void* arg)
         queue_buff = pvPortMalloc(1024*2);
         memset(queue_buff, 0, 1024*2);
 
-        xQueueReceive(queue, queue_buff, portMAX_DELAY);
-
-        switch (cjson__analysis_type(queue_buff))
+        if (xQueueReceive(queue, queue_buff, 100/portTICK_PERIOD_MS)==pdTRUE)
         {
-            //扫描
-            case CUSTOM_EVENT_WIFI_SCAN:
+            switch (cjson__analysis_type(queue_buff))
             {
-                ssid_list = pvPortMalloc(256);
-                memset(ssid_list, 0, 256);
-                switch (cjson_analysis_wifi_scan(queue_buff))
+                //扫描
+                case CUSTOM_EVENT_WIFI_SCAN:
                 {
-                    case 0:
+                    ssid_list = pvPortMalloc(256);
+                    memset(ssid_list, 0, 256);
+                    switch (cjson_analysis_wifi_scan(queue_buff))
                     {
-                        wifi_mgmr_sta_scanlist_dump(wifi_aps, wifi_mgmr_sta_scanlist_nums_get());
-                        // if(wifi_mgmr_sta_scanlist_nums_get())
-                        for (size_t i = 0; i < wifi_mgmr_sta_scanlist_nums_get(); i++)
+                        case 0:
                         {
-                            //进行字符串拼接
-                            strcat(ssid_list, wifi_aps[i].ssid);
-                            if (wifi_mgmr_sta_scanlist_nums_get()-i != 1) {
-                                strcat(ssid_list, "\n");
+                            wifi_mgmr_sta_scanlist_dump(wifi_aps, wifi_mgmr_sta_scanlist_nums_get());
+                            // if(wifi_mgmr_sta_scanlist_nums_get())
+                            for (size_t i = 0; i < wifi_mgmr_sta_scanlist_nums_get(); i++)
+                            {
+                                //进行字符串拼接
+                                strcat(ssid_list, wifi_aps[i].ssid);
+                                if (wifi_mgmr_sta_scanlist_nums_get()-i != 1) {
+                                    strcat(ssid_list, "\n");
+                                }
                             }
+                            lv_dropdown_set_options(ui->src_home_ddlist_1, ssid_list);
+                            vTaskDelay(100/portTICK_RATE_MS);
+                            lv_event_send(ui->src_home_img_loding, LV_EVENT_CLICKED, NULL);
+                            vPortFree(ssid_list);
+                            bflb_uart_put(uartx, user_data[UART_CMD_WIFI_SCAN_DONE].uart_data.data, 4);
                         }
-                        lv_dropdown_set_options(ui->src_home_ddlist_1, ssid_list);
-                        lv_event_send(ui->src_home_img_loding, LV_EVENT_CLICKED, NULL);
-                        vPortFree(ssid_list);
-                    }
-                    break;
-                    case 1:
-                    {
-                        wifi_mgmr_sta_scan(&wifi_scan_config);
-                    }
-                    break;
-                    default:
                         break;
+                        case 1:
+                        {
+                            wifi_mgmr_sta_scan(&wifi_scan_config);
+                        }
+                        break;
+                        default:
+                            break;
+                    }
                 }
-            }
-            break;
-            //WiFi
-            case CUSTOM_EVENT_GET_WIFI:
-            {
-                ssid = cjson_analysis_ssid(queue_buff);
-                password = cjson_analysis_password(queue_buff);
-                LOG_I("ssid=%s password:%s", ssid, password);
-                wifi_connect(ssid, password);
-            }
-            break;
-            //接收ip地址
-            case CUSTOM_EVENT_GOT_IP:
-            {
-                ipv4_addr = cjson__analysis_ip(queue_buff);
-                LOG_I(" ipv4 addr=%s", ipv4_addr);
-                memset(queue_buff, 0, 1024*2);
-                sprintf(queue_buff, "IP:%s", ipv4_addr);
-                ui->wifi_stayus = true;
-                strcpy(ui->ssid, ssid);
-                strcpy(ui->password, password);
-                //识别当前界面
-
-                if (ui->wifi_stayus)
-                    lv_img_set_src(ui->src_home_img_wifi, &_wifi_alpha_20x20);
-                else
-                    lv_img_set_src(ui->src_home_img_wifi, &_no_internet_alpha_20x20);
-
-                // lv_label_set_text(ui->WiFi_config_label_10, queue_buff);
-                lv_event_send(ui->src_home_img_loding, LV_EVENT_CLICKED, NULL);
-                lv_textarea_set_text(ui->src_home_ta_1, ui->password);
-                lv_label_set_text(ui->src_home_label_ip, queue_buff);
-
-                lv_dropdown_add_option(ui->src_home_ddlist_1, ui->ssid, lv_dropdown_get_option_cnt(ui->src_home_ddlist_1)+1);
-
-                if (lv_dropdown_get_option_index(ui->src_home_ddlist_1, ui->ssid)>=0) {
-                    lv_dropdown_set_selected(ui->src_home_ddlist_1, lv_dropdown_get_option_index(ui->src_home_ddlist_1, ui->ssid));
+                break;
+                //WiFi
+                case CUSTOM_EVENT_GET_WIFI:
+                {
+                    ssid = cjson_analysis_ssid(queue_buff);
+                    password = cjson_analysis_password(queue_buff);
+                    LOG_I("ssid=%s password:%s", ssid, password);
+                    wifi_connect(ssid, password);
                 }
+                break;
+                //接收ip地址
+                case CUSTOM_EVENT_GOT_IP:
+                {
+                    ipv4_addr = cjson__analysis_ip(queue_buff);
+                    LOG_I(" ipv4 addr=%s", ipv4_addr);
+                    memset(queue_buff, 0, 1024*2);
+                    sprintf(queue_buff, "IP:%s", ipv4_addr);
+                    ui->wifi_stayus = true;
+                    strcpy(ui->ssid, ssid);
+                    strcpy(ui->password, password);
+                    //识别当前界面
+                    bflb_uart_put(uartx, user_data[UART_CMD_WIFI_CONNECT_OK].uart_data.data, 4);
+
+                    if (ui->wifi_stayus)
+                        lv_img_set_src(ui->src_home_img_wifi, &_wifi_alpha_20x20);
+                    else
+                        lv_img_set_src(ui->src_home_img_wifi, &_no_internet_alpha_20x20);
+                    // lv_label_set_text(ui->WiFi_config_label_10, queue_buff);
+                    vTaskDelay(100/portTICK_RATE_MS);
+                    lv_event_send(ui->src_home_img_loding, LV_EVENT_CLICKED, NULL);
+                    lv_textarea_set_text(ui->src_home_ta_1, ui->password);
+                    lv_label_set_text(ui->src_home_label_ip, queue_buff);
+
+                    lv_dropdown_add_option(ui->src_home_ddlist_1, ui->ssid, lv_dropdown_get_option_cnt(ui->src_home_ddlist_1)+1);
+
+                    if (lv_dropdown_get_option_index(ui->src_home_ddlist_1, ui->ssid)>=0) {
+                        lv_dropdown_set_selected(ui->src_home_ddlist_1, lv_dropdown_get_option_index(ui->src_home_ddlist_1, ui->ssid));
+                    }
+                    else {
+                        lv_dropdown_set_selected(ui->src_home_ddlist_1, 0);
+                    }
+
+                    vPortFree(ssid);
+                    vPortFree(password);
+                    vPortFree(ipv4_addr);
+
+                    if (https_Handle!=NULL) {
+                        vTaskDelete(https_Handle);
+                    }
+                    vTaskDelay(1500/portTICK_RATE_MS);
+                    xTaskCreate(https_get_weather_task, "https task", 1024*2, NULL, 4, &https_Handle);
+
+                }
+                break;
+                case CUSTOM_EVENT_GET_WEATHER:
+                {
+                    if (!cjson_get_weather(queue_buff)) {
+                        //今天天气
+
+                        lv_img_set_src(ui->src_home_img_1, compare_wea_output_img_100x100(weathers[0].wea)); //天气图片
+                        lv_label_set_text(ui->src_home_label_dizhi, weathers[0].city);//地址
+                        lv_label_set_text(ui->src_home_label_waether, weathers[0].wea);
+                        lv_label_set_text_fmt(ui->src_home_label_temp, "%*.2s℃", 2, weathers[0].tem_day);
+                        //明天天气
+                        lv_img_set_src(ui->src_home_img_day1, compare_wea_output_img_20x20(weathers[1].wea));
+                        lv_label_set_text_fmt(ui->src_home_day1_temp, "%*.2s°", 2, weathers[1].tem_day);
+                        //后天天气
+                        lv_img_set_src(ui->src_home_img_day2, compare_wea_output_img_20x20(weathers[2].wea));
+                        lv_label_set_text_fmt(ui->src_home_day2_temp, "%*.2s°", 2, weathers[2].tem_day);
+                        //大后天天气
+                        lv_img_set_src(ui->src_home_img_day3, compare_wea_output_img_20x20(weathers[3].wea));
+                        lv_label_set_text_fmt(ui->src_home_day3_temp, "%*.2s°", 2, weathers[3].tem_day);
+
+                        bflb_uart_put(uartx, user_data[UART_CMD_CHECK_WEATHER].uart_data.data, 4);
+                    }
+
+                }
+                break;
+                break;
+
+                default:
+                    break;
+            }
+        }
+        //循环查询
+        switch (uart_cmd)
+        {
+            case UART_RX_CMD_OPENL:
+            {
+                LOG_I("Voice cmd: [打开灯光]");
+                if (ui->mqtt_connect_status)
+                    lv_event_send(ui->src_home_imgbtn_closeL, LV_EVENT_CLICKED, NULL);
                 else {
-                    lv_dropdown_set_selected(ui->src_home_ddlist_1, 0);
+                    bflb_uart_put(uartx, user_data[UART_CMD_CONRTOL_ERROR].uart_data.data, 4);
                 }
-
-                vPortFree(ssid);
-                vPortFree(password);
-                vPortFree(ipv4_addr);
-
-                if (https_Handle!=NULL) {
-                    vTaskDelete(https_Handle);
-                }
-                xTaskCreate(https_get_weather_task, "https task", 1024*2, NULL, 4, &https_Handle);
-
             }
             break;
-            case CUSTOM_EVENT_GET_WEATHER:
+            case UART_RX_CMD_CLOSEL:
             {
-                if (!cjson_get_weather(queue_buff)) {
-                    //今天天气
-
-                    lv_img_set_src(ui->src_home_img_1, compare_wea_output_img_100x100(weathers[0].wea)); //天气图片
-                    lv_label_set_text(ui->src_home_label_dizhi, weathers[0].city);//地址
-                    lv_label_set_text(ui->src_home_label_waether, weathers[0].wea);
-                    lv_label_set_text_fmt(ui->src_home_label_temp, "%*.2s℃", 2, weathers[0].tem_day);
-                    //明天天气
-                    lv_img_set_src(ui->src_home_img_day1, compare_wea_output_img_20x20(weathers[1].wea));
-                    lv_label_set_text_fmt(ui->src_home_day1_temp, "%*.2s°", 2, weathers[1].tem_day);
-                    //后天天气
-                    lv_img_set_src(ui->src_home_img_day2, compare_wea_output_img_20x20(weathers[2].wea));
-                    lv_label_set_text_fmt(ui->src_home_day2_temp, "%*.2s°", 2, weathers[2].tem_day);
-                    //大后天天气
-                    lv_img_set_src(ui->src_home_img_day3, compare_wea_output_img_20x20(weathers[3].wea));
-                    lv_label_set_text_fmt(ui->src_home_day3_temp, "%*.2s°", 2, weathers[3].tem_day);
+                LOG_I("Voice cmd: [关闭灯光]");
+                if (ui->mqtt_connect_status)
+                    lv_event_send(ui->src_home_imgbtn_openL, LV_EVENT_CLICKED, NULL);
+                else {
+                    bflb_uart_put(uartx, user_data[UART_CMD_CONRTOL_ERROR].uart_data.data, 4);
                 }
-
             }
             break;
+            case UART_RX_CMD_CHECK_WEATHER:
+                LOG_I("Voice cmd: [天气查询]");
+                vTaskDelay(2000/portTICK_RATE_MS);
+                vTaskResume(https_Handle);
+                break;
+            case UART_RX_CMD_CONNECT_MQTT:
+            {
+                LOG_I("Voice cmd: [连接服务器]");
+                vTaskDelay(2000/portTICK_RATE_MS);
+                lv_tabview_set_act(ui->src_home_tabview_1, 3, LV_ANIM_ON);
+                vTaskDelay(500/portTICK_RATE_MS);
+                lv_event_send(ui->src_home_btn_connect_mqtt, LV_EVENT_CLICKED, NULL);
+            }
+            break;
+            case UART_RX_CMD_CONNECT_WIFI:
+                LOG_I("Voice cmd: [连接WiFi]");
+                lv_event_send(ui->src_home_btn_connect, LV_EVENT_CLICKED, NULL);
+                break;
+            case UART_RX_CMD_OPEN_APP_1:
+                LOG_I("Voice cmd: [打开VScode]");
+                if (ui->ble_status)
+                    lv_event_send(ui->src_home_imgbtn_1, LV_EVENT_CLICKED, NULL);
+                else {
+                    bflb_uart_put(uartx, user_data[UART_CMD_BLE_CONNECT_NG].uart_data.data, 4);
+                }
+                break;
+            case UART_RX_CMD_OPEN_APP_2:
+                LOG_I("Voice cmd: [打开百度网盘]");
+                if (ui->ble_status)
+                    lv_event_send(ui->src_home_imgbtn_2, LV_EVENT_CLICKED, NULL);
+                else
+                    bflb_uart_put(uartx, user_data[UART_CMD_BLE_CONNECT_NG].uart_data.data, 4);
 
+                break;
+            case UART_RX_CMD_OPEN_APP_3:
+                LOG_I("Voice cmd: [打开谷歌浏览器]");
+                if (ui->ble_status)
+                    lv_event_send(ui->src_home_imgbtn_3, LV_EVENT_CLICKED, NULL);
+                break;
+            case UART_RX_CMD_OPEN_APP_4:
+                LOG_I("Voice cmd: [打开串口助手]");
+                if (ui->ble_status)
+                    lv_event_send(ui->src_home_imgbtn_4, LV_EVENT_CLICKED, NULL);
+                else
+                    bflb_uart_put(uartx, user_data[UART_CMD_BLE_CONNECT_NG].uart_data.data, 4);
+                break;
+            case UART_RX_CMD_OPEN_APP_5:
+                LOG_I("Voice cmd: [打开OBS]");
+                if (ui->ble_status)
+                    lv_event_send(ui->src_home_imgbtn_6, LV_EVENT_CLICKED, NULL);
+                else
+                    bflb_uart_put(uartx, user_data[UART_CMD_BLE_CONNECT_NG].uart_data.data, 4);
+                break;
+            case UART_RX_CMD_OPEN_APP_6:
+                LOG_I("Voice cmd: [打开立创EDA]");
+                if (ui->ble_status)
+                    lv_event_send(ui->src_home_imgbtn_5, LV_EVENT_CLICKED, NULL);
+                else
+                    bflb_uart_put(uartx, user_data[UART_CMD_BLE_CONNECT_NG].uart_data.data, 4);
+                break;
+            case UART_RX_CMD_WIFI_SCAN:
+                LOG_I("Voice cmd: [扫描WiFi]");
+                lv_event_send(ui->src_home_btn_scan, LV_EVENT_CLICKED, NULL);
+                break;
             default:
                 break;
         }
+        uart_cmd = UART_RX_CMD_NONE;
+
         vPortFree(queue_buff);
     }
 }
@@ -238,6 +344,7 @@ void queue_receive_ble_task(void* arg)
                         lv_img_set_src(ui->src_home_img_BLE, &_BLE_ok_alpha_20x20);
                         lv_obj_add_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
                         lv_obj_clear_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
+                        ui->ble_status = true;
                     }
                     break;
                     case BLE_STATUS_DISCONNECT:
@@ -247,6 +354,7 @@ void queue_receive_ble_task(void* arg)
                         lv_img_set_src(ui->src_home_img_BLE, &_BLE_no_alpha_20x20);
                         lv_obj_add_flag(ui->src_home_cont_dis, LV_OBJ_FLAG_HIDDEN);
                         lv_obj_clear_flag(ui->src_home_cont_BLE_TEXT, LV_OBJ_FLAG_HIDDEN);
+                        ui->ble_status = false;
                     }
                     break;
                     default:
@@ -289,7 +397,7 @@ void custom_init(lv_ui* ui)
 {
     /* Add your codes here */
     queue = xQueueCreate(1, 1024*2);
-    xTaskCreate(queue_receive_task, "queue_receive_task", 1024*2, ui, 3, NULL);
+    xTaskCreate(queue_receive_task, "queue_receive_task", 1024, ui, 3, NULL);
     http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
     mqtt_client_init();
 }
@@ -330,6 +438,12 @@ static custom_event_t cjson__analysis_type(char* json_data)
     if (WIFI_SCAN) {
         cJSON_Delete(root);
         return CUSTOM_EVENT_WIFI_SCAN;
+    }
+
+    cJSON* VOICE = cJSON_GetObjectItem(root, "voice_cmd");
+    if (VOICE) {
+        cJSON_Delete(root);
+        return CUSTOM_EVENT_UART_CMD;
     }
 
     cJSON_Delete(root);
@@ -622,6 +736,30 @@ static int cjson_analysis_wifi_scan(char* json_data)
     }
 
     return 0;
+}
+/**
+ * @brief  cjson_analysis_uart_cmd
+ *
+ * @param json_data
+ * @return int
+*/
+static int cjson_analysis_uart_cmd(char* json_data)
+{
+    cJSON* root = cJSON_Parse(json_data);
+    if (root==NULL) {
+        LOG_E("%s is NOT json");
+        return -1;
+    }
+
+    cJSON* uart_cmd = cJSON_GetObjectItem(root, "voice_cmd");
+    if (uart_cmd==NULL) {
+        LOG_E("%s is NULL");
+        cJSON_Delete(root);
+        return -1;
+    }
+    int i = uart_cmd->valueint;
+    cJSON_Delete(root);
+    return i;
 }
 /**
  * @brief

@@ -83,22 +83,24 @@ static void src_home_imgbtn_confiL_event_handler(lv_event_t* e)
 static void src_home_imgbtn_closeL_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
+	lv_ui* ui = (lv_ui*)lv_event_get_user_data(e);
 	switch (code)
 	{
 		case LV_EVENT_LONG_PRESSED:
 		{
-			lv_obj_clear_flag(guider_ui.src_home_cont_6, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_clear_flag(ui->src_home_cont_6, LV_OBJ_FLAG_HIDDEN);
 		}
 		break;
 		case LV_EVENT_CLICKED:
 		{
-			lv_obj_add_flag(guider_ui.src_home_imgbtn_closeL, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_clear_flag(guider_ui.src_home_imgbtn_openL, LV_OBJ_FLAG_HIDDEN);
-			if (mqtt_app_publish(lv_textarea_get_text(guider_ui.src_home_ta_topic), lv_textarea_get_text(guider_ui.src_home_ta_msg_open), 0)!=0)
-			{
-				lv_label_set_text(guider_ui.src_home_label_14, "mqtt disconnect");
-				lv_obj_set_style_text_color(guider_ui.src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
-			}
+			lv_obj_add_flag(ui->src_home_imgbtn_closeL, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_clear_flag(ui->src_home_imgbtn_openL, LV_OBJ_FLAG_HIDDEN);
+
+			// if (mqtt_app_publish(lv_textarea_get_text(ui->src_home_ta_topic), lv_textarea_get_text(ui->src_home_ta_msg_open), 0)!=0)
+			// {
+			// 	lv_label_set_text(ui->src_home_label_14, "mqtt disconnect");
+			// 	lv_obj_set_style_text_color(ui->src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+			// }
 		}
 		break;
 		default:
@@ -388,6 +390,5 @@ void events_init_src_home(lv_ui* ui)
 	lv_obj_add_event_cb(ui->src_home_imgbtn_4, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_D);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_5, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_F);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_6, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_E);
-
 
 }

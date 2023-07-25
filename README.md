@@ -2,8 +2,16 @@
 
 |开发板     | 概述 | 详细介绍|
 | :----:    |:----: |:----: |
-| Ai-Pi_Eeys| 小安派-Eyes-Sx出场固件源码| [点击查看](Ai-Pi_Eeys/README.md) |
-
+| Ai-Pi_Eeys| 小安派-Eyes出厂固件源码| [点击查看](Ai-Pi_Eeys/README.md) |
+| Ai-Pi_Eeys_weather| 小安派-Eeys_天气站出厂固件源码| [点击查看](Ai-Pi_Eeys_weather/README.md) |
+| AiPi_Audio| 小安派-Audio出厂固件源码| [点击查看](AiPi-Audio/README.md) |
+| AiPi-Voice| 小安派-Voice出厂固件源码| [点击查看](AiPi-Voice/README.md) |
+| AiPi_Cam| 小安派-Cam出厂固件源码| [点击查看](AiPi-Cam/README.md) |
+| AiPi-DSL_Dashboard| 小安派桌面助手固件源码| [点击查看](AiPi-DSL_Dashboard/README.md) |
+| AiPi-DSL_MusicPlay| 小安派-DSL_2.4出厂固件源码| [点击查看](AiPi-DSL_MusicPlay/README.md) |
+| AiPi-DSL_Watch| 小安派-DSL_1.28出厂固件源码| [点击查看](AiPi-DSL_Watch/README.md) |
+| AiPi-SCP-2.4| 小安派-SCP-2.4出厂固件源码| [点击查看](AiPi-SCP-2.4/README.md) |
+| AiPi-SCP-4.3| 小安派-SCP-4.3出厂固件源码| [点击查看](AiPi-SCP-4.3/README.md) |
 
 
 ## 一、克隆Ai-Thinker仓库
