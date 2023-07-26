@@ -10,15 +10,17 @@
 
 <img decoding="async" src="IMG/IMG_5384.HEIC.JPG" width="50%">
 
-## 文件介绍
->├── 3D_stl ——3D外壳文件
+## 文件介绍\
+`json
+├── 3D_stl ——3D外壳文件
 ├── AiPi-DSL_Dashboard_code ——小安派桌面助手源码
 ├── Ai-WB2_SmarLight ——受控智能灯源码
 ├── IMG ——图片文件夹
 ├── README.md —— 说明文档
 ├── software ——固件集成
 └── VC_code ——VC 离线语音源码
->
+`
+
 ## 使用说明
 
 ### 1、配置WiFi 连接
@@ -32,9 +34,11 @@
 #### 1）连接蓝牙
 
 电脑未连接**桌面助手**时，会提示连接：
+
 <img decoding="async" src="IMG/UI_2.png" width="50%">
 
 电脑使用蓝牙连接名称为**“AiPi-Dashboard”**的蓝牙键盘设备，连接成功后，界面会变成：
+
 <img decoding="async" src="IMG/image.png" width="50%">
 
 #### 2）快捷使用
@@ -50,6 +54,7 @@
 |   立创EDA专业版 |Ctrl+Alt+F|
 
 可以设置电脑上的任意软件以这6个快捷键的其中一个，可以是实现快捷打开，比如：
+
 <img decoding="async" src="IMG/UI_3.png" width="30%">
 
 完成这个设置之后，你就可以桌面助手打开电脑的任意软件。
