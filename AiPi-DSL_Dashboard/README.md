@@ -10,8 +10,10 @@
 
 <img decoding="async" src="IMG/IMG_5384.HEIC.JPG" width="50%">
 
-## 文件介绍\
-`json
+## 文件介绍
+
+```json
+
 ├── 3D_stl ——3D外壳文件
 ├── AiPi-DSL_Dashboard_code ——小安派桌面助手源码
 ├── Ai-WB2_SmarLight ——受控智能灯源码
@@ -19,7 +21,7 @@
 ├── README.md —— 说明文档
 ├── software ——固件集成
 └── VC_code ——VC 离线语音源码
-`
+```
 
 ## 使用说明
 
