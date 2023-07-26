@@ -12,8 +12,7 @@
 
 ## 文件介绍
 
-```json
-
+```
 ├── 3D_stl ——3D外壳文件
 ├── AiPi-DSL_Dashboard_code ——小安派桌面助手源码
 ├── Ai-WB2_SmarLight ——受控智能灯源码
