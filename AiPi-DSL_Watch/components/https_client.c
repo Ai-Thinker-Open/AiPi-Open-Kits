@@ -413,12 +413,16 @@ static void get_https_date(char* date)
 static char* https_get_data(const char* https_request_data)
 {
     char* request_data = https_request_data;
+    if (request_data ==NULL) return NULL;
     static char* https_data;
     https_data = pvPortMalloc(1024*2);
     memset(https_data, 0, 1024*2);
     request_data += 2;
     char* date = pvPortMalloc(64);
     char* request_value = strtok(request_data, "\n");
+
+    if (request_value ==NULL) return NULL;
+
     for (size_t i = 0; i < 9; i++)
     {
         LOG_I("%s", request_value);
@@ -448,8 +452,12 @@ void https_get_weather_task(void* arg)
         //请求一次错误的响应，只获取时间
         char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
         memset(queue_buff, 0, 1024*2);
+        if (buff==NULL) {
+            goto __ERR;
+        }
         sprintf(queue_buff, "{\"weather\":%s}", buff);
         xQueueSend(queue, queue_buff, portMAX_DELAY);
+    __ERR:
         vPortFree(buff);
         vTaskSuspend(https_Handle);
         vTaskDelay(50/portTICK_RATE_MS);
