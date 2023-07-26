@@ -38,7 +38,7 @@
 
 <img decoding="async" src="IMG/UI_2.png" width="50%">
 
-电脑使用蓝牙连接名称为**“AiPi-Dashboard”**的蓝牙键盘设备，连接成功后，界面会变成：
+电脑使用蓝牙连接名称为 **“AiPi-Dashboard”** 的蓝牙键盘设备，连接成功后，界面会变成：
 
 <img decoding="async" src="IMG/image.png" width="50%">
 
