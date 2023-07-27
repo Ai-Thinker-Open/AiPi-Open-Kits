@@ -138,6 +138,8 @@ static void http_hour_requst_time(TimerHandle_t timer)
     }
     else {
         timers_http++;
+        if (timers_http%10==0)
+            LOG_I("timer conect =%d", timers_http);
     }
 
 }

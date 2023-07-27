@@ -646,6 +646,7 @@ char* compare_wea_output_img_100x100(const char* weather_data)
     if (strncmp(weather, "雷阵雨转中到大雨", 16)==0) return &_tianqiyeleiyu_alpha_100x100;
     if (strncmp(weather, "雷阵雨转中雨", 12)==0) return &_tianqiyeleiyu_alpha_100x100;
     if (strncmp(weather, "中到大雨转大暴雨", 16)==0) return &_tianqizhongyu_alpha_100x100;
+    if (strncmp(weather, "阵雨转大雨", 16)==0) return &_tianqiduoyunxiaoyuzhuanqing_alpha_100x100;
     return &_tianqiqing_alpha_100x100;
 }
 /**
@@ -676,7 +677,7 @@ char* compare_wea_output_img_20x20(const char* weather_data)
     if (strncmp(weather, "雷阵雨转中到大雨", 16)==0) return &_tianqiqing_i_leiyu_alpha_20x20;
     if (strncmp(weather, "雷阵雨转中雨", 12)==0) return &_tianqiqing_i_leiyu_alpha_20x20;
     if (strncmp(weather, "中到大雨转大暴雨", 16)==0) return &_tianqiqing_i_zhongyu_alpha_20x20;
-
+    if (strncmp(weather, "阵雨转大雨", 16)==0) return &_tianqiqing_i_xiaoyuzhuanqing_alpha_20x20;
     return &_tianqiqing_i_alpha_20x20;
 }
 
