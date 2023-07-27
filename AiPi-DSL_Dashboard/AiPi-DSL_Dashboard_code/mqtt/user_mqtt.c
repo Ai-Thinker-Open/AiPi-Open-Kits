@@ -158,7 +158,9 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
             guider_ui.mqtt_connect_status = false;
             LOG_I("MQTT event MQTT_CONNECT_DISCONNECTED");
             struct in_addr addr;
-
+            mqtt_client_free(AiPi_client);
+            vTaskDelay(100/portTICK_RATE_MS);
+            AiPi_client = mqtt_client_new();
             netconn_gethostbyname(user_mqtt_client.host, &addr);
             struct mqtt_connect_client_info_t mqtt_client_info = {
                .client_id = MQTT_CLIENT_ID,

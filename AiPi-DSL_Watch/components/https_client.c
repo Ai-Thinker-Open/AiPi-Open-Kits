@@ -315,8 +315,9 @@ exit:
     //connect http server
     ret = connect(sock_client, (struct sockaddr*)&dest, sizeof(dest));
     if (ret!=0) {
-        LOG_E("... socket connect failed errno=%d", errno);
+        LOG_E("... socket connect fail ed errno=%d", errno);
         close(sock_client);
+
         goto __exit;
     }
     LOG_I("HTTP client connect server success!");
@@ -443,8 +444,8 @@ void https_get_weather_task(void* arg)
     memset(queue_buff, 0, 1024*2);
     //
     char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
-    sprintf(queue_buff, "{\"weather\":%s}", buff);
-    xQueueSend(queue, queue_buff, portMAX_DELAY);
+    // sprintf(queue_buff, "{\"weather\":%s}", buff);
+    // xQueueSend(queue, queue_buff, portMAX_DELAY);
     xTimerStart(http_timers, portMAX_DELAY);
     vPortFree(buff);
     vTaskSuspend(https_Handle);
@@ -456,7 +457,7 @@ void https_get_weather_task(void* arg)
             goto __ERR;
         }
         sprintf(queue_buff, "{\"weather\":%s}", buff);
-        xQueueSend(queue, queue_buff, portMAX_DELAY);
+        // xQueueSend(queue, queue_buff, portMAX_DELAY);
     __ERR:
         vPortFree(buff);
         vTaskSuspend(https_Handle);
