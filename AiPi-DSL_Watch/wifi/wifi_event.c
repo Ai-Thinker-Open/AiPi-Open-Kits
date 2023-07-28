@@ -125,6 +125,7 @@ void wifi_event_handler(uint32_t code)
         case CODE_WIFI_ON_DISCONNECT:
         {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_DISCONNECT", __func__);
+
         }
         break;
         case CODE_WIFI_ON_AP_STARTED:
@@ -180,7 +181,7 @@ uint8_t wifi_connect(char* ssid, char* passwd)
         switch (sta_ConnectStatus) {
 
             case CODE_WIFI_ON_DISCONNECT:	//连接失败（超过了重连次数还没有连接成功的状态）
-                wifi_sta_disconnect();
+                wifi_sta_connect(ssid, passwd, NULL, NULL, 0, 0, 0, 1);
                 guider_ui.wifi_stayus = false;
                 return 4;
             case CODE_WIFI_ON_CONNECTED:	//连接成功(表示wifi sta状态的时候表示同时获取IP(DHCP)成功，或者使用静态IP)
