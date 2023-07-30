@@ -38,14 +38,13 @@ enum {
     HIDS_FEATURE = 0x03,
 };
 
-static struct hids_report input = {
+static struct hids_report kb_input = {
     .id = 0x00,
     .type = HIDS_INPUT,
 };
 
 static uint8_t hid_input_ccc;
 static uint8_t ctrl_point;
-
 static uint8_t report_map[] =
 {
     0x05, 0x01,       // Usage Page (Generic Desktop)
@@ -93,8 +92,23 @@ static uint8_t report_map[] =
     0xC0              // End Collection (Application)
 };
 
-static ssize_t read_info(struct bt_conn* conn,
-              const struct bt_gatt_attr* attr, void* buf,
+#define TUD_HID_REPORT_DESC_CONSUMER(...) \
+  HID_USAGE_PAGE ( HID_USAGE_PAGE_CONSUMER    )              ,\
+  HID_USAGE      ( HID_USAGE_CONSUMER_CONTROL )              ,\
+  HID_COLLECTION ( HID_COLLECTION_APPLICATION )              ,\
+    /* Report ID if any */\
+    __VA_ARGS__ \
+    HID_LOGICAL_MIN  ( 0x00                                ) ,\
+    HID_LOGICAL_MAX_N( 0x03FF, 2                           ) ,\
+    HID_USAGE_MIN    ( 0x00                                ) ,\
+    HID_USAGE_MAX_N  ( 0x03FF, 2                           ) ,\
+    HID_REPORT_COUNT ( 1                                   ) ,\
+    HID_REPORT_SIZE  ( 16                                  ) ,\
+    HID_INPUT        ( HID_DATA | HID_ARRAY | HID_ABSOLUTE ) ,\
+  HID_COLLECTION_END \
+
+static ssize_t read_info(struct bt_conn *conn,
+              const struct bt_gatt_attr *attr, void *buf,
               uint16_t len, uint16_t offset)
 {
     printf("read_info:%d \r\n", len);
@@ -102,8 +116,8 @@ static ssize_t read_info(struct bt_conn* conn,
                  sizeof(struct hids_info));
 }
 
-static ssize_t read_report_map(struct bt_conn* conn,
-                   const struct bt_gatt_attr* attr, void* buf,
+static ssize_t read_report_map(struct bt_conn *conn,
+                   const struct bt_gatt_attr *attr, void *buf,
                    uint16_t len, uint16_t offset)
 {
     printf("read_report_map:%d \r\n", len);
@@ -111,33 +125,33 @@ static ssize_t read_report_map(struct bt_conn* conn,
                  sizeof(report_map));
 }
 
-static ssize_t read_report(struct bt_conn* conn,
-               const struct bt_gatt_attr* attr, void* buf,
+static ssize_t read_report(struct bt_conn *conn,
+               const struct bt_gatt_attr *attr, void *buf,
                uint16_t len, uint16_t offset)
 {
     return bt_gatt_attr_read(conn, attr, buf, len, offset, attr->user_data,
                  sizeof(struct hids_report));
 }
 
-static void input_ccc_changed(const struct bt_gatt_attr* attr, uint16_t value)
+static void input_ccc_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
     hid_input_ccc = (value == BT_GATT_CCC_NOTIFY) ? 1 : 0;
     printf("hid_input_ccc = [%d]\r\n", hid_input_ccc);
 }
 
-static ssize_t read_input_report(struct bt_conn* conn,
-                 const struct bt_gatt_attr* attr, void* buf,
+static ssize_t read_input_report(struct bt_conn *conn,
+                 const struct bt_gatt_attr *attr, void *buf,
                  uint16_t len, uint16_t offset)
 {
     return bt_gatt_attr_read(conn, attr, buf, len, offset, NULL, 0);
 }
 
-static ssize_t write_ctrl_point(struct bt_conn* conn,
-                const struct bt_gatt_attr* attr,
-                const void* buf, uint16_t len, uint16_t offset,
+static ssize_t write_ctrl_point(struct bt_conn *conn,
+                const struct bt_gatt_attr *attr,
+                const void *buf, uint16_t len, uint16_t offset,
                 uint8_t flags)
 {
-    uint8_t* value = attr->user_data;
+    uint8_t *value = attr->user_data;
 
     if (offset + len > sizeof(ctrl_point)) {
         return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
@@ -162,12 +176,10 @@ static struct bt_gatt_attr attrs[] = {
                    BT_GATT_CHRC_READ | BT_GATT_CHRC_NOTIFY,
                    BT_GATT_PERM_READ,
                    read_input_report, NULL, NULL),
-
     BT_GATT_CCC(input_ccc_changed,
             BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
-
     BT_GATT_DESCRIPTOR(BT_UUID_HIDS_REPORT_REF, BT_GATT_PERM_READ,
-               read_report, NULL, &input),
+               read_report, NULL, &kb_input),
 
     BT_GATT_CHARACTERISTIC(BT_UUID_HIDS_CTRL_POINT,
                    BT_GATT_CHRC_WRITE_WITHOUT_RESP,
@@ -175,16 +187,16 @@ static struct bt_gatt_attr attrs[] = {
                    NULL, write_ctrl_point, &ctrl_point),
 };
 
-int hog_send_keyboard_value(struct bt_conn* conn, key_mask_t special_key_mask, uint8_t* keyboard_cmd, uint8_t num_key)
+int hog_send_keyboard_value(struct bt_conn *conn, key_mask_t special_key_mask, uint8_t *keyboard_cmd, uint8_t num_key)
 {
-    struct bt_gatt_attr* attr;
+    struct bt_gatt_attr *attr;
 
-    uint8_t buffer[HID_KEYBOARD_IN_RPT_LEN] = { 0 };
+    uint8_t buffer[HID_KEYBOARD_IN_RPT_LEN] = {0};
 
-    if (hid_input_ccc != BT_GATT_CCC_NOTIFY) {
-        printf("input ccc invaild \r\n");
-        return -EPERM;
-    }
+    // if (hid_input_ccc != BT_GATT_CCC_NOTIFY) {
+    //     printf("input ccc invaild \r\n");
+    //     return -EPERM;
+    // }
 
     buffer[0] = special_key_mask;
     for (int i = 0; i < num_key; i++) {

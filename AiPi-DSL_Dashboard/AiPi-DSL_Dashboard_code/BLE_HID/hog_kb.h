@@ -19,8 +19,6 @@
 #define LEFT_SHIFT_KEY_MASK          (1 << 1)
 #define LEFT_ALT_KEY_MASK            (1 << 2)
 #define LEFT_GUI_KEY_MASK            (1 << 3)
-
-
 #define RIGHT_CONTROL_KEY_MASK       (1 << 4)
 #define RIGHT_SHIFT_KEY_MASK         (1 << 5)
 #define RIGHT_ALT_KEY_MASK           (1 << 6)
@@ -64,7 +62,9 @@ typedef enum {
 
 typedef uint8_t key_mask_t;
 
+
+
 void hog_kb_init(void);
-int hog_send_keyboard_value(struct bt_conn* conn, key_mask_t special_key_mask, uint8_t* keyboard_cmd, uint8_t num_key);
+int hog_send_keyboard_value(struct bt_conn *conn, key_mask_t special_key_mask, uint8_t *keyboard_cmd, uint8_t num_key);
 
 #endif
