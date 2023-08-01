@@ -1,6 +1,7 @@
 #ifndef _LCD_CONF_USER_H_
 #define _LCD_CONF_USER_H_
 
+
 /* clang-format off */
 
 /* Select screen Type, Optional:
@@ -24,7 +25,7 @@
     LCD_SPI_GC9A01
 */
 
-#define  LCD_SPI_GC9A01
+#define  LCD_SPI_ST7796_Ai
 
 /* dbi ili9488 config */
 #if defined LCD_DBI_ILI9488
@@ -304,6 +305,42 @@
 */
 #define ST7796_SPI_COLOR_REVERSAL 0
 
+#elif defined LCD_SPI_ST7796_Ai
+
+    /* Selecting interface type, more configuration of peripherals comes later
+        1: SPI peripheral, supported functions: spi-4wire,
+    */
+#define LCD_SPI_INTERFACE_TYPE 1
+
+    /* Selecting pixel format
+        1: rgb565
+    */
+#define ST7796_SPI_PIXEL_FORMAT 1
+
+    /* enable the lcd reset function
+        0: Does not care about lcd hard reset
+        1: use gpio to reset the lcd
+    */
+#define LCD_RESET_EN 1
+
+    /* LCD width and height */
+#define ST7796_SPI_W 240
+#define ST7796_SPI_H 320
+
+/* The offset of the area can be displayed */
+#define ST7796_SPI_OFFSET_X 0
+#define ST7796_SPI_OFFSET_Y 0
+
+/* Color reversal, Some screens are required
+    0: disable
+    1: enable
+*/
+#define ST7796_SPI_COLOR_REVERSAL 0
+
+#define LCD_ROTATED_NONE
+// #define LCD_ROTATED_90
+// #define LCD_ROTATED_180
+// #define LCD_ROTATED_270
 /* spi st7796 config */
 #elif defined LCD_SPI_GC9A01
 
@@ -325,7 +362,7 @@
 
     /* LCD width and height */
 #define  GC9A01_SPI_W 240
-#define  GC9A01_SPI_H 320
+#define  GC9A01_SPI_H 240
 
 /* The offset of the area can be displayed */
 #define GC9A01_SPI_OFFSET_X 0
@@ -336,11 +373,6 @@
     1: enable
 */
 #define GC9A01_SPI_COLOR_REVERSAL 0
-
-#define LCD_ROTATED_NONE
-// #define LCD_ROTATED_90
-// #define LCD_ROTATED_180
-// #define LCD_ROTATED_270
 #endif
 
 /********** DBI peripheral configuration ***********/

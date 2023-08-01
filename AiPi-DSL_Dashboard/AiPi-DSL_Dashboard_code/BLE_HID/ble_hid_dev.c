@@ -34,6 +34,8 @@
 
 #define BLE_DEV_NAME "AiPi-Dashboard"
 
+#define BLE_USE_WINDOWS_BEACON 
+
 QueueHandle_t ble_hid_queue;
 xQueueHandle ble_queue;
 extern xQueueHandle queue;
@@ -47,11 +49,24 @@ static struct bt_data salve_rsp[] = {
     BT_DATA(BT_DATA_NAME_COMPLETE, adv_name, sizeof adv_name),
 };
 
+#ifdef BLE_USE_WINDOWS_BEACON
+static uint8_t windows_pair_beacon[] = {
+    0x06, /* Microsoft Vendor ID */
+    0x00, /* Microsoft Vendor ID */
+    0x03, /* Microsoft Beacon ID */
+    0x00, /* Microsoft Beacon Sub Scenario */
+    0x80, /* Reserved RSSI Byte */
+};
+#endif
+
 static struct bt_data salve_adv[] = {
     BT_DATA_BYTES(BT_DATA_FLAGS, BT_LE_AD_NO_BREDR | BT_LE_AD_GENERAL),
     BT_DATA(BT_DATA_GAP_APPEARANCE, &appearance, sizeof appearance),
     BT_DATA(BT_DATA_UUID16_ALL, &server_uuid, sizeof server_uuid),
     // BT_DATA(BT_DATA_MANUFACTURER_DATA, specific_data, 16),
+#ifdef BLE_USE_WINDOWS_BEACON
+    BT_DATA(BT_DATA_MANUFACTURER_DATA, windows_pair_beacon, sizeof windows_pair_beacon),
+#endif
 };
 
 /**
