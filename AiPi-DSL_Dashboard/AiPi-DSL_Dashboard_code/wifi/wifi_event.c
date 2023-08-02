@@ -135,6 +135,7 @@ void wifi_event_handler(uint32_t code)
         case CODE_WIFI_ON_DISCONNECT:
         {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_DISCONNECT", __func__);
+
         }
         break;
         case CODE_WIFI_ON_AP_STARTED:
@@ -201,7 +202,7 @@ uint8_t wifi_connect(char* ssid, char* passwd)
                 return 2;
             case CODE_WIFI_ON_DISCONNECT:	//连接失败（超过了重连次数还没有连接成功的状态）
 
-                wifi_sta_disconnect();
+                // wifi_sta_disconnect();
                 guider_ui.wifi_stayus = false;
                 vPortFree(queue_buff);
                 return 4;
@@ -226,7 +227,5 @@ uint8_t wifi_connect(char* ssid, char* passwd)
 
     }
     vPortFree(queue_buff);
-
-
     return 14; //连接超时
 }

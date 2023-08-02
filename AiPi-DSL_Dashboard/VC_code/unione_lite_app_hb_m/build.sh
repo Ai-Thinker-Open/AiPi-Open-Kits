@@ -43,7 +43,7 @@ for i in release debug ; do
     if [ "update"X == "$1"X ]; then
         cd build && make clean OTA_UPDATE=TRUE && make OTA_UPDATE=TRUE
     else
-        cd build && make clean && make all 
+        cd build && make clean && make
     fi
     cd -
     if [ "release"x == "${i}"x ]; then

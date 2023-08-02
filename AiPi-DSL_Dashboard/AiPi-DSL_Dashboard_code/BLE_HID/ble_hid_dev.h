@@ -36,6 +36,10 @@ typedef  enum {
     HID_KEY_NUMBLE_E,
     HID_KEY_NUMBLE_F,
     HID_KEY_NUMBLE_G,
+    HID_KEY_NUMBLE_H,
+    HID_KEY_NUMBLE_I,
+    HID_KEY_NUMBLE_J,
+    HID_KEY_NUMBLE_K,
     //
 
     HID_KEY_NUMBLE_VOL_UP,

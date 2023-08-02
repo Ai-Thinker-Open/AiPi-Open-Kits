@@ -12,7 +12,8 @@
 #include "timers.h"
 #include "lvgl.h"
 #include "log.h"
-
+#include "bflb_uart.h"
+#include "voice_uart.h"
 #include "ble_hid_dev.h"
 #include "user_mqtt.h"
 #define DBG_TAG "LV EVENT"
@@ -225,6 +226,8 @@ static void src_home_imgbtn_voice_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_VOL_MUTE;
+	static struct bflb_device_s* uartx;
+	uartx = bflb_device_get_by_name("uart1");
 	switch (code)
 	{
 		case LV_EVENT_CLICKED:
@@ -233,6 +236,7 @@ static void src_home_imgbtn_voice_event_handler(lv_event_t* e)
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_novoice, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+			bflb_uart_put(uartx, user_data[UART_CMD_VOL_MUTE_OK].uart_data.data, 4);
 		}
 		break;
 		default:
@@ -244,6 +248,8 @@ static void src_home_imgbtn_novoice_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_VOL_MUTE;
+	static struct bflb_device_s* uartx;
+	uartx = bflb_device_get_by_name("uart1");
 	switch (code)
 	{
 		case LV_EVENT_CLICKED:
@@ -251,6 +257,7 @@ static void src_home_imgbtn_novoice_event_handler(lv_event_t* e)
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_novoice, LV_OBJ_FLAG_HIDDEN);
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+			bflb_uart_put(uartx, user_data[UART_CMD_VOL_MUTE_NG].uart_data.data, 4);
 		}
 		break;
 		default:
@@ -320,11 +327,21 @@ static void src_home_imgbtn_dashboard(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 	hid_key_num_t hid_key_num = (hid_key_num_t)lv_event_get_user_data(e);
+	static struct bflb_device_s* uartx;
+	uartx = bflb_device_get_by_name("uart1");
 	switch (code) {
 		case LV_EVENT_CLICKED:
 		{
-
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+			switch (hid_key_num)
+			{
+				case HID_KEY_NUMBLE_MISIC_NEXT:
+				case HID_KEY_NUMBLE_MISIC_PAST:
+					bflb_uart_put(uartx, user_data[UART_CMD_MUSIC_NEXT].uart_data.data, 4);
+					break;
+				default:
+					break;
+			}
 		}
 		break;
 
@@ -347,7 +364,7 @@ static void src_home_imgbtn_vol_I_cb(lv_event_t* e)
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
 		break;
-		case LV_EVENT_LONG_PRESSED:
+		case LV_EVENT_LONG_PRESSED_REPEAT:
 		{
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
@@ -362,7 +379,7 @@ static void src_home_imgbtn_vol_n_cb(lv_event_t* e)
 	lv_event_code_t code = lv_event_get_code(e);
 	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_VOL_DOWN;
 	switch (code) {
-		case LV_EVENT_CLICKED:
+		case LV_EVENT_PRESSED:
 		{
 			LOG_I("imgbtn_vol_n CLICKED");
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
@@ -370,7 +387,7 @@ static void src_home_imgbtn_vol_n_cb(lv_event_t* e)
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
 		break;
-		case LV_EVENT_LONG_PRESSED:
+		case LV_EVENT_LONG_PRESSED_REPEAT:
 		{
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}

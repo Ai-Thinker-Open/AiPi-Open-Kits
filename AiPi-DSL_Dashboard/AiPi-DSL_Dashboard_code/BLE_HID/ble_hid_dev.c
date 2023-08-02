@@ -368,6 +368,32 @@ static void ble_hid_dev_send(hid_key_num_t key_num)
             LOG_I("HID SEND:0X%2X 0X%02X 0X%02X", LEFT_CONTROL_KEY_MASK, LEFT_ALT_KEY_MASK, key_vaule[0]);
         }
         break;
+        case HID_KEY_NUMBLE_G:
+        {
+            key_vaule[0] = KEY_NUMBLE_G;
+            hog_send_keyboard_value(ble_conn_handle, LEFT_CONTROL_KEY_MASK, NULL, 0);
+            vTaskDelay(50/portTICK_RATE_MS);
+            hog_send_keyboard_value(ble_conn_handle, LEFT_CONTROL_KEY_MASK|LEFT_ALT_KEY_MASK, NULL, 0);
+            vTaskDelay(50/portTICK_RATE_MS);
+            hog_send_keyboard_value(ble_conn_handle, LEFT_CONTROL_KEY_MASK|LEFT_ALT_KEY_MASK, key_vaule, sizeof key_vaule);
+            vTaskDelay(100/portTICK_RATE_MS);
+            hog_send_keyboard_value(ble_conn_handle, 0, NULL, 0);
+            LOG_I("HID SEND:0X%2X 0X%02X 0X%02X", LEFT_CONTROL_KEY_MASK, LEFT_ALT_KEY_MASK, key_vaule[0]);
+        }
+        break;
+        case HID_KEY_NUMBLE_H:
+        {
+            key_vaule[0] = KEY_NUMBLE_H;
+            hog_send_keyboard_value(ble_conn_handle, LEFT_CONTROL_KEY_MASK, NULL, 0);
+            vTaskDelay(50/portTICK_RATE_MS);
+            hog_send_keyboard_value(ble_conn_handle, LEFT_CONTROL_KEY_MASK|LEFT_ALT_KEY_MASK, NULL, 0);
+            vTaskDelay(50/portTICK_RATE_MS);
+            hog_send_keyboard_value(ble_conn_handle, LEFT_CONTROL_KEY_MASK|LEFT_ALT_KEY_MASK, key_vaule, sizeof key_vaule);
+            vTaskDelay(100/portTICK_RATE_MS);
+            hog_send_keyboard_value(ble_conn_handle, 0, NULL, 0);
+            LOG_I("HID SEND:0X%2X 0X%02X 0X%02X", LEFT_CONTROL_KEY_MASK, LEFT_ALT_KEY_MASK, key_vaule[0]);
+        }
+        break;
         case HID_KEY_NUMBLE_VOL_UP:
         {
             hog_send_keyboard_plus_value(ble_conn_handle, VOLUME_INCREMENT, NULL, 0);

@@ -125,12 +125,15 @@ static void queue_receive_task(void* arg)
                             vTaskDelay(100/portTICK_RATE_MS);
                             lv_event_send(ui->src_home_img_loding, LV_EVENT_CLICKED, NULL);
                             vPortFree(ssid_list);
+
                             bflb_uart_put(uartx, user_data[UART_CMD_WIFI_SCAN_DONE].uart_data.data, 4);
                         }
                         break;
                         case 1:
                         {
+                            bflb_uart_put(uartx, user_data[UART_CMD_WIFI_SCAN_START].uart_data.data, 4);
                             wifi_mgmr_sta_scan(&wifi_scan_config);
+
                         }
                         break;
                         default:
@@ -222,7 +225,8 @@ static void queue_receive_task(void* arg)
                     break;
             }
         }
-        //循环查询
+
+        //避免队列读取的阻塞影响LVGL 事件的发送
         switch (uart_cmd)
         {
             case UART_RX_CMD_OPENL:
@@ -309,6 +313,61 @@ static void queue_receive_task(void* arg)
                 LOG_I("Voice cmd: [扫描WiFi]");
                 lv_event_send(ui->src_home_btn_scan, LV_EVENT_CLICKED, NULL);
                 break;
+            case UART_RX_CMD_VOL_MUTX_OK:
+                LOG_I("Voice cmd: [电脑静音]");
+                lv_event_send(ui->src_home_imgbtn_novoice, LV_EVENT_CLICKED, NULL);
+                break;
+            case UART_RX_CMD_VOL_MUTX_NG:
+                LOG_I("Voice cmd: [电脑开声音]");
+                lv_event_send(ui->src_home_imgbtn_voice, LV_EVENT_CLICKED, NULL);
+                break;
+            case UART_RX_CMD_VOL_UP:
+                LOG_I("Voice cmd: [音量加]");
+                lv_event_send(ui->src_home_imgbtn_vol_I, LV_EVENT_LONG_PRESSED, NULL);
+                vTaskDelay(1000/portTICK_RATE_MS);
+                lv_event_send(ui->src_home_imgbtn_vol_I, LV_EVENT_CLICKED, NULL);
+
+                break;
+            case UART_RX_CMD_VOL_DOWN:
+                LOG_I("Voice cmd: [音量减]");
+                lv_event_send(ui->src_home_imgbtn_vol_n, LV_EVENT_LONG_PRESSED, NULL);
+                vTaskDelay(1000/portTICK_RATE_MS);
+                lv_event_send(ui->src_home_imgbtn_vol_n, LV_EVENT_CLICKED, NULL);
+
+                break;
+            case UART_RX_CMD_MUSIC_NEXT:
+                LOG_I("Voice cmd: [播放下一曲]");
+                lv_event_send(ui->src_home_imgbtn_7, LV_EVENT_CLICKED, NULL);
+                break;
+            case UART_RX_CMD_MUSIC_PAST:
+                LOG_I("Voice cmd: [播放上一曲]");
+                lv_event_send(ui->src_home_imgbtn_8, LV_EVENT_CLICKED, NULL);
+                break;
+            case UART_RX_CMD_MUSIC_PALY:
+                LOG_I("Voice cmd: 播放]");
+                lv_event_send(ui->src_home_imgbtn_satrt, LV_EVENT_CLICKED, NULL);
+                break;
+            case UART_RX_CMD_MUSIC_PALY_PLUS:
+                LOG_I("Voice cmd: [播放音乐]");
+                break;
+            case UART_RX_CMD_MUSIC_OPEN:
+            {
+                hid_key_num_t hid_key_num = HID_KEY_NUMBLE_G;
+                xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+                LOG_I("Voice cmd: [打开音乐播放器]");
+            }
+            break;
+            case UART_RX_CMD_MUSIC_STOP:
+                LOG_I("Voice cmd: [暂停播放]");
+                lv_event_send(ui->src_home_imgbtn_stop, LV_EVENT_CLICKED, NULL);
+                break;
+            case UART_RX_CMD_GAME_OPEN:
+            {
+                hid_key_num_t hid_key_num = HID_KEY_NUMBLE_H;
+                xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+                LOG_I("Voice cmd: [原神启动]");
+            }
+            break;
             default:
                 break;
         }

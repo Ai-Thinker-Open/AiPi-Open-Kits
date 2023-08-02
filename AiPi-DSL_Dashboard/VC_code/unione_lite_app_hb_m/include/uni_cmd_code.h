@@ -22,6 +22,17 @@ const cmd_code_map_t g_cmd_code_arry[] = {
   {0xc, "openAPP6"},
   {0xd, "status"},
   {0xe, "wifiScan"},
+  {0xf, "volumeMute"},
+  {0x10, "volumeNoMute"},
+  {0x11, "volumeUp"},
+  {0x12, "volumeDown"},
+  {0x13, "openMusic"},
+  {0x14, "Music_next"},
+  {0x15, "Music_past"},
+  {0x16, "playMusic"},
+  {0x17, "playMusicPlus"},
+  {0x18, "openG"},
+  {0x19, "stopMusic"},
 };
 
 #endif
