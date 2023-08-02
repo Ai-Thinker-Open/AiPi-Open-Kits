@@ -898,43 +898,99 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_imgbtn_set_src(ui->src_home_imgbtn_8, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_next0cloes_alpha_20x20, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_8, LV_OBJ_FLAG_CHECKABLE);
 
-    //Write codes src_home_slider_voicse
-    ui->src_home_slider_voicse = lv_slider_create(ui->src_home_cont_dis);
-    lv_obj_set_pos(ui->src_home_slider_voicse, 5, 60-34);
-    lv_obj_set_size(ui->src_home_slider_voicse, 6, 150-34);
-    lv_obj_set_scrollbar_mode(ui->src_home_slider_voicse, LV_SCROLLBAR_MODE_OFF);
+    ui->src_home_imgbtn_vol_I = lv_imgbtn_create(ui->src_home_cont_dis);
+    lv_obj_set_pos(ui->src_home_imgbtn_vol_I, 0, 28);
+    lv_obj_set_size(ui->src_home_imgbtn_vol_I, 20, 20);
+    lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_vol_I, LV_SCROLLBAR_MODE_OFF);
 
-    //Set style for src_home_slider_voicse. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->src_home_slider_voicse, 50, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->src_home_slider_voicse, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui->src_home_slider_voicse, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_dir(ui->src_home_slider_voicse, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->src_home_slider_voicse, 60, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(ui->src_home_slider_voicse, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(ui->src_home_slider_voicse, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_opa(ui->src_home_slider_voicse, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(ui->src_home_slider_voicse, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_ofs_x(ui->src_home_slider_voicse, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_ofs_y(ui->src_home_slider_voicse, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_color(ui->src_home_slider_voicse, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_width(ui->src_home_slider_voicse, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(ui->src_home_slider_voicse, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    //Set style for src_home_imgbtn_vol_I. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_shadow_width(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_color(ui->src_home_imgbtn_vol_I, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_opa(ui->src_home_imgbtn_vol_I, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_spread(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_ofs_x(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_ofs_y(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui->src_home_imgbtn_vol_I, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui->src_home_imgbtn_vol_I, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui->src_home_imgbtn_vol_I, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_img_opa(ui->src_home_imgbtn_vol_I, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
 
-    //Set style for src_home_slider_voicse. Part: LV_PART_INDICATOR, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->src_home_slider_voicse, 50, LV_PART_INDICATOR|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->src_home_slider_voicse, lv_color_make(0x8b, 0x8b, 0x8b), LV_PART_INDICATOR|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui->src_home_slider_voicse, lv_color_make(0x21, 0x95, 0xf6), LV_PART_INDICATOR|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_dir(ui->src_home_slider_voicse, LV_GRAD_DIR_NONE, LV_PART_INDICATOR|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->src_home_slider_voicse, 173, LV_PART_INDICATOR|LV_STATE_DEFAULT);
+    //Set style for src_home_imgbtn_vol_I. Part: LV_PART_MAIN, State: LV_STATE_PRESSED
+    lv_obj_set_style_shadow_width(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_color(ui->src_home_imgbtn_vol_I, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_opa(ui->src_home_imgbtn_vol_I, 255, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_spread(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_ofs_x(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_ofs_y(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_text_color(ui->src_home_imgbtn_vol_I, lv_color_make(0xFF, 0x33, 0xFF), LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_img_recolor(ui->src_home_imgbtn_vol_I, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_img_opa(ui->src_home_imgbtn_vol_I, 255, LV_PART_MAIN|LV_STATE_PRESSED);
 
-    //Set style for src_home_slider_voicse. Part: LV_PART_KNOB, State: LV_STATE_DEFAULT
-    lv_obj_set_style_radius(ui->src_home_slider_voicse, 50, LV_PART_KNOB|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui->src_home_slider_voicse, lv_color_make(0x8d, 0x8d, 0x8d), LV_PART_KNOB|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui->src_home_slider_voicse, lv_color_make(0x21, 0x95, 0xf6), LV_PART_KNOB|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_dir(ui->src_home_slider_voicse, LV_GRAD_DIR_NONE, LV_PART_KNOB|LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui->src_home_slider_voicse, 255, LV_PART_KNOB|LV_STATE_DEFAULT);
-    lv_slider_set_range(ui->src_home_slider_voicse, 0, 100);
-    lv_slider_set_value(ui->src_home_slider_voicse, 60, false);
+    //Set style for src_home_imgbtn_vol_I. Part: LV_PART_MAIN, State: LV_STATE_CHECKED
+    lv_obj_set_style_shadow_width(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_color(ui->src_home_imgbtn_vol_I, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_opa(ui->src_home_imgbtn_vol_I, 255, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_spread(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_ofs_x(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_ofs_y(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(ui->src_home_imgbtn_vol_I, lv_color_make(0xFF, 0x33, 0xFF), LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_img_recolor(ui->src_home_imgbtn_vol_I, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_vol_I, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_img_opa(ui->src_home_imgbtn_vol_I, 255, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_vol_I, LV_IMGBTN_STATE_RELEASED, NULL, &_vol_i_alpha_20x20, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_vol_I, LV_IMGBTN_STATE_PRESSED, NULL, &_vol_i_sm_alpha_20x20, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_vol_I, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_vol_i_alpha_20x20, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_vol_I, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_vol_i_sm_alpha_20x20, NULL);
+    lv_obj_add_flag(ui->src_home_imgbtn_vol_I, LV_OBJ_FLAG_CHECKABLE);
+    //Write codes src_home_imgbtn_vol_n
+    ui->src_home_imgbtn_vol_n = lv_imgbtn_create(ui->src_home_cont_dis);
+    lv_obj_set_pos(ui->src_home_imgbtn_vol_n, 0, 118);
+    lv_obj_set_size(ui->src_home_imgbtn_vol_n, 20, 20);
+    lv_obj_set_scrollbar_mode(ui->src_home_imgbtn_vol_n, LV_SCROLLBAR_MODE_OFF);
+
+    //Set style for src_home_imgbtn_vol_n. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+    lv_obj_set_style_shadow_width(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_color(ui->src_home_imgbtn_vol_n, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_opa(ui->src_home_imgbtn_vol_n, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_spread(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_ofs_x(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_ofs_y(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui->src_home_imgbtn_vol_n, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui->src_home_imgbtn_vol_n, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui->src_home_imgbtn_vol_n, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_img_opa(ui->src_home_imgbtn_vol_n, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+    //Set style for src_home_imgbtn_vol_n. Part: LV_PART_MAIN, State: LV_STATE_PRESSED
+    lv_obj_set_style_shadow_width(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_color(ui->src_home_imgbtn_vol_n, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_opa(ui->src_home_imgbtn_vol_n, 255, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_spread(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_ofs_x(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_ofs_y(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_text_color(ui->src_home_imgbtn_vol_n, lv_color_make(0xFF, 0x33, 0xFF), LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_img_recolor(ui->src_home_imgbtn_vol_n, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_PRESSED);
+    lv_obj_set_style_img_opa(ui->src_home_imgbtn_vol_n, 255, LV_PART_MAIN|LV_STATE_PRESSED);
+
+    //Set style for src_home_imgbtn_vol_n. Part: LV_PART_MAIN, State: LV_STATE_CHECKED
+    lv_obj_set_style_shadow_width(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_color(ui->src_home_imgbtn_vol_n, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_opa(ui->src_home_imgbtn_vol_n, 255, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_spread(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_ofs_x(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_ofs_y(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(ui->src_home_imgbtn_vol_n, lv_color_make(0xFF, 0x33, 0xFF), LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_img_recolor(ui->src_home_imgbtn_vol_n, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_img_recolor_opa(ui->src_home_imgbtn_vol_n, 0, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_obj_set_style_img_opa(ui->src_home_imgbtn_vol_n, 255, LV_PART_MAIN|LV_STATE_CHECKED);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_vol_n, LV_IMGBTN_STATE_RELEASED, NULL, &_vol_n_alpha_20x20, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_vol_n, LV_IMGBTN_STATE_PRESSED, NULL, &_vol_n_sm_alpha_20x20, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_vol_n, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &_vol_n_alpha_20x20, NULL);
+    lv_imgbtn_set_src(ui->src_home_imgbtn_vol_n, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_vol_n_sm_alpha_20x20, NULL);
+    lv_obj_add_flag(ui->src_home_imgbtn_vol_n, LV_OBJ_FLAG_CHECKABLE);
 
     //Write codes src_home_imgbtn_voice
     ui->src_home_imgbtn_voice = lv_imgbtn_create(ui->src_home_cont_dis);
@@ -1036,7 +1092,5 @@ void shortcuts_scr_set(lv_ui* ui)
     lv_imgbtn_set_src(ui->src_home_imgbtn_novoice, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &_novoiceclose_alpha_20x20, NULL);
     lv_obj_add_flag(ui->src_home_imgbtn_novoice, LV_OBJ_FLAG_CHECKABLE);
 
-    lv_obj_add_flag(ui->src_home_slider_voicse, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(ui->src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(ui->src_home_cont_music_ctrl, LV_OBJ_FLAG_HIDDEN);
+
 }

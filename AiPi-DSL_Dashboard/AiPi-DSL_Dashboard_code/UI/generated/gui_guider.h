@@ -151,6 +151,8 @@ extern "C" {
 		lv_obj_t* src_home_img_loding;
 		lv_obj_t* src_home_btn_scan;
 		lv_obj_t* src_home_btn_scan_label;
+		lv_obj_t* src_home_imgbtn_vol_I;
+		lv_obj_t* src_home_imgbtn_vol_n;
 		char ssid[32];
 		char password[64];
 		bool wifi_stayus;
@@ -250,6 +252,10 @@ extern "C" {
 	LV_IMG_DECLARE(_baiduopen_alpha_35x35);
 	LV_IMG_DECLARE(_jlcclose_alpha_35x35);
 	LV_IMG_DECLARE(_VSclose_alpha_35x35);
+	LV_IMG_DECLARE(_vol_i_alpha_20x20);
+	LV_IMG_DECLARE(_vol_i_sm_alpha_20x20);
+	LV_IMG_DECLARE(_vol_n_alpha_20x20);
+	LV_IMG_DECLARE(_vol_n_sm_alpha_20x20);
 #ifdef __cplusplus
 }
 #endif

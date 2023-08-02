@@ -186,12 +186,15 @@ static void src_home_btn_topicOK_event_handler(lv_event_t* e)
 static void src_home_imgbtn_stop_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
+	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_MISIC_STOP;
 	switch (code)
 	{
 		case LV_EVENT_CLICKED:
 		{
+			LOG_I("imgbtn_stop CLICKED");
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_satrt, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_stop, LV_OBJ_FLAG_HIDDEN);
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
 		break;
 		default:
@@ -202,12 +205,15 @@ static void src_home_imgbtn_stop_event_handler(lv_event_t* e)
 static void src_home_imgbtn_satrt_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
+	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_MISIC_PLAY;
 	switch (code)
 	{
 		case LV_EVENT_CLICKED:
 		{
+			LOG_I("imgbtn_satrt CLICKED");
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_stop, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_satrt, LV_OBJ_FLAG_HIDDEN);
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
 		break;
 		default:
@@ -223,6 +229,7 @@ static void src_home_imgbtn_voice_event_handler(lv_event_t* e)
 	{
 		case LV_EVENT_CLICKED:
 		{
+			LOG_I("imgbtn_voice CLICKED");
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_novoice, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
@@ -236,14 +243,14 @@ static void src_home_imgbtn_voice_event_handler(lv_event_t* e)
 static void src_home_imgbtn_novoice_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
-
+	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_VOL_MUTE;
 	switch (code)
 	{
 		case LV_EVENT_CLICKED:
 		{
 			lv_obj_clear_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.src_home_imgbtn_novoice, LV_OBJ_FLAG_HIDDEN);
-
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
 		break;
 		default:
@@ -316,21 +323,56 @@ static void src_home_imgbtn_dashboard(lv_event_t* e)
 	switch (code) {
 		case LV_EVENT_CLICKED:
 		{
+
 			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
 		break;
 
-		case LV_EVENT_CANCEL:
-		{
-			switch (hid_key_num) {
-				case HID_KEY_NUMBLE_VOL_CHENG:
-				{
+		default:
+			break;
+	}
+}
 
-				}
-				break;
-				default:
-					break;
-			}
+static void src_home_imgbtn_vol_I_cb(lv_event_t* e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_VOL_UP;
+	switch (code) {
+		case LV_EVENT_CLICKED:
+		{
+			LOG_I("imgbtn_vol_I CLICKED");
+
+			lv_obj_clear_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_add_flag(guider_ui.src_home_imgbtn_novoice, LV_OBJ_FLAG_HIDDEN);
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+		}
+		break;
+		case LV_EVENT_LONG_PRESSED:
+		{
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+		}
+		break;
+		default:
+			break;
+	}
+}
+
+static void src_home_imgbtn_vol_n_cb(lv_event_t* e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	hid_key_num_t hid_key_num = HID_KEY_NUMBLE_VOL_DOWN;
+	switch (code) {
+		case LV_EVENT_CLICKED:
+		{
+			LOG_I("imgbtn_vol_n CLICKED");
+			lv_obj_clear_flag(guider_ui.src_home_imgbtn_voice, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_add_flag(guider_ui.src_home_imgbtn_novoice, LV_OBJ_FLAG_HIDDEN);
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+		}
+		break;
+		case LV_EVENT_LONG_PRESSED:
+		{
+			xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
 		}
 		break;
 		default:
@@ -374,21 +416,31 @@ void events_init_src_home(lv_ui* ui)
 	lv_obj_add_event_cb(ui->src_home_imgbtn_10, src_home_imgbtn_10_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_btn_connect_mqtt, src_home_btn_connect_mqtt_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_btn_topicOK, src_home_btn_topicOK_event_handler, LV_EVENT_ALL, ui);
+
 	lv_obj_add_event_cb(ui->src_home_imgbtn_stop, src_home_imgbtn_stop_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_satrt, src_home_imgbtn_satrt_event_handler, LV_EVENT_ALL, ui);
+
 	lv_obj_add_event_cb(ui->src_home_imgbtn_voice, src_home_imgbtn_voice_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_novoice, src_home_imgbtn_novoice_event_handler, LV_EVENT_ALL, ui);
+
 	lv_obj_add_event_cb(ui->src_home_img_wifi, src_home_img_wifi_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_btn_connect, src_home_btn_connect_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->src_home_img_loding, src_home_img_loding_event_handler, LV_EVENT_ALL, ui);
+
 	//搜索
 	lv_obj_add_event_cb(ui->src_home_btn_scan, src_home_imgbtn_scan_event_handler, LV_EVENT_ALL, ui);
 	//快捷按键
+
+	lv_obj_add_event_cb(ui->src_home_imgbtn_vol_I, src_home_imgbtn_vol_I_cb, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->src_home_imgbtn_vol_n, src_home_imgbtn_vol_n_cb, LV_EVENT_ALL, ui);
+
 	lv_obj_add_event_cb(ui->src_home_imgbtn_1, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_A);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_2, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_B);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_3, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_C);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_4, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_D);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_5, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_F);
 	lv_obj_add_event_cb(ui->src_home_imgbtn_6, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_E);
+	lv_obj_add_event_cb(ui->src_home_imgbtn_7, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_MISIC_NEXT);
+	lv_obj_add_event_cb(ui->src_home_imgbtn_8, src_home_imgbtn_dashboard, LV_EVENT_ALL, (void*)HID_KEY_NUMBLE_MISIC_PAST);
 
 }

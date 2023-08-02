@@ -24,6 +24,14 @@
 #define RIGHT_ALT_KEY_MASK           (1 << 6)
 #define RIGHT_GUI_KEY_MASK           (1 << 7)
 
+#define VOLUME_INCREMENT (1 << 0)
+#define VOLUME_DECREMENT (1 << 1)
+#define MISIC_PLAY_STOP (1 << 2)
+#define MISIC_NEXT (1 << 3)
+#define MISIC_PAST (1 << 4)
+#define VOLUME_MUTE (1 << 5)
+
+
 typedef enum {
     KEY_NUMBLE_A = 0X04,
     KEY_NUMBLE_B,
@@ -52,11 +60,6 @@ typedef enum {
     KEY_NUMBLE_Y,
     KEY_NUMBLE_Z,
     //vloume
-    KEY_NUMBLE_LOV_MUTE = 0X7F,
-    KEY_NUMBLE_LOV_UP = 0X80,
-    KEY_NUMBLE_LOV_DOWN,
-    //
-
 }key_numble_t;
 
 
@@ -65,6 +68,7 @@ typedef uint8_t key_mask_t;
 
 
 void hog_kb_init(void);
-int hog_send_keyboard_value(struct bt_conn *conn, key_mask_t special_key_mask, uint8_t *keyboard_cmd, uint8_t num_key);
+int hog_send_keyboard_plus_value(struct bt_conn* conn, key_mask_t special_key_mask, uint8_t* keyboard_cmd, uint8_t num_key);
+int hog_send_keyboard_value(struct bt_conn* conn, key_mask_t special_key_mask, uint8_t* keyboard_cmd, uint8_t num_key);
 
 #endif

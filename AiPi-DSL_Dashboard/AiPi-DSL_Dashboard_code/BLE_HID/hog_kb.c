@@ -39,7 +39,12 @@ enum {
 };
 
 static struct hids_report kb_input = {
-    .id = 0x00,
+    .id = 0x01,
+    .type = HIDS_INPUT,
+};
+
+static struct hids_report input = {
+    .id = 0x02,
     .type = HIDS_INPUT,
 };
 
@@ -50,6 +55,7 @@ static uint8_t report_map[] =
     0x05, 0x01,       // Usage Page (Generic Desktop)
     0x09, 0x06,       // Usage (Keyboard)
     0xA1, 0x01,       // Collection (Application)
+    0x85, 0x01, // ID
     0x05, 0x07,       //   Usage Page (Key Codes)
     0x19, 0xe0,       //   Usage Minimum (224)
     0x29, 0xe7,       //   Usage Maximum (231)
@@ -89,7 +95,29 @@ static uint8_t report_map[] =
     // 0x95, 0x02,       //   Report Count (2)
     // 0xB1, 0x02,       //   Feature (Data, Variable, Absolute)
 
-    0xC0              // End Collection (Application)
+    0xC0,              // End Collection (Application)
+
+    0x05, 0x0C, // Usage Page (Generic Desktop)
+    0x09, 0x01, // Usage (Consumer Control)
+    0xA1, 0x00, // Collection (Application)
+    0x85, 0x02, // ID (Report ID 2)
+
+    0x05, 0x0C, // Usage Page (Consumer Devices)
+    0x15, 0x00, // Logical Minimum (0)
+    0x25, 0x01, // Logical Maximum (1)
+    0x75, 0x01, // Report Size (1 bit)
+    0x95, 0x08, // Report Count (8) - 总共有5个功能键
+    0x09, 0xE9, // Usage (Volume Increment)
+    0x09, 0xEA, // Usage (Volume Decrement)
+    0x09, 0xCD, // Usage (Play/Pause)
+    0x09, 0xB5, // Usage (Next Track)
+    0x09, 0xB6, // Usage (Previous Track)
+    0x09, 0xE2, // Usage (Mute)
+    0x09, 0xB1, // Usage (Pause)
+    0x09, 0xB7, // Usage (Stop)
+    0x81, 0x02, // Input (Data, Variable, Absolute) - 输入5个位表示5个功能键状态
+
+    0xC0, // End Collection (Application)
 };
 
 #define TUD_HID_REPORT_DESC_CONSUMER(...) \
@@ -176,16 +204,51 @@ static struct bt_gatt_attr attrs[] = {
                    BT_GATT_CHRC_READ | BT_GATT_CHRC_NOTIFY,
                    BT_GATT_PERM_READ,
                    read_input_report, NULL, NULL),
+
     BT_GATT_CCC(input_ccc_changed,
             BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
-    BT_GATT_DESCRIPTOR(BT_UUID_HIDS_REPORT_REF, BT_GATT_PERM_READ,
-               read_report, NULL, &kb_input),
+
+    BT_GATT_DESCRIPTOR(BT_UUID_HIDS_REPORT_REF, BT_GATT_PERM_READ,read_report, NULL, &kb_input),
+
+     BT_GATT_CHARACTERISTIC(BT_UUID_HIDS_REPORT,
+                           BT_GATT_CHRC_READ | BT_GATT_CHRC_NOTIFY,
+                           BT_GATT_PERM_READ,
+                           read_input_report, NULL, NULL),
+
+    BT_GATT_CCC(input_ccc_changed,BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+
+    BT_GATT_DESCRIPTOR(BT_UUID_HIDS_REPORT_REF, BT_GATT_PERM_READ, read_report, NULL, &input),
 
     BT_GATT_CHARACTERISTIC(BT_UUID_HIDS_CTRL_POINT,
                    BT_GATT_CHRC_WRITE_WITHOUT_RESP,
                    BT_GATT_PERM_WRITE,
                    NULL, write_ctrl_point, &ctrl_point),
 };
+
+int hog_send_keyboard_plus_value(struct bt_conn* conn, key_mask_t special_key_mask, uint8_t* keyboard_cmd, uint8_t num_key)
+{
+    struct bt_gatt_attr* attr;
+
+    uint8_t buffer[HID_KEYBOARD_IN_RPT_LEN] = { 0 };
+
+    if (hid_input_ccc != BT_GATT_CCC_NOTIFY)
+    {
+        printf("input ccc invaild \r\n");
+        return -EPERM;
+    }
+
+    buffer[0] = special_key_mask;
+    for (int i = 0; i < num_key; i++)
+    {
+        buffer[i + 2] = keyboard_cmd[i];
+    }
+    attr = &attrs[10];
+
+    // printf("dump:%02x %02x %02x %02x %02x %02x %02x %02x \r\n",
+    //         buffer[0], buffer[1], buffer[2], buffer[3],
+    //         buffer[4], buffer[5], buffer[6], buffer[7]);
+    return bt_gatt_notify(conn, attr, buffer, HID_KEYBOARD_IN_RPT_LEN);
+}
 
 int hog_send_keyboard_value(struct bt_conn* conn, key_mask_t special_key_mask, uint8_t* keyboard_cmd, uint8_t num_key)
 {

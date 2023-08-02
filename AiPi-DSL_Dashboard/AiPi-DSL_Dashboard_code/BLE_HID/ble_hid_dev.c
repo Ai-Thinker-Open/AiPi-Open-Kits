@@ -368,13 +368,57 @@ static void ble_hid_dev_send(hid_key_num_t key_num)
             LOG_I("HID SEND:0X%2X 0X%02X 0X%02X", LEFT_CONTROL_KEY_MASK, LEFT_ALT_KEY_MASK, key_vaule[0]);
         }
         break;
+        case HID_KEY_NUMBLE_VOL_UP:
+        {
+            hog_send_keyboard_plus_value(ble_conn_handle, VOLUME_INCREMENT, NULL, 0);
+            vTaskDelay(100/portTICK_RATE_MS);
+            hog_send_keyboard_plus_value(ble_conn_handle, 0, NULL, 0);
+            LOG_I("HID SEND:0X%02X", VOLUME_INCREMENT);
+        }
+        break;
+        case HID_KEY_NUMBLE_VOL_DOWN:
+        {
+            hog_send_keyboard_plus_value(ble_conn_handle, VOLUME_DECREMENT, NULL, 0);
+            vTaskDelay(100/portTICK_RATE_MS);
+            hog_send_keyboard_plus_value(ble_conn_handle, 0, NULL, 0);
+            LOG_I("HID SEND:0X%02X", VOLUME_DECREMENT);
+        }
+        break;
         case HID_KEY_NUMBLE_VOL_MUTE:
         {
-            key_vaule[0] = KEY_NUMBLE_LOV_MUTE;
-            hog_send_keyboard_value(ble_conn_handle, 0, key_vaule, sizeof key_vaule);
+            hog_send_keyboard_plus_value(ble_conn_handle, VOLUME_MUTE, NULL, 0);
             vTaskDelay(100/portTICK_RATE_MS);
+            hog_send_keyboard_plus_value(ble_conn_handle, 0, NULL, 0);
+            LOG_I("HID SEND:0X%02X", VOLUME_MUTE);
+        }
+        break;
+
+        case HID_KEY_NUMBLE_MISIC_STOP:
+        case HID_KEY_NUMBLE_MISIC_PLAY:
+        {
+            hog_send_keyboard_plus_value(ble_conn_handle, MISIC_PLAY_STOP, NULL, 0);
+            vTaskDelay(100/portTICK_RATE_MS);
+            hog_send_keyboard_plus_value(ble_conn_handle, 0, NULL, 0);
+
+            LOG_I("HID SEND:0X%02X", MISIC_PLAY_STOP);
+        }
+        break;
+        case HID_KEY_NUMBLE_MISIC_NEXT:
+        {
+            hog_send_keyboard_plus_value(ble_conn_handle, MISIC_NEXT, NULL, 0);
+            vTaskDelay(100/portTICK_RATE_MS);
+
             hog_send_keyboard_value(ble_conn_handle, 0, NULL, 0);
-            LOG_I("HID SEND:0X%02X", key_vaule[0]);
+            LOG_I("HID SEND:0X%02X", MISIC_NEXT);
+        }
+        break;
+        case HID_KEY_NUMBLE_MISIC_PAST:
+        {
+            hog_send_keyboard_plus_value(ble_conn_handle, MISIC_PAST, NULL, 0);
+            vTaskDelay(100/portTICK_RATE_MS);
+
+            hog_send_keyboard_value(ble_conn_handle, 0, NULL, 0);
+            LOG_I("HID SEND:0X%02X", MISIC_PAST);
         }
         break;
         default:

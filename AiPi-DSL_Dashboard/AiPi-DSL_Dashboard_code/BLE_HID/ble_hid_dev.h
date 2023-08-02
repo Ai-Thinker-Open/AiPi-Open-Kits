@@ -37,10 +37,16 @@ typedef  enum {
     HID_KEY_NUMBLE_F,
     HID_KEY_NUMBLE_G,
     //
-    HID_KEY_NUMBLE_VOL_CHENG,
+
     HID_KEY_NUMBLE_VOL_UP,
     HID_KEY_NUMBLE_VOL_DOWN,
     HID_KEY_NUMBLE_VOL_MUTE,
+
+    HID_KEY_NUMBLE_MISIC_PLAY,
+    HID_KEY_NUMBLE_MISIC_STOP,
+    HID_KEY_NUMBLE_MISIC_NEXT,
+    HID_KEY_NUMBLE_MISIC_PAST,
+
 }hid_key_num_t;
 
 void ble_hid_task(void* arg);
