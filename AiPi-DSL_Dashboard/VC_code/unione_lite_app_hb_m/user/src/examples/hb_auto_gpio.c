@@ -17,14 +17,13 @@ typedef enum {
   UART_CMD_WIFI_CONNECT_OK,
   UART_CMD_WIFI_CONNECT_NG,
   UART_CMD_BLE_CONNECT_OK,
-  UART_CMD_BLE_CONNECT_NG,
   UART_CMD_CONNECT_FILAS,
   UART_CMD_CHECK_ERROR,
   UART_CMD_SEND_ERROR,
   UART_CMD_CONRTOL_ERROR,
   UART_CMD_WIFI_SCAN_DONE,
   UART_CMD_MUSIC_NEXT,
-  UART_CMD_BLE_CONNECT_OK,
+  UART_CMD_BLE_CONNECT_NG,
   UART_CMD_VOL_MUTE_OK,
   UART_CMD_VOL_MUTE_NG,
 }uart_cmd_t;
@@ -233,7 +232,6 @@ static void _uart_recv_cb(char* buf, int len)
     num_cnt = 0;
   }
 
-  if (j==0) uni_hal_reset_system();
   user_player_reply_list_in_order(user_data[j].pcm);
 }
 

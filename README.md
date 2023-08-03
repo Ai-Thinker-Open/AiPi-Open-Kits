@@ -37,7 +37,9 @@ git submodule update
 . export.sh
 ```
 ## 三、编译和烧录
+
 在AiPi-Open-Kits下可以看见各种小安派的Demo文件夹，使用cd命令进入到需要编译和烧录的Demo下
+
 ```javascript
 cd 对应Demo目录文件夹
 make                          //编译命令
@@ -57,12 +59,21 @@ make flash COMX=/dev/ttyUSB0  //烧录命令
 | GND    | ------ |GND      |
 
 ### 2.编译和烧录固件
-（1）进入 AiPi-Cam 的目录文件夹
+
+#### （1）进入 AiPi-Cam 的目录文件夹
+
 <img decoding="async" src="IMG/01.png" width="80%">
-（2）输入 make 编译固件
+
+#### （2）输入 make 编译固件
+
 <img decoding="async" src="IMG/02.png" width="80%">
-（3）输入 make flash COMX=/dev/ttyUSB0
+
+#### （3）输入 make flash COMX=/dev/ttyUSB0
+
 出现“Please Press Reset Key!"后按下RST
+
 <img decoding="async" src="IMG/03.png" width="80%">
-（4）出现“All Success”表示烧录成功
+
+#### （4）出现“All Success”表示烧录成功
+
 <img decoding="async" src="IMG/04.png" width="80%">
