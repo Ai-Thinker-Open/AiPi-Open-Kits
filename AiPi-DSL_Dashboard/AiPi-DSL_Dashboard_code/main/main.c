@@ -68,7 +68,7 @@ int main(void)
     easyflash_init();
     /* lvgl init */
     lv_log_register_print_cb(lv_log_print_g_cb);
-    xTaskCreate(voice_uart_task, "uart task", 1024*2, NULL, 10, NULL);
+    xTaskCreate(voice_uart_task, "uart task", 1024, NULL, 10, NULL);
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();
@@ -78,7 +78,7 @@ int main(void)
 
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 1, NULL);
     xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 1024, NULL, 2, NULL);
-    xTaskCreate(ble_hid_task, "ble_hid_task", 1024*2, (void*)&guider_ui, 6, NULL);
+    xTaskCreate(ble_hid_task, "ble_hid_task", 1024, (void*)&guider_ui, 6, NULL);
     vTaskStartScheduler();
     // while (1) {
 
@@ -96,7 +96,7 @@ static int bl61x_get_heap_size(void)
     bflb_mem_usage(KMEM_HEAP, &info1);
     bflb_mem_usage(PMEM_HEAP, &info2);
 
-    total_free_size = info1.free_size + info2.free_size;
+    total_free_size = info1.free_size;
 
     return total_free_size;
 }

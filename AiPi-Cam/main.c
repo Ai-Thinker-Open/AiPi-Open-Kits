@@ -17,9 +17,9 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+ /****************************************************************************
+  * Included Files
+  ****************************************************************************/
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -46,8 +46,8 @@
 #include "pbuff_dvp.h"
 #include "dbi_disp.h"
 
-// #include "auadc.h"
-// #include "audac.h"
+  // #include "auadc.h"
+  // #include "audac.h"
 
 #undef CONFIG_CHERRYUSB
 #ifdef CONFIG_CHERRYUSB
@@ -64,9 +64,9 @@ volatile uint32_t g_uvc_fps = 0;
  * user Definitions
  ****************************************************************************/
 #define USE_SD_FATFS    0
-// #undef CONFIG_CHERRYUSB
+ // #undef CONFIG_CHERRYUSB
 
-#define USER_AP_NAME "ai_pi_1"
+#define USER_AP_NAME "AiPi-CAM"
 #define USER_AP_PASSWORD "12345678"
 
 /****************************************************************************
@@ -77,16 +77,16 @@ volatile uint32_t g_uvc_fps = 0;
 #define TASK_PRIORITY_FW (16)
 
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+ /****************************************************************************
+  * Private Types
+  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+  /****************************************************************************
+   * Private Data
+   ****************************************************************************/
 
-static struct bflb_device_s *uart0;
-static struct bflb_device_s *gpio;
+static struct bflb_device_s* uart0;
+static struct bflb_device_s* gpio;
 
 static TaskHandle_t wifi_fw_task;
 
@@ -94,15 +94,15 @@ static wifi_conf_t conf = {
     .country_code = "CN",
 };
 
-extern void shell_init_with_task(struct bflb_device_s *shell);
+extern void shell_init_with_task(struct bflb_device_s* shell);
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Functions
- ****************************************************************************/
+ /****************************************************************************
+  * Functions
+  ****************************************************************************/
 
 int wifi_start_firmware_task(void)
 {
@@ -130,7 +130,7 @@ int wifi_start_firmware_task(void)
     bflb_irq_attach(WIFI_IRQn, (irq_callback)interrupt0_handler, NULL);
     bflb_irq_enable(WIFI_IRQn);
 
-    xTaskCreate(wifi_main, (char *)"fw", WIFI_STACK_SIZE, NULL, TASK_PRIORITY_FW, &wifi_fw_task);
+    xTaskCreate(wifi_main, (char*)"fw", WIFI_STACK_SIZE, NULL, TASK_PRIORITY_FW, &wifi_fw_task);
 
     return 0;
 }
@@ -204,11 +204,11 @@ void wifi_event_handler(uint32_t code)
 static TaskHandle_t http_server_task_hd;
 static TaskHandle_t cam_process_task_hd;
 static TaskHandle_t button_process_task_hd;
-extern char *datajpeg_buf;
+extern char* datajpeg_buf;
 extern uint32_t datajpeg_len;
-void * MuxSem_Handle = NULL;
+void* MuxSem_Handle = NULL;
 
-static void fps_printf_task(void *pvParameters)
+static void fps_printf_task(void* pvParameters)
 {
     // extern volatile uint32_t g_dbi_disp_fps;
     // extern volatile uint32_t g_dvp_fps;
@@ -237,61 +237,61 @@ static void fps_printf_task(void *pvParameters)
 
 static void start_ap(void)
 {
-    wifi_mgmr_ap_params_t config = {0};
+    wifi_mgmr_ap_params_t config = { 0 };
 
-	config.channel = 3;
-	config.key = USER_AP_PASSWORD;
-	config.ssid = USER_AP_NAME;
-	config.use_dhcpd = 1;
+    config.channel = 3;
+    config.key = USER_AP_PASSWORD;
+    config.ssid = USER_AP_NAME;
+    config.use_dhcpd = 1;
 
-	if(wifi_mgmr_conf_max_sta(2) != 0){
-		return 5;
-	}
-	if(wifi_mgmr_ap_start(&config) == 0){
-		return 0;
-	}
+    if (wifi_mgmr_conf_max_sta(2) != 0) {
+        return 5;
+    }
+    if (wifi_mgmr_ap_start(&config) == 0) {
+        return 0;
+    }
 }
 
-void http_server_task(void *param)
+void http_server_task(void* param)
 {
     start_ap();
     mhttp_server_init();
 }
 
-void button_process_task(void *param)
+void button_process_task(void* param)
 {
     static uint32_t press_10ms_cnt = 0;
     uint32_t press_mode = 0;
     static bool led_ctrl = 0;
     uint32_t frames = 1;
-    uint8_t *pBuf = NULL;
+    uint8_t* pBuf = NULL;
     uint32_t len;
-    uint8_t *pStr2 = NULL;
+    uint8_t* pStr2 = NULL;
     uint32_t len2;
 
     bflb_gpio_init(gpio, GPIO_PIN_2, GPIO_INPUT | GPIO_FLOAT | GPIO_SMT_EN | GPIO_DRV_0);
     bflb_gpio_init(gpio, GPIO_PIN_16, GPIO_OUTPUT | GPIO_FLOAT | GPIO_SMT_EN | GPIO_DRV_1);
     // bflb_gpio_reset(gpio, GPIO_PIN_16);
-    while(1){
-        if(bflb_gpio_read(gpio, GPIO_PIN_2) == 1) {
+    while (1) {
+        if (bflb_gpio_read(gpio, GPIO_PIN_2) == 1) {
             press_10ms_cnt++;
         }
-        else if(bflb_gpio_read(gpio, GPIO_PIN_2) == 0){
-            if(press_10ms_cnt > 10 && press_10ms_cnt < 100){
+        else if (bflb_gpio_read(gpio, GPIO_PIN_2) == 0) {
+            if (press_10ms_cnt > 10 && press_10ms_cnt < 100) {
                 press_mode = 1;
             }
-            else if(press_10ms_cnt > 100){
+            else if (press_10ms_cnt > 100) {
                 press_mode = 2;
             }
             press_10ms_cnt = 0;
         }
 
-        if(1 == press_mode){
+        if (1 == press_mode) {
             press_mode = 0;
             printf("1 == press_mode\r\n");
 #if USE_SD_FATFS
             xSemaphoreTake(MuxSem_Handle, portMAX_DELAY);
-            if(bl_cam_frame_fifo_get(&frames, &pBuf, &len, &pStr2, &len2, 2) == 0)
+            if (bl_cam_frame_fifo_get(&frames, &pBuf, &len, &pStr2, &len2, 2) == 0)
             {
                 take_photo(pBuf, len);
                 bl_cam_frame_pop();
@@ -300,14 +300,14 @@ void button_process_task(void *param)
             xSemaphoreGive(MuxSem_Handle);
 #endif
         }
-        else if(2 == press_mode){
+        else if (2 == press_mode) {
             press_mode = 0;
             led_ctrl = !led_ctrl;
             printf("led_ctrl:%d\r\n", led_ctrl);
-            if(led_ctrl){
+            if (led_ctrl) {
                 bflb_gpio_set(gpio, GPIO_PIN_16);
             }
-            else{
+            else {
                 bflb_gpio_reset(gpio, GPIO_PIN_16);
             }
         }
@@ -316,18 +316,18 @@ void button_process_task(void *param)
     }
 }
 
-void cam_process_task(void *param)
+void cam_process_task(void* param)
 {
     uint32_t frames = 1;
-    uint8_t *pBuf = NULL;
+    uint8_t* pBuf = NULL;
     uint32_t len;
-    uint8_t *pStr2 = NULL;
+    uint8_t* pStr2 = NULL;
     uint32_t len2;
 
-    while(1)
+    while (1)
     {
         xSemaphoreTake(MuxSem_Handle, portMAX_DELAY);
-        if(bl_cam_frame_fifo_get(&frames, &pBuf, &len, &pStr2, &len2, 2) == 0)
+        if (bl_cam_frame_fifo_get(&frames, &pBuf, &len, &pStr2, &len2, 2) == 0)
         {
             bl_cam_frame_pop();
             datajpeg_buf = pBuf;
@@ -342,14 +342,14 @@ void cam_process_task(void *param)
 void create_http_server_task(void)
 {
     MuxSem_Handle = xSemaphoreCreateMutex();
-	if (NULL != MuxSem_Handle)
-	{
-		printf("MuxSem_Handle creat success!\r\n");
-	}
+    if (NULL != MuxSem_Handle)
+    {
+        printf("MuxSem_Handle creat success!\r\n");
+    }
 
-    xTaskCreate(http_server_task, (char *)"fw", WIFI_HTTP_SERVER_STACK_SIZE, NULL, HTTP_SERVERTASK_PRIORITY, &http_server_task_hd);
-    xTaskCreate(cam_process_task, (char *)"cam_proc_task", CAM_PROCESS_STACK_SIZE, NULL, CAM_PROCESS_PRIORITY, &cam_process_task_hd);
-    xTaskCreate(button_process_task, (char *)"button_proc_task", button_PROCESS_STACK_SIZE, NULL, button_PROCESS_PRIORITY, &button_process_task_hd);
+    xTaskCreate(http_server_task, (char*)"fw", WIFI_HTTP_SERVER_STACK_SIZE, NULL, HTTP_SERVERTASK_PRIORITY, &http_server_task_hd);
+    xTaskCreate(cam_process_task, (char*)"cam_proc_task", CAM_PROCESS_STACK_SIZE, NULL, CAM_PROCESS_PRIORITY, &cam_process_task_hd);
+    xTaskCreate(button_process_task, (char*)"button_proc_task", button_PROCESS_STACK_SIZE, NULL, button_PROCESS_PRIORITY, &button_process_task_hd);
 }
 
 //fatfs
@@ -394,11 +394,13 @@ void filesystem_init(void)
             ret = f_mount(NULL, "/sd", 1);
             LOG_I("then start to remount.\r\n");
         }
-    } else if (ret != FR_OK) {
+    }
+    else if (ret != FR_OK) {
         LOG_F("fail to mount filesystem,error= %d\r\n", ret);
         LOG_F("SD card might fail to initialise.\r\n");
         _CALL_ERROR();
-    } else {
+    }
+    else {
         LOG_D("Succeed to mount filesystem\r\n");
     }
 
@@ -407,15 +409,15 @@ void filesystem_init(void)
     }
 }
 
-int take_photo(uint8_t *Buf, uint32_t len)
+int take_photo(uint8_t* Buf, uint32_t len)
 {
     FRESULT ret;
     FIL fnew;
     UINT fnum;
     uint32_t time_node;
     static creat_file_cnt = 0;
-    #define PHOTO_NAME_LEN 30
-    uint8_t file_name[PHOTO_NAME_LEN] = {0};
+#define PHOTO_NAME_LEN 30
+    uint8_t file_name[PHOTO_NAME_LEN] = { 0 };
 
     memset(file_name, 0, PHOTO_NAME_LEN);
     snprintf(file_name, PHOTO_NAME_LEN, "/sd/%d.jpg", creat_file_cnt);
@@ -437,11 +439,13 @@ int take_photo(uint8_t *Buf, uint32_t len)
             LOG_I("Write Succeed! photo cnt:%d\r\n", creat_file_cnt-1);
             LOG_I("Write data size:%d Byte, written size:%d KB\r\n", len, fnum);
             // LOG_I("Time:%dms, Write Speed:%d KB/s \r\n", time_node, ((sizeof(RW_Buffer) * i) >> 10) * 1000 / time_node);
-        } else {
+        }
+        else {
             LOG_F("Fail to write files(%d)\n", ret);
             return;
         }
-    } else {
+    }
+    else {
         LOG_F("Fail to open or create files: %d.\r\n", ret);
         return;
     }
@@ -453,7 +457,7 @@ int main(void)
 #if USE_SD_FATFS
     filesystem_init();
 #endif
-    
+
     bflb_irq_set_nlbits(4);
     bflb_irq_set_priority(37, 3, 0);
     bflb_irq_set_priority(WIFI_IRQn, 1, 0);

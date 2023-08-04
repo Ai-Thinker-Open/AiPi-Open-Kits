@@ -434,7 +434,7 @@ static void ble_hid_dev_send(hid_key_num_t key_num)
             hog_send_keyboard_plus_value(ble_conn_handle, MISIC_NEXT, NULL, 0);
             vTaskDelay(100/portTICK_RATE_MS);
 
-            hog_send_keyboard_value(ble_conn_handle, 0, NULL, 0);
+            hog_send_keyboard_plus_value(ble_conn_handle, 0, NULL, 0);
             LOG_I("HID SEND:0X%02X", MISIC_NEXT);
         }
         break;
@@ -443,7 +443,7 @@ static void ble_hid_dev_send(hid_key_num_t key_num)
             hog_send_keyboard_plus_value(ble_conn_handle, MISIC_PAST, NULL, 0);
             vTaskDelay(100/portTICK_RATE_MS);
 
-            hog_send_keyboard_value(ble_conn_handle, 0, NULL, 0);
+            hog_send_keyboard_plus_value(ble_conn_handle, 0, NULL, 0);
             LOG_I("HID SEND:0X%02X", MISIC_PAST);
         }
         break;

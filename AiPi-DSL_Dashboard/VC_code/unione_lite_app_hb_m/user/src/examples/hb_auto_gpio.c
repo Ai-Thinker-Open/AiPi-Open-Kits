@@ -77,6 +77,7 @@ user_data_t user_data[] = {
   {{{0x5B, 0x4B, 0x02, 0x0A}, 4},"[120]"},
   {{{0x5B, 0x4B, 0x02, 0x0B}, 4},"[121]"},
   {{{0x5B, 0x4B, 0x02, 0x0C}, 4},"[124]"},
+
   {{{0x5B, 0x4B, 0x02, 0x0D}, 4},"[125]"},
   {{{0x5B, 0x4B, 0x02, 0x0E}, 4},"[129]"},
   {{{0x5B, 0x4B, 0x02, 0x0F}, 4},"[123]"},
@@ -135,7 +136,7 @@ static void _custom_setting_cb(USER_EVENT_TYPE event,
       user_uart_send(g_uart_buf[11].data, g_uart_buf[11].len);
     }
     else if (0 == uni_strcmp(setting->cmd, "wifiScan")) {
-      user_player_reply_list_in_order("[123]");
+      user_player_reply_list_in_order("[110]");
       user_uart_send(g_uart_buf[12].data, g_uart_buf[12].len);
     }
     else if (0 == uni_strcmp(setting->cmd, "volumeMute")) {

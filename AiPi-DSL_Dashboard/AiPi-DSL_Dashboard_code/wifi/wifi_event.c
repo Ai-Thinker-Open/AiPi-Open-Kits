@@ -175,11 +175,13 @@ uint8_t wifi_connect(char* ssid, char* passwd)
     if (NULL==ssid || 0==strlen(ssid)) {
         return 1;
     }
-
+    //先断开WiFi
     if (wifi_mgmr_sta_state_get() == 1) {
         wifi_sta_disconnect();
     }
-    if (wifi_sta_connect(ssid, passwd, NULL, NULL, 0, 0, 0, 1)) {
+    LOG_I("WiFi STA connect .....");
+    if (wifi_sta_connect(ssid, passwd, NULL, NULL, 0, 0, 0, 1)<0) {
+        vPortFree(queue_buff);
         return 4;
     }
     LOG_I("Wating wifi connet");
@@ -204,7 +206,7 @@ uint8_t wifi_connect(char* ssid, char* passwd)
 
                 // wifi_sta_disconnect();
                 guider_ui.wifi_stayus = false;
-                vPortFree(queue_buff);
+                // vPortFree(queue_buff);
                 return 4;
             case CODE_WIFI_ON_CONNECTED:	//连接成功(表示wifi sta状态的时候表示同时获取IP(DHCP)成功，或者使用静态IP)
                 // LOG_I("Wating wifi connet OK");

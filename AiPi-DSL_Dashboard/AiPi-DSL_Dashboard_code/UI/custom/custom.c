@@ -132,6 +132,7 @@ static void queue_receive_task(void* arg)
                         case 1:
                         {
                             bflb_uart_put(uartx, user_data[UART_CMD_WIFI_SCAN_START].uart_data.data, 4);
+                            vTaskDelay(1000/portTICK_RATE_MS);
                             wifi_mgmr_sta_scan(&wifi_scan_config);
 
                         }
@@ -312,6 +313,7 @@ static void queue_receive_task(void* arg)
             case UART_RX_CMD_WIFI_SCAN:
                 LOG_I("Voice cmd: [扫描WiFi]");
                 lv_event_send(ui->src_home_btn_scan, LV_EVENT_CLICKED, NULL);
+
                 break;
             case UART_RX_CMD_VOL_MUTX_OK:
                 LOG_I("Voice cmd: [电脑静音]");
@@ -348,8 +350,14 @@ static void queue_receive_task(void* arg)
                 lv_event_send(ui->src_home_imgbtn_satrt, LV_EVENT_CLICKED, NULL);
                 break;
             case UART_RX_CMD_MUSIC_PALY_PLUS:
+            {
                 LOG_I("Voice cmd: [播放音乐]");
-                break;
+                hid_key_num_t hid_key_num = HID_KEY_NUMBLE_G;
+                xQueueSend(ble_hid_queue, &hid_key_num, portMAX_DELAY);
+                vTaskDelay(6000/portTICK_RATE_MS);
+                lv_event_send(ui->src_home_imgbtn_satrt, LV_EVENT_CLICKED, NULL);
+            }
+            break;
             case UART_RX_CMD_MUSIC_OPEN:
             {
                 hid_key_num_t hid_key_num = HID_KEY_NUMBLE_G;
@@ -458,7 +466,7 @@ void custom_init(lv_ui* ui)
 {
     /* Add your codes here */
     queue = xQueueCreate(1, 1024*2);
-    xTaskCreate(queue_receive_task, "queue_receive_task", 1024, ui, 3, NULL);
+    xTaskCreate(queue_receive_task, "queue_receive_task", 1024*3, ui, 3, NULL);
     http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
     mqtt_client_init();
 }
