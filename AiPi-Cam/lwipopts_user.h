@@ -73,7 +73,7 @@
 #define MEMP_NUM_UDP_PCB              16
 #define MEMP_NUM_REASSDATA            LWIP_MIN((IP_REASS_MAX_PBUFS), 5)
 
-#define MAC_TXQ_DEPTH                 CONFIG_MAC_TXQ_DEPTH
+#define MAC_TXQ_DEPTH                 32
 #define MAC_RXQ_DEPTH                 CONFIG_MAC_RXQ_DEPTH
 
 #define TCP_MSS                       1360
@@ -109,7 +109,7 @@
 
 #define LWIP_TIMEVAL_PRIVATE      0 // use sys/time.h for struct timeval
 
-//#define LWIP_PROVIDE_ERRNO
+ //#define LWIP_PROVIDE_ERRNO
 
 #define LWIP_DHCP                 1
 #define LWIP_DNS                  1
@@ -119,7 +119,7 @@
 #define SO_REUSE                  1
 #define LWIP_TCP_KEEPALIVE        1
 
-extern int *__errno(void);
+extern int* __errno(void);
 #define errno                         (*__errno())
 #define LWIP_NETIF_STATUS_CALLBACK    1
 #define LWIP_NETIF_API                1
