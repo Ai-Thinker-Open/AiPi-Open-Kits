@@ -12,6 +12,7 @@
 | AiPi-DSL_Watch| 小安派-DSL_1.28出厂固件源码| [点击查看](AiPi-DSL_Watch/README.md) |
 | AiPi-SCP-2.4| 小安派-SCP-2.4出厂固件源码| [点击查看](AiPi-SCP-2.4/README.md) |
 | AiPi-SCP-4.3| 小安派-SCP-4.3出厂固件源码| [点击查看](AiPi-SCP-4.3/README.md) |
+| AiPi-Eyes-DU| 小安派-Eyes-DU出厂固件源码| [点击查看](AiPi-Eyes-DU/README.md) |
 
 
 ## 一、克隆Ai-Thinker仓库
