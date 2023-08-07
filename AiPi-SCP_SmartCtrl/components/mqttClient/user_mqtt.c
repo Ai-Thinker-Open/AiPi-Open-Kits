@@ -17,16 +17,35 @@
 #include <mqtt.h>
 
 #include "user_mqtt.h"
+#include "custom.h"
 #include <lwip/inet.h>
 #include "bflb_uart.h"
 
 #define GBD_TAG "MQTT"
 
 static mqtt_client_t* AiPi_client;
+extern xQueueHandle queue;
 
 static  user_mqtt_client_t  user_mqtt_client;
 static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connection_status_t status);
 static void mqtt_request_cb(void* arg, err_t err);
+
+static char topic_buff[128];
+static void mqtt_incoming_publish_cb(void* arg, const char* topic, u32_t tot_len)
+{
+    // LOG_I("topic=%.*s", tot_len, topic);
+    memset(topic_buff, 0, 128);
+    sprintf(topic_buff, "%.*s", tot_len, topic);
+}
+
+static void mqtt_incoming_data_cb(void* arg, const u8_t* data, u16_t len, u8_t flags)
+{
+    // LOG_I("flags=%d DATA=%.*s", flags, len, data);
+    char* queue_buff = pvPortMalloc(512);
+    memset(queue_buff, 0, 512);
+    sprintf(queue_buff, "{\"mqtt_msg\":{\"topic\":\"%s\",\"data\":%.*s}}", topic_buff, len, data);
+    xQueueSendFromISR(queue, queue_buff, pdTRUE);
+}
 /**
  * @brief
  *
@@ -37,6 +56,7 @@ void mqtt_client_init(void)
         mqtt_client_free(AiPi_client);
     }
     AiPi_client = mqtt_client_new();
+
 }
 
 
@@ -68,12 +88,14 @@ int mqtt_start_connect(char* host, uint16_t port, char* user_name, char* pass)
     strcpy(user_mqtt_client.pass, pass);
     strcpy(user_mqtt_client.user_name, user_name);
     user_mqtt_client.port = port;
+
     return mqtt_client_connect(AiPi_client, &addr, port, mqtt_event_connect_cb, NULL, &mqtt_client_info);
 }
 
 void mqtt_app_diconnect(void)
 {
     mqtt_disconnect(AiPi_client);
+
 }
 /**
  * @brief mqtt_app_subscribe
@@ -84,10 +106,10 @@ void mqtt_app_diconnect(void)
 */
 int mqtt_app_subscribe(char* topic, int qos)
 {
-    static struct bflb_device_s* uartx;
-    uartx = bflb_device_get_by_name("uart1");
+
     if (mqtt_client_is_connected(AiPi_client))
     {
+
         return mqtt_subscribe(AiPi_client, topic, qos, mqtt_request_cb, NULL);
     }
     else {
@@ -128,7 +150,9 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
         case MQTT_CONNECT_ACCEPTED:
         {
             LOG_I("MQTT event MQTT_CONNECT_ACCEPTED");
-
+            mqtt_set_inpub_callback(AiPi_client, mqtt_incoming_publish_cb, mqtt_incoming_data_cb, NULL);
+            char* queu_buff = "{\"mqtt_connect\":1}";
+            xQueueSendFromISR(queue, queu_buff, pdTRUE);
 
         }
         break;
@@ -157,18 +181,20 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
         {
 
             LOG_I("MQTT event MQTT_CONNECT_DISCONNECTED");
-            struct in_addr addr;
-            mqtt_client_free(AiPi_client);
-            vTaskDelay(100/portTICK_RATE_MS);
-            AiPi_client = mqtt_client_new();
-            netconn_gethostbyname(user_mqtt_client.host, &addr);
-            struct mqtt_connect_client_info_t mqtt_client_info = {
-               .client_id = MQTT_CLIENT_ID,
-               .client_pass = user_mqtt_client.pass,
-               .client_user = user_mqtt_client.user_name,
-               .keep_alive = 120,
-            };
-            mqtt_client_connect(AiPi_client, &addr, user_mqtt_client.port, mqtt_event_connect_cb, NULL, &mqtt_client_info);
+            // struct in_addr addr;
+            // mqtt_client_free(AiPi_client);
+            // vTaskDelay(100/portTICK_RATE_MS);
+            // AiPi_client = mqtt_client_new();
+            // netconn_gethostbyname(user_mqtt_client.host, &addr);
+            // struct mqtt_connect_client_info_t mqtt_client_info = {
+            //    .client_id = MQTT_CLIENT_ID,
+            //    .client_pass = user_mqtt_client.pass,
+            //    .client_user = user_mqtt_client.user_name,
+            //    .keep_alive = 120,
+            // };
+            // mqtt_client_connect(AiPi_client, &addr, user_mqtt_client.port, mqtt_event_connect_cb, NULL, &mqtt_client_info);
+            char* queu_buff = "{\"mqtt_disconnect\":1}";
+            xQueueSendFromISR(queue, queu_buff, pdTRUE);
         }
         break;
         /** Timeout */

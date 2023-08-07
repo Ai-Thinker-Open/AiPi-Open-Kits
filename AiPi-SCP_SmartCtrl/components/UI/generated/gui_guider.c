@@ -20,6 +20,9 @@ void ui_init_style(lv_style_t * style)
 void init_scr_del_flag(lv_ui *ui)
 {
 	ui->screen_del = true;
+	ui->screen_rgb1_del = true;
+	ui->screen_rgb2_del = true;
+	ui->screen_rgb3_del = true;
 }
 
 void setup_ui(lv_ui *ui)

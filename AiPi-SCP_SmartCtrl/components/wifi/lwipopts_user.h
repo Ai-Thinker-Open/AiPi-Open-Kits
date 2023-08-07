@@ -32,7 +32,7 @@
 #ifndef LWIP_HDR_LWIPOPTS_H__
 #define LWIP_HDR_LWIPOPTS_H__
 
-#define CONFIG_MAC_TXQ_DEPTH 16
+#define CONFIG_MAC_TXQ_DEPTH 32
 #define CONFIG_MAC_RXQ_DEPTH 12
 
 #define LWIP_NETIF_API     1
@@ -144,4 +144,7 @@ extern int* __errno(void);
 #define SNTP_SET_SYSTEM_TIME_NTP sntp_set_time
 
 #define LWIP_MQTT 1
+#define MQTT_CONNECT_TIMOUT 120   //set mqtt connect time out
+#define MQTT_VAR_HEADER_BUFFER_LEN 256 //set mqtt recv buff len
+
 #endif /* LWIP_HDR_LWIPOPTS_H__ */

@@ -338,9 +338,9 @@
 #define ST7796_SPI_COLOR_REVERSAL 0
 
 // #define LCD_ROTATED_NONE
-// #define LCD_ROTATED_90
+#define LCD_ROTATED_90
 // #define LCD_ROTATED_180
-#define LCD_ROTATED_270
+// #define LCD_ROTATED_270
 /* spi st7796 config */
 #elif defined LCD_SPI_GC9A01
 

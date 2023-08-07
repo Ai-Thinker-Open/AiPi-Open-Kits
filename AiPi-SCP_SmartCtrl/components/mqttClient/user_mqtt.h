@@ -11,7 +11,7 @@
 #ifndef USER_MQTT_H
 #define USER_MQTT_H
 
-#define MQTT_CLIENT_ID "AiPi-DSL_Dashboard"
+#define MQTT_CLIENT_ID "AiPi-SCP_2.4"
 
 typedef struct {
     char host[512];

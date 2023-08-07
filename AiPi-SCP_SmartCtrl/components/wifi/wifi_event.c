@@ -29,7 +29,7 @@
 #include "board.h"
 #include "log.h"
 
-
+#include "custom.h"
 #define DBG_TAG "WIFI EVENT"
 
 #define WIFI_STACK_SIZE     (1024*4)
@@ -41,7 +41,7 @@ static wifi_conf_t conf =
 };
 static TaskHandle_t wifi_fw_task;
 static uint32_t sta_ConnectStatus = 0;
-
+extern xQueueHandle queue;
 /**
  * @brief WiFi 任务
  *
@@ -105,14 +105,14 @@ void wifi_event_handler(uint32_t code)
         break;
         case CODE_WIFI_ON_SCAN_DONE:
         {
-            // char* scan_msg = pvPortMalloc(128);
-            // wifi_mgmr_sta_scanlist();
+            char* scan_msg = pvPortMalloc(128);
+            wifi_mgmr_sta_scanlist();
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_SCAN_DONE SSID numbles:%d", __func__, wifi_mgmr_sta_scanlist_nums_get());
-            // sprintf(scan_msg, "{\"wifi_scan\":{\"status\":0}}");
-            // // xQueueSend(queue, scan_msg, );
-            // if (wifi_mgmr_sta_scanlist_nums_get()>0)
-            //     xQueueSendFromISR(queue, scan_msg, pdTRUE);
-            // vPortFree(scan_msg);
+            sprintf(scan_msg, "{\"wifi_scan\":{\"status\":0}}");
+            // xQueueSend(queue, scan_msg, );
+            if (wifi_mgmr_sta_scanlist_nums_get()>0)
+                xQueueSendFromISR(queue, scan_msg, pdTRUE);
+            vPortFree(scan_msg);
         }
         break;
         case CODE_WIFI_ON_CONNECTED:
@@ -131,7 +131,11 @@ void wifi_event_handler(uint32_t code)
         case CODE_WIFI_ON_DISCONNECT:
         {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_DISCONNECT", __func__);
-
+            char* queue_buff = pvPortMalloc(128);
+            memset(queue_buff, 0, 128);
+            sprintf(queue_buff, "{\"wifi_disconnect\":true}");
+            xQueueSendFromISR(queue, queue_buff, pdTRUE);
+            vPortFree(queue_buff);
         }
         break;
         case CODE_WIFI_ON_AP_STARTED:
@@ -206,15 +210,15 @@ uint8_t wifi_connect(char* ssid, char* passwd)
                 // LOG_I("Wating wifi connet OK");
                 break;
             case CODE_WIFI_ON_GOT_IP:
-                // wifi_sta_ip4_addr_get(&ipv4_addr, NULL, NULL, NULL);
-                // LOG_I("wifi connened %s,IP:%s", ssid, inet_ntoa(ipv4_addr));
-                // sprintf(queue_buff, "{\"ip\":{\"IP\":\"%s\"}}", inet_ntoa(ipv4_addr));
-                // flash_erase_set(SSID_KEY, ssid);
-                // flash_erase_set(PASS_KEY, passwd);
-                // guider_ui.wifi_stayus = true;
-                // xQueueSend(queue, queue_buff, portMAX_DELAY);
-                // LOG_I("Wating wifi connet OK and get ip OK");
-                // vPortFree(queue_buff);
+                wifi_sta_ip4_addr_get(&ipv4_addr, NULL, NULL, NULL);
+                LOG_I("wifi connened %s,IP:%s", ssid, inet_ntoa(ipv4_addr));
+                sprintf(queue_buff, "{\"ip\":{\"IP\":\"%s\"}}", inet_ntoa(ipv4_addr));
+
+                flash_erase_set(SSID_KEY, ssid);
+                flash_erase_set(PASS_KEY, passwd);
+                xQueueSend(queue, queue_buff, portMAX_DELAY);
+                LOG_I("Wating wifi connet OK and get ip OK");
+                vPortFree(queue_buff);
                 return 0;
             default:
                 //等待连接成功

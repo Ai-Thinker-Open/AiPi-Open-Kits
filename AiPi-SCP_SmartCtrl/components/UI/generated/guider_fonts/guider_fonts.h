@@ -15,6 +15,17 @@ extern "C" {
 #include "font/lv_font.h"
 #endif
 
+LV_FONT_DECLARE(lv_font_simhei_12)
+LV_FONT_DECLARE(lv_font_montserratMedium_16)
+LV_FONT_DECLARE(lv_font_arial_16)
+LV_FONT_DECLARE(lv_font_simhei_14)
+LV_FONT_DECLARE(lv_font_montserratMedium_12)
+LV_FONT_DECLARE(lv_font_arial_14)
+LV_FONT_DECLARE(lv_font_simhei_16)
+LV_FONT_DECLARE(lv_font_montserratMedium_14)
+LV_FONT_DECLARE(lv_font_Antonio_Regular_45)
+LV_FONT_DECLARE(lv_font_arial_10)
+LV_FONT_DECLARE(lv_font_simhei_10)
 LV_FONT_DECLARE(lv_font_simsun_18)
 
 
