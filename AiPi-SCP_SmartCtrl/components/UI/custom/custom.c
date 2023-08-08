@@ -53,6 +53,7 @@ static void http_hour_requst_time(TimerHandle_t timer);
 static int cjson_get_weather(char* weather_data);
 static mqtt_dev_type_t mqtt_analysis_type_for_msg(const char* json_data);
 static double mqtt_analysis_get_data_for_fish(char* json_data, char* data_paramName);
+static bool mqtt_get_rgb_data(char* json_data, uint8_t* red, uint8_t* green, uint8_t* blue);
 /**
  * Create a demo application
  */
@@ -140,11 +141,13 @@ static void queue_receive_task(void* arg)
           lv_dropdown_set_options(ui->screen_ddlist_ssid_list, ssid_list);
           vTaskDelay(100/portTICK_RATE_MS);
           lv_event_send(ui->screen_img_loading, LV_EVENT_CLICKED, NULL);
+          memset(ui->ssid_list, 0, 256);
+          strcpy(ui->ssid_list, ssid_list);
+          ui->wifi_scan_done = true;
           vPortFree(ssid_list);
         }
       }
       break;
-
       case CUSTOM_EVENT_GET_WIFI: //获取到WiFi 名称和密码
       {
         ssid = cjson_analysis_ssid(queue_buff);
@@ -162,13 +165,23 @@ static void queue_receive_task(void* arg)
         LOG_I(" ipv4 addr=%s", ipv4_addr);
         memset(queue_buff, 0, 1024);
         sprintf(queue_buff, "IP:%s", ipv4_addr);
+        strcpy(ui->ssid, flash_get_data(SSID_KEY, 32));
+        strcpy(ui->password, flash_get_data(PASS_KEY, 32));
         ui->wifi_status = true;
         // 更新屏幕显示
         if (ui->screen_type==0) {
           lv_img_set_src(ui->screen_img_wifi, &_wifi_alpha_22x18);
+          lv_textarea_set_text(ui->screen_ta_pass, ui->password);
+          //在列表中添加连接的SSID
+          lv_dropdown_add_option(ui->screen_ddlist_ssid_list, ui->ssid, lv_dropdown_get_option_cnt(ui->screen_ddlist_ssid_list)+1);
+          //找到列表中的SSID 并选中显示
+          if (lv_dropdown_get_option_index(ui->screen_ddlist_ssid_list, ui->ssid)>=0) {
+            lv_dropdown_set_selected(ui->screen_ddlist_ssid_list, lv_dropdown_get_option_index(ui->screen_ddlist_ssid_list, ui->ssid));
+          }
+          else {
+            lv_dropdown_set_selected(ui->screen_ddlist_ssid_list, 0);
+          }
         }
-        strcpy(ui->ssid, flash_get_data(SSID_KEY, 32));
-        strcpy(ui->password, flash_get_data(PASS_KEY, 32));
         vPortFree(ipv4_addr);
 
         if (https_Handle!=NULL) {
@@ -179,14 +192,14 @@ static void queue_receive_task(void* arg)
         mqtt_start_connect(MQTT_SERVER, MQTT_PORT, MQTT_USER_NAME, MQTT_PASSWOLD);
       }
       break;
-      case CUSTOM_EVENT_GET_WIFI_DISCONNECT:
+      case CUSTOM_EVENT_GET_WIFI_DISCONNECT: //WiFi 断开
       {
         if (ui->screen_type==0) {
           lv_img_set_src(ui->screen_img_wifi, &_no_internet_alpha_22x18);
         }
       }
       break;
-      case CUSTOM_EVENT_GET_WEATHER:
+      case CUSTOM_EVENT_GET_WEATHER: //获取到天气
       {
         if (!cjson_get_weather(queue_buff)) {
           if (ui->screen_type==0) {
@@ -195,19 +208,24 @@ static void queue_receive_task(void* arg)
         }
       }
       break;
-      case CUSTOM_EVENT_MQTT_CONNECT:
+      case CUSTOM_EVENT_MQTT_CONNECT: //MQTT 连接服务器成功
       {
         LOG_F("CUSTOM_EVENT_MQTT_CONNECT queue data:%s", queue_buff);
-        mqtt_app_subscribe(FISH_MQTT_SUB_TOPIC, 1);
+        mqtt_app_subscribe(FISH_MQTT_SUB_TOPIC, 0);
+        mqtt_app_subscribe(MQTT_CLIETN_TOPIC, 0);
       }
       break;
-      case CUSTOM_EVENT_MQTT_DISCONNECT:
+      case CUSTOM_EVENT_MQTT_DISCONNECT: //MQTT断开
       {
         LOG_F("CUSTOM_EVENT_MQTT_DISCONNECT queue data:%s", queue_buff);
-        if (ui->wifi_status)
+        if (ui->wifi_status) {
+          mqtt_client_init();
           mqtt_start_connect(MQTT_SERVER, MQTT_PORT, MQTT_USER_NAME, MQTT_PASSWOLD);
+        }
+
       }
-      case CUSTOM_EVENT_MQTT_GET_MSG:
+      break;
+      case CUSTOM_EVENT_MQTT_GET_MSG: //MQTT 接收到数据
       {
         LOG_D("GET_MSG queue data:%.*s", strlen(queue_buff), queue_buff);
         switch (mqtt_analysis_type_for_msg(queue_buff))
@@ -217,11 +235,7 @@ static void queue_receive_task(void* arg)
             if (ui->screen_type==0) {
               lv_obj_add_flag(ui->screen_cont_sensor_no, LV_OBJ_FLAG_HIDDEN);
               lv_label_set_text(ui->screen_label_3, "已连接");
-              LOG_I("fish data:%s=%.0f %s=%.1f %s=%.2f",
-                FISH_O2, mqtt_analysis_get_data_for_fish(queue_buff, FISH_O2)*100,
-                FISH_TEMP, mqtt_analysis_get_data_for_fish(queue_buff, FISH_TEMP),
-                FISH_PH, mqtt_analysis_get_data_for_fish(queue_buff, FISH_PH)
-              );
+              ui->fish_dev_connect_status = true;
               char* data_str = pvPortMalloc(16);
               memset(data_str, 0, 16);
               sprintf(data_str, "%.0f", mqtt_analysis_get_data_for_fish(queue_buff, FISH_O2)*100);
@@ -236,12 +250,144 @@ static void queue_receive_task(void* arg)
             }
           }
           break;
+          case MQTT_DEV_TYPE_RGB_WB2:
+          {
+            LOG_I("device connect id:%d", MQTT_DEV_TYPE_RGB_WB2);
+            if (ui->screen_type==0) {
+              lv_obj_add_flag(ui->screen_cont_dev1_no, LV_OBJ_FLAG_HIDDEN);
+              lv_label_set_text(ui->screen_label_status1, "Ai-WB2/已连接");
+              ui->ai_wb2_dev->connect_status = true;
+              //接收到RGB消息
+              ui->ai_wb2_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->ai_wb2_dev->red, &ui->ai_wb2_dev->green, &ui->ai_wb2_dev->blue);
+              if (ui->ai_wb2_dev->switch_status) {
+                lv_obj_add_flag(ui->screen_img_wb2_open, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(ui->screen_img_wb2_close, LV_OBJ_FLAG_HIDDEN);
+                lv_img_set_src(ui->screen_img_rgb, &_RGB_close_alpha_32x32);
+              }
+              else {
+                lv_obj_add_flag(ui->screen_img_wb2_close, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(ui->screen_img_wb2_open, LV_OBJ_FLAG_HIDDEN);
+                lv_img_set_src(ui->screen_img_rgb, &_RGB_open_alpha_32x32);
+              }
+            }
+            else {
+              ui->ai_wb2_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->ai_wb2_dev->red, &ui->ai_wb2_dev->green, &ui->ai_wb2_dev->blue);
+              // 配置另外一个界面的UI
+              if (ui->ai_wb2_dev->switch_status) {
+                lv_obj_add_state(ui->screen_rgb1_wb2_sw, LV_STATE_CHECKED);
+                lv_obj_clear_flag(ui->screen_rgb1_cpicker_wb2_rgb, LV_OBJ_FLAG_HIDDEN);
+                lv_color_t wb1_rgb_color = {
+                  .ch.red = ui->ai_wb2_dev->red,
+                  .ch.green = ui->ai_wb2_dev->green,
+                  .ch.blue = ui->ai_wb2_dev->blue,
+                };
+
+                lv_colorwheel_set_rgb(ui->screen_rgb1_cpicker_wb2_rgb, wb1_rgb_color);
+              }
+              else {
+                lv_obj_clear_state(ui->screen_rgb1_wb2_sw, LV_STATE_CHECKED);
+                lv_obj_add_flag(ui->screen_rgb1_cpicker_wb2_rgb, LV_OBJ_FLAG_HIDDEN);
+              }
+            }
+
+          }
+          break;
+
+          case MQTT_DEV_TYPE_RGB_M62:
+          {
+            LOG_I("device connect id:%d", MQTT_DEV_TYPE_RGB_M62);
+            if (ui->screen_type==0) {
+              lv_obj_add_flag(ui->screen_cont_dev2_no, LV_OBJ_FLAG_HIDDEN);
+              lv_label_set_text(ui->screen_label_status2, "Ai-M62/已连接");
+              ui->ai_m62_dev->connect_status = true;
+
+              ui->ai_m62_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->ai_m62_dev->red, &ui->ai_m62_dev->green, &ui->ai_m62_dev->blue);
+              if (ui->ai_m62_dev->switch_status) {
+                lv_obj_clear_flag(ui->screen_img_m62_close, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(ui->screen_img_m62_open, LV_OBJ_FLAG_HIDDEN);
+                lv_img_set_src(ui->screen_img_rgb1, &_RGB_close_alpha_32x32);
+              }
+              else {
+                lv_obj_clear_flag(ui->screen_img_m62_open, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(ui->screen_img_m62_close, LV_OBJ_FLAG_HIDDEN);
+                lv_img_set_src(ui->screen_img_rgb1, &_RGB_open_alpha_32x32);
+              }
+
+            }
+            else {
+              ui->ai_m62_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->ai_m62_dev->red, &ui->ai_m62_dev->green, &ui->ai_m62_dev->blue);
+              //配置另外一个界面的UI
+              if (ui->ai_m62_dev->switch_status) {
+                lv_obj_add_state(ui->screen_rgb2_Ai_M62_sw, LV_STATE_CHECKED);
+                lv_obj_clear_flag(ui->screen_rgb2_cpicker_M62_rgb, LV_OBJ_FLAG_HIDDEN);
+                lv_color_t m62_rgb_color = {
+                  .ch.red = ui->ai_m62_dev->red,
+                  .ch.green = ui->ai_m62_dev->green,
+                  .ch.blue = ui->ai_m62_dev->blue,
+                };
+
+                lv_colorwheel_set_rgb(ui->screen_rgb2_cpicker_M62_rgb, m62_rgb_color);
+              }
+              else {
+                lv_obj_clear_state(ui->screen_rgb2_Ai_M62_sw, LV_STATE_CHECKED);
+                lv_obj_add_flag(ui->screen_rgb2_cpicker_M62_rgb, LV_OBJ_FLAG_HIDDEN);
+              }
+            }
+          }
+          break;
+          case MQTT_DEV_TYPE_RGB_BW16:
+          {
+            LOG_I("device connect id:%d", MQTT_DEV_TYPE_RGB_BW16);
+            if (ui->screen_type==0) {
+              lv_obj_add_flag(ui->screen_cont_dev_no, LV_OBJ_FLAG_HIDDEN);
+              lv_label_set_text(ui->screen_label_status3, "BW16/已连接");
+              ui->bw16_dev->connect_status = true;
+              ui->bw16_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->bw16_dev->red, &ui->bw16_dev->green, &ui->bw16_dev->blue);
+
+              if (ui->bw16_dev->switch_status) {
+                lv_obj_clear_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
+                lv_img_set_src(ui->screen_img_rgb3, &_RGB_close_alpha_32x32);
+              }
+              else {
+                lv_obj_clear_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
+                lv_img_set_src(ui->screen_img_rgb3, &_RGB_open_alpha_32x32);
+              }
+            }
+            else {
+              ui->bw16_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->bw16_dev->red, &ui->bw16_dev->green, &ui->bw16_dev->blue);
+              if (ui->bw16_dev->switch_status) {
+                lv_obj_add_state(ui->screen_rgb3_bw16_sw, LV_STATE_CHECKED);
+                lv_obj_clear_flag(ui->screen_rgb3_cpicker_bw16_rgb, LV_OBJ_FLAG_HIDDEN);
+                lv_color_t bw16_rgb_color = {
+                  .ch.red = ui->bw16_dev->red,
+                  .ch.green = ui->bw16_dev->green,
+                  .ch.blue = ui->bw16_dev->blue
+                };
+
+                lv_colorwheel_set_rgb(ui->screen_rgb3_cpicker_bw16_rgb, bw16_rgb_color);
+              }
+              else {
+                lv_obj_clear_state(ui->screen_rgb3_bw16_sw, LV_STATE_CHECKED);
+                lv_obj_add_flag(ui->screen_rgb3_cpicker_bw16_rgb, LV_OBJ_FLAG_HIDDEN);
+              }
+            }
+          }
+          break;
 
           default:
             break;
         }
       }
       break;
+      case CUSTOM_EVENT_MQTT_PUB_MSG: //MQTT 需要发布数据
+      {
+        LOG_F("mqtt send :%s", queue_buff);
+        mqtt_app_publish(MQTT_CLIETN_PUB_TOPIC, queue_buff, 0);
+      }
+      break;
+
       default:
         break;
     }
@@ -311,7 +457,14 @@ static custom_event_t queue_get_custom_event(char* json_data)
     cJSON_Delete(root);
     return CUSTOM_EVENT_MQTT_GET_MSG;
   }
+  cJSON* mqtt_pub = cJSON_GetObjectItem(root, "RGB");
+  if (mqtt_pub) {
+    cJSON_Delete(root);
+    return CUSTOM_EVENT_MQTT_PUB_MSG;
+  }
+
   cJSON_Delete(root);
+
   return 0;
 }
 
@@ -501,20 +654,24 @@ static mqtt_dev_type_t mqtt_analysis_type_for_msg(const char* json_data)
     LOG_I("[%s] is not json", json_data);
     return MQTT_DEV_TYPE_NONE;
   }
+  LOG_T(json_data);
+
   cJSON* MQTT_MSG = cJSON_GetObjectItem(root, "mqtt_msg");
   cJSON* MQTT_TOPIC = cJSON_GetObjectItem(MQTT_MSG, "topic");
   cJSON* MQTT_DATA = cJSON_GetObjectItem(MQTT_MSG, "data");
   //鱼缸设备
   cJSON* MQTT_HEADER = cJSON_GetObjectItem(MQTT_DATA, "header");
-  cJSON* MQTT_TYPE = cJSON_GetObjectItem(MQTT_HEADER, "type");
-  if (MQTT_TYPE!=NULL) {
-    cJSON_Delete(root);
-    return MQTT_DEV_TYPE_FISH;
+  if (MQTT_HEADER!=NULL) {
+    cJSON* MQTT_TYPE = cJSON_GetObjectItem(MQTT_HEADER, "type");
+    if (MQTT_TYPE!=NULL) {
+      cJSON_Delete(root);
+      return MQTT_DEV_TYPE_FISH;
+    }
   }
+  //RGB 设备
   cJSON* MQTT_BOARD = cJSON_GetObjectItem(MQTT_DATA, "board_id");
   if (MQTT_BOARD!=NULL)
   {
-    LOG_I("board id=%d", MQTT_BOARD->valueint);
     cJSON_Delete(root);
 
     return MQTT_BOARD->valueint+1;
@@ -539,6 +696,7 @@ static double mqtt_analysis_get_data_for_fish(char* json_data, char* data_paramN
     LOG_I("[%s] is not json", data_type);
     return MQTT_DEV_TYPE_NONE;
   }
+
   cJSON* MQTT_MSG = cJSON_GetObjectItem(root, "mqtt_msg");
   cJSON* MQTT_TOPIC = cJSON_GetObjectItem(MQTT_MSG, "topic");
   cJSON* MQTT_DATA = cJSON_GetObjectItem(MQTT_MSG, "data");
@@ -550,4 +708,47 @@ static double mqtt_analysis_get_data_for_fish(char* json_data, char* data_paramN
   double data_value = MQTT_DATA_TYPE->valuedouble;
   cJSON_Delete(root);
   return data_value;
+}
+/**
+ * @brief mqtt_get_rgb_data
+ *
+ * @param json_data queue json data
+ * @param red red data 0~255
+ * @param green green 0~255
+ * @param blue
+ * @return true
+ * @return false
+*/
+static bool mqtt_get_rgb_data(char* json_data, uint8_t* red, uint8_t* green, uint8_t* blue)
+{
+  char* data_type = json_data;
+
+  cJSON* root = cJSON_Parse(json_data);
+  if (root==NULL) {
+
+    LOG_I("[%s] is not json", json_data);
+    return MQTT_DEV_TYPE_NONE;
+  }
+  LOG_T(json_data);
+  cJSON* MQTT_MSG = cJSON_GetObjectItem(root, "mqtt_msg");
+  cJSON* MQTT_TOPIC = cJSON_GetObjectItem(MQTT_MSG, "topic");
+  cJSON* MQTT_DATA = cJSON_GetObjectItem(MQTT_MSG, "data");
+  cJSON* MQTT_STATUS = cJSON_GetObjectItem(MQTT_DATA, "status");
+  cJSON* MQTT_RGB = cJSON_GetObjectItem(MQTT_DATA, "RGB");
+  if (MQTT_RGB!=NULL) {
+    cJSON* RGB_R = cJSON_GetObjectItem(MQTT_RGB, "R");
+    cJSON* RGB_G = cJSON_GetObjectItem(MQTT_RGB, "G");
+    cJSON* RGB_B = cJSON_GetObjectItem(MQTT_RGB, "B");
+    *red = (uint8_t)RGB_R->valueint;
+    *green = (uint8_t)RGB_G->valueint;
+    *blue = (uint8_t)RGB_B->valueint;
+  }
+  else {
+    cJSON_Delete(root);
+    return false;
+  }
+  bool swtich_value = MQTT_STATUS->valueint;
+  cJSON_Delete(root);
+
+  return swtich_value;
 }

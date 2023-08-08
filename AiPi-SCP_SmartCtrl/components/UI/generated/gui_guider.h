@@ -12,6 +12,15 @@ extern "C" {
 
 #include "lvgl.h"
 #include "guider_fonts.h"
+	typedef struct
+	{
+		bool connect_status;
+		bool switch_status;
+		uint8_t red;
+		uint8_t green;
+		uint8_t blue;
+	}mqtt_rgb_dev_t;
+
 
 	typedef struct
 	{
@@ -103,16 +112,21 @@ extern "C" {
 		lv_obj_t* screen_rgb3_bw16_sw;
 		lv_obj_t* screen_rgb3_label_6;
 		lv_obj_t* screen_rgb3_cpicker_bw16_rgb;
+		mqtt_rgb_dev_t* ai_wb2_dev;
+		mqtt_rgb_dev_t* ai_m62_dev;
+		mqtt_rgb_dev_t* bw16_dev;
 
-
-
+		bool fish_dev_connect_status;
 		char ssid[32];
+		char ssid_list[256];
 		char password[64];
 		bool wifi_status;
+		bool wifi_scan_done;
 		int screen_type;
 		bool mqtt_connect_status;
 		char city[32];
 		char waether[32];
+
 	}lv_ui;
 
 	extern int screen_digital_clock_1_hour_value;

@@ -255,6 +255,21 @@ void setup_scr_screen_rgb2(lv_ui* ui) {
 	//Set style for screen_rgb2_cpicker_M62_rgb. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
 	lv_obj_set_style_arc_width(ui->screen_rgb2_cpicker_M62_rgb, 20, LV_PART_MAIN|LV_STATE_DEFAULT);
 
+	if (ui->ai_m62_dev->switch_status) {
+		lv_obj_clear_flag(ui->screen_rgb2_cpicker_M62_rgb, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_state(ui->screen_rgb2_Ai_M62_sw, LV_STATE_CHECKED);
+		lv_color_t m62_rgb_color = {
+				  .ch.red = ui->ai_m62_dev->red,
+				  .ch.green = ui->ai_m62_dev->green,
+				  .ch.blue = ui->ai_m62_dev->blue,
+		};
+		lv_colorwheel_set_rgb(ui->screen_rgb2_cpicker_M62_rgb, m62_rgb_color);
+	}
+	else
+	{
+		lv_obj_add_flag(ui->screen_rgb2_cpicker_M62_rgb, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_clear_state(ui->screen_rgb2_Ai_M62_sw, LV_STATE_CHECKED);
+	}
 	//Init events for screen
 	events_init_screen_rgb2(ui);
 }

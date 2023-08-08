@@ -120,6 +120,15 @@ static void screen_img_wb2_open_event_handler(lv_event_t* e)
 		{
 			lv_obj_add_flag(guider_ui.screen_img_wb2_open, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(guider_ui.screen_img_wb2_close, LV_OBJ_FLAG_HIDDEN);
+
+			lv_img_set_src(guider_ui.screen_img_rgb, &_RGB_close_alpha_32x32);
+			guider_ui.ai_wb2_dev->switch_status = true;
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_wb2_dev->switch_status, guider_ui.ai_wb2_dev->red, guider_ui.ai_wb2_dev->green, guider_ui.ai_wb2_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
@@ -136,6 +145,15 @@ static void screen_img_wb2_close_event_handler(lv_event_t* e)
 		{
 			lv_obj_add_flag(guider_ui.screen_img_wb2_close, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(guider_ui.screen_img_wb2_open, LV_OBJ_FLAG_HIDDEN);
+
+			lv_img_set_src(guider_ui.screen_img_rgb, &_RGB_open_alpha_32x32);
+			guider_ui.ai_wb2_dev->switch_status = false;
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_wb2_dev->switch_status, guider_ui.ai_wb2_dev->red, guider_ui.ai_wb2_dev->green, guider_ui.ai_wb2_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
@@ -177,6 +195,15 @@ static void screen_img_m62_open_event_handler(lv_event_t* e)
 		{
 			lv_obj_clear_flag(guider_ui.screen_img_m62_close, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.screen_img_m62_open, LV_OBJ_FLAG_HIDDEN);
+
+			lv_img_set_src(guider_ui.screen_img_rgb1, &_RGB_close_alpha_32x32);
+			guider_ui.ai_m62_dev->switch_status = true;
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_m62_dev->switch_status, guider_ui.ai_m62_dev->red, guider_ui.ai_m62_dev->green, guider_ui.ai_m62_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
@@ -193,6 +220,15 @@ static void screen_img_m62_close_event_handler(lv_event_t* e)
 		{
 			lv_obj_add_flag(guider_ui.screen_img_m62_close, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(guider_ui.screen_img_m62_open, LV_OBJ_FLAG_HIDDEN);
+
+			lv_img_set_src(guider_ui.screen_img_rgb1, &_RGB_open_alpha_32x32);
+			guider_ui.ai_m62_dev->switch_status = false;
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_m62_dev->switch_status, guider_ui.ai_m62_dev->red, guider_ui.ai_m62_dev->green, guider_ui.ai_m62_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
@@ -234,6 +270,15 @@ static void screen_img_bw16_open_event_handler(lv_event_t* e)
 		{
 			lv_obj_clear_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
+
+			lv_img_set_src(guider_ui.screen_img_rgb3, &_RGB_close_alpha_32x32);
+			guider_ui.bw16_dev->switch_status = true;
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.bw16_dev->switch_status, guider_ui.bw16_dev->red, guider_ui.bw16_dev->green, guider_ui.bw16_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
@@ -250,6 +295,15 @@ static void screen_img_bw16_close_event_handler(lv_event_t* e)
 		{
 			lv_obj_add_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_clear_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
+
+			lv_img_set_src(guider_ui.screen_img_rgb3, &_RGB_open_alpha_32x32);
+			guider_ui.bw16_dev->switch_status = false;
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.bw16_dev->switch_status, guider_ui.bw16_dev->red, guider_ui.bw16_dev->green, guider_ui.bw16_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
@@ -318,11 +372,33 @@ static void screen_rgb1_imgbtn_brack_event_handler(lv_event_t* e)
 static void screen_rgb1_wb2_sw_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t* switch_wb2 = lv_event_get_target(e);
+	lv_color_t wb2_rgb;
 	switch (code)
 	{
 		case LV_EVENT_VALUE_CHANGED:
 		{
-			lv_obj_add_flag(guider_ui.screen_rgb1_cpicker_wb2_rgb, LV_OBJ_FLAG_HIDDEN);
+			if (lv_obj_has_state(switch_wb2, LV_STATE_CHECKED)) {
+				LOG_I("wb2 RGB sw No");
+				lv_obj_clear_flag(guider_ui.screen_rgb1_cpicker_wb2_rgb, LV_OBJ_FLAG_HIDDEN);
+				guider_ui.ai_wb2_dev->switch_status = true;
+				wb2_rgb = lv_colorwheel_get_rgb(guider_ui.screen_rgb1_cpicker_wb2_rgb);
+
+				guider_ui.ai_wb2_dev->red = wb2_rgb.ch.red;
+				guider_ui.ai_wb2_dev->green = wb2_rgb.ch.green;
+				guider_ui.ai_wb2_dev->blue = wb2_rgb.ch.blue;
+			}
+			else {
+				LOG_I("wb2 RGB sw Off");
+				lv_obj_add_flag(guider_ui.screen_rgb1_cpicker_wb2_rgb, LV_OBJ_FLAG_HIDDEN);
+				guider_ui.ai_wb2_dev->switch_status = false;
+			}
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_wb2_dev->switch_status, guider_ui.ai_wb2_dev->red, guider_ui.ai_wb2_dev->green, guider_ui.ai_wb2_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
@@ -340,6 +416,14 @@ static void screen_rgb1_cpicker_wb2_rgb_event_handler(lv_event_t* e)
 		{
 			wb2_rgb = lv_colorwheel_get_rgb(guider_ui.screen_rgb1_cpicker_wb2_rgb);
 			LOG_I("wb2 RGB: %02x%02X%02X", wb2_rgb.ch.red, wb2_rgb.ch.green, wb2_rgb.ch.blue);
+			guider_ui.ai_wb2_dev->red = wb2_rgb.ch.red;
+			guider_ui.ai_wb2_dev->green = wb2_rgb.ch.green;
+			guider_ui.ai_wb2_dev->blue = wb2_rgb.ch.blue;
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_wb2_dev->switch_status, guider_ui.ai_wb2_dev->red, guider_ui.ai_wb2_dev->green, guider_ui.ai_wb2_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 
@@ -383,11 +467,35 @@ static void screen_rgb2_imgbtn_brack2_event_handler(lv_event_t* e)
 static void screen_rgb2_Ai_M62_sw_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t* switch_m62 = lv_event_get_target(e);
+	lv_color_t m62_rgb;
 	switch (code)
 	{
 		case LV_EVENT_VALUE_CHANGED:
 		{
-			lv_obj_add_flag(guider_ui.screen_rgb2_cpicker_M62_rgb, LV_OBJ_FLAG_HIDDEN);
+			if (lv_obj_has_state(switch_m62, LV_STATE_CHECKED)) {
+				LOG_I("m62 RGB sw No");
+				lv_obj_clear_flag(guider_ui.screen_rgb2_cpicker_M62_rgb, LV_OBJ_FLAG_HIDDEN);
+				guider_ui.ai_m62_dev->switch_status = true;
+				m62_rgb = lv_colorwheel_get_rgb(guider_ui.screen_rgb2_cpicker_M62_rgb);
+
+				guider_ui.ai_m62_dev->red = m62_rgb.ch.red;
+				guider_ui.ai_m62_dev->green = m62_rgb.ch.green;
+				guider_ui.ai_m62_dev->blue = m62_rgb.ch.blue;
+			}
+			else {
+				LOG_I("m62 RGB sw Off");
+				lv_obj_add_flag(guider_ui.screen_rgb2_cpicker_M62_rgb, LV_OBJ_FLAG_HIDDEN);
+				guider_ui.ai_m62_dev->switch_status = false;
+			}
+
+
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_m62_dev->switch_status, guider_ui.ai_m62_dev->red, guider_ui.ai_m62_dev->green, guider_ui.ai_m62_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
@@ -405,6 +513,15 @@ static void screen_rgb2_cpicker_m62_rgb_event_handler(lv_event_t* e)
 		{
 			m62_rgb = lv_colorwheel_get_rgb(guider_ui.screen_rgb2_cpicker_M62_rgb);
 			LOG_I("M62 RGB: %02x%02X%02X", m62_rgb.ch.red, m62_rgb.ch.green, m62_rgb.ch.blue);
+			guider_ui.ai_m62_dev->red = m62_rgb.ch.red;
+			guider_ui.ai_m62_dev->green = m62_rgb.ch.green;
+			guider_ui.ai_m62_dev->blue = m62_rgb.ch.blue;
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_m62_dev->switch_status, guider_ui.ai_m62_dev->red, guider_ui.ai_m62_dev->green, guider_ui.ai_m62_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 
@@ -448,17 +565,38 @@ static void screen_rgb3_imgbtn_brack3_event_handler(lv_event_t* e)
 static void screen_rgb3_bw16_sw_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t* switch_bw16 = lv_event_get_target(e);
+	lv_color_t BW16_rgb;
 	switch (code)
 	{
 		case LV_EVENT_VALUE_CHANGED:
 		{
-			lv_obj_add_flag(guider_ui.screen_rgb3_cpicker_bw16_rgb, LV_OBJ_FLAG_HIDDEN);
+			if (lv_obj_has_state(switch_bw16, LV_STATE_CHECKED)) {
+				LOG_I("bw16 RGB sw No");
+				lv_obj_clear_flag(guider_ui.screen_rgb3_cpicker_bw16_rgb, LV_OBJ_FLAG_HIDDEN);
+				guider_ui.bw16_dev->switch_status = true;
+				BW16_rgb = lv_colorwheel_get_rgb(guider_ui.screen_rgb3_cpicker_bw16_rgb);
+				guider_ui.bw16_dev->red = BW16_rgb.ch.red;
+				guider_ui.ai_m62_dev->green = BW16_rgb.ch.green;
+				guider_ui.ai_m62_dev->blue = BW16_rgb.ch.blue;
+			}
+			else {
+				LOG_I("bw16 RGB sw Off");
+				lv_obj_add_flag(guider_ui.screen_rgb3_cpicker_bw16_rgb, LV_OBJ_FLAG_HIDDEN);
+				guider_ui.bw16_dev->switch_status = false;
+			}
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.bw16_dev->switch_status, guider_ui.bw16_dev->red, guider_ui.bw16_dev->green, guider_ui.bw16_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 		default:
 			break;
 	}
 }
+
 static void screen_rgb3_cpicker_BW16_rgb_event_handler(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
@@ -469,6 +607,15 @@ static void screen_rgb3_cpicker_BW16_rgb_event_handler(lv_event_t* e)
 		{
 			BW16_rgb = lv_colorwheel_get_rgb(guider_ui.screen_rgb3_cpicker_bw16_rgb);
 			LOG_I("M62 RGB: %02x%02X%02X", BW16_rgb.ch.red, BW16_rgb.ch.green, BW16_rgb.ch.blue);
+			guider_ui.bw16_dev->red = BW16_rgb.ch.red;
+			guider_ui.ai_m62_dev->green = BW16_rgb.ch.green;
+			guider_ui.ai_m62_dev->blue = BW16_rgb.ch.blue;
+
+			char* queue_buff = pvPortMalloc(64);
+			memset(queue_buff, 0, 64);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.bw16_dev->switch_status, guider_ui.bw16_dev->red, guider_ui.bw16_dev->green, guider_ui.bw16_dev->blue);
+			xQueueSend(queue, queue_buff, portMAX_DELAY);
+			vPortFree(queue_buff);
 		}
 		break;
 

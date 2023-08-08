@@ -10,21 +10,21 @@
 #include "events_init.h"
 #include "custom.h"
 
-static lv_obj_t * g_kb_screen_rgb3;
-static void kb_screen_rgb3_event_cb(lv_event_t *e)
+static lv_obj_t* g_kb_screen_rgb3;
+static void kb_screen_rgb3_event_cb(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
-	lv_obj_t *kb = lv_event_get_target(e);
-	if(code == LV_EVENT_READY || code == LV_EVENT_CANCEL){
+	lv_obj_t* kb = lv_event_get_target(e);
+	if (code == LV_EVENT_READY || code == LV_EVENT_CANCEL) {
 		lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
 	}
 }
-__attribute__((unused)) static void ta_screen_rgb3_event_cb(lv_event_t *e)
+__attribute__((unused)) static void ta_screen_rgb3_event_cb(lv_event_t* e)
 {
 
 	lv_event_code_t code = lv_event_get_code(e);
-	lv_obj_t *ta = lv_event_get_target(e);
-	lv_obj_t *kb = lv_event_get_user_data(e);
+	lv_obj_t* ta = lv_event_get_target(e);
+	lv_obj_t* kb = lv_event_get_user_data(e);
 	if (code == LV_EVENT_FOCUSED || code == LV_EVENT_CLICKED)
 	{
 		lv_keyboard_set_textarea(kb, ta);
@@ -39,7 +39,7 @@ __attribute__((unused)) static void ta_screen_rgb3_event_cb(lv_event_t *e)
 	}
 }
 
-void setup_scr_screen_rgb3(lv_ui *ui){
+void setup_scr_screen_rgb3(lv_ui* ui) {
 
 	//Write codes screen_rgb3
 	ui->screen_rgb3 = lv_obj_create(NULL);
@@ -68,8 +68,8 @@ void setup_scr_screen_rgb3(lv_ui *ui){
 	lv_obj_set_style_img_recolor_opa(ui->screen_rgb3_img_rgb3_bg, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_img_opa(ui->screen_rgb3_img_rgb3_bg, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_add_flag(ui->screen_rgb3_img_rgb3_bg, LV_OBJ_FLAG_CLICKABLE);
-	lv_img_set_src(ui->screen_rgb3_img_rgb3_bg,&_img_bg_alpha_320x240);
-	lv_img_set_pivot(ui->screen_rgb3_img_rgb3_bg, 50,50);
+	lv_img_set_src(ui->screen_rgb3_img_rgb3_bg, &_img_bg_alpha_320x240);
+	lv_img_set_pivot(ui->screen_rgb3_img_rgb3_bg, 50, 50);
 	lv_img_set_angle(ui->screen_rgb3_img_rgb3_bg, 0);
 
 	//Write codes screen_rgb3_imgbtn_brack3
@@ -254,7 +254,22 @@ void setup_scr_screen_rgb3(lv_ui *ui){
 
 	//Set style for screen_rgb3_cpicker_bw16_rgb. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
 	lv_obj_set_style_arc_width(ui->screen_rgb3_cpicker_bw16_rgb, 20, LV_PART_MAIN|LV_STATE_DEFAULT);
+	if (ui->bw16_dev->switch_status) {
+		lv_obj_clear_flag(ui->screen_rgb3_cpicker_bw16_rgb, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_state(ui->screen_rgb3_bw16_sw, LV_STATE_CHECKED);
+		lv_color_t bw16_rgb_color = {
+				 .ch.red = ui->bw16_dev->red,
+				 .ch.green = ui->bw16_dev->green,
+				 .ch.blue = ui->bw16_dev->blue
+		};
 
+		lv_colorwheel_set_rgb(ui->screen_rgb3_cpicker_bw16_rgb, bw16_rgb_color);
+	}
+	else
+	{
+		lv_obj_add_flag(ui->screen_rgb3_cpicker_bw16_rgb, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_clear_state(ui->screen_rgb3_bw16_sw, LV_STATE_CHECKED);
+	}
 	//Init events for screen
 	events_init_screen_rgb3(ui);
 }

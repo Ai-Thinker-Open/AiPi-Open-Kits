@@ -23,6 +23,8 @@ extern "C" {
 #define MQTT_PASSWOLD "xuhong123456"
 #define MQTT_PORT 1883
 #define FISH_MQTT_SUB_TOPIC "/FishTank/a81710cf69dd/devPub"
+#define MQTT_CLIETN_TOPIC "topic/dev/pub"
+#define MQTT_CLIETN_PUB_TOPIC "topic/dev/sub"
 
     typedef enum {
         CUSTOM_EVENT_NONE = 0,
@@ -34,6 +36,7 @@ extern "C" {
         CUSTOM_EVENT_MQTT_CONNECT,
         CUSTOM_EVENT_MQTT_DISCONNECT,
         CUSTOM_EVENT_MQTT_GET_MSG,
+        CUSTOM_EVENT_MQTT_PUB_MSG,
     }custom_event_t;
 
     typedef enum {

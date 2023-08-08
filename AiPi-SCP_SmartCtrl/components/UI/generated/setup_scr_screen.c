@@ -269,8 +269,11 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_style_radius(ui->screen_ta_pass, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_color(ui->screen_ta_pass, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui->screen_ta_pass, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
-	lv_textarea_set_text(ui->screen_ta_pass, "Hello World");
 
+	if (ui->wifi_status)
+		lv_textarea_set_text(ui->screen_ta_pass, ui->password);
+	else
+		lv_textarea_set_text(ui->screen_ta_pass, "password");
 	//use keyboard on screen_ta_pass
 	lv_obj_add_event_cb(ui->screen_ta_pass, ta_screen_event_cb, LV_EVENT_ALL, g_kb_screen);
 
@@ -298,6 +301,7 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_style_text_color(ui->screen_btn_connect, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui->screen_btn_connect, &lv_font_simhei_16, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(ui->screen_btn_connect, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
+
 	ui->screen_btn_connect_label = lv_label_create(ui->screen_btn_connect);
 	lv_label_set_text(ui->screen_btn_connect_label, "连接");
 	lv_obj_set_style_pad_all(ui->screen_btn_connect, 0, LV_STATE_DEFAULT);
@@ -308,7 +312,32 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_ddlist_ssid_list, 96, 33);
 	lv_obj_set_size(ui->screen_ddlist_ssid_list, 131, 36);
 	lv_obj_set_scrollbar_mode(ui->screen_ddlist_ssid_list, LV_SCROLLBAR_MODE_OFF);
-	lv_dropdown_set_options(ui->screen_ddlist_ssid_list, "list1\nlist2\nlist3");
+	lv_dropdown_set_options(ui->screen_ddlist_ssid_list, "list1\nlist1\nlist1");
+
+	if (ui->wifi_status && ui->wifi_scan_done) {
+
+		lv_dropdown_set_options(ui->screen_ddlist_ssid_list, ui->ssid_list); //配置SSID 连接列表
+		if (lv_dropdown_get_option_index(ui->screen_ddlist_ssid_list, ui->ssid)>=0) { //查询连接中的ssid
+			lv_dropdown_set_selected(ui->screen_ddlist_ssid_list, lv_dropdown_get_option_index(ui->screen_ddlist_ssid_list, ui->ssid)); //查询到就选中
+		}
+		else {
+			// 查询不到就添加，并且选中
+			lv_dropdown_add_option(ui->screen_ddlist_ssid_list, ui->ssid, lv_dropdown_get_option_cnt(ui->screen_ddlist_ssid_list)+1);
+			lv_dropdown_set_selected(ui->screen_ddlist_ssid_list, lv_dropdown_get_option_index(ui->screen_ddlist_ssid_list, ui->ssid));
+		}
+	}
+	else if (ui->wifi_status) {
+		if (lv_dropdown_get_option_index(ui->screen_ddlist_ssid_list, ui->ssid)>=0) { // 在列表中查询连接的ssid
+			lv_dropdown_set_selected(ui->screen_ddlist_ssid_list, lv_dropdown_get_option_index(ui->screen_ddlist_ssid_list, ui->ssid));//查询到就选中
+		}
+		else {
+			// 查询不到就添加，并且选中
+			lv_dropdown_add_option(ui->screen_ddlist_ssid_list, ui->ssid, lv_dropdown_get_option_cnt(ui->screen_ddlist_ssid_list)+1);
+			lv_dropdown_set_selected(ui->screen_ddlist_ssid_list, lv_dropdown_get_option_index(ui->screen_ddlist_ssid_list, ui->ssid));
+		}
+	}
+
+
 
 	//Set style for screen_ddlist_ssid_list. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
 	lv_obj_set_style_radius(ui->screen_ddlist_ssid_list, 3, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -605,7 +634,7 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_label_O2_vlue, 65, 27);
 	lv_obj_set_size(ui->screen_label_O2_vlue, 42, 12);
 	lv_obj_set_scrollbar_mode(ui->screen_label_O2_vlue, LV_SCROLLBAR_MODE_OFF);
-	lv_label_set_text(ui->screen_label_O2_vlue, "70%");
+	lv_label_set_text(ui->screen_label_O2_vlue, "000");
 	lv_label_set_long_mode(ui->screen_label_O2_vlue, LV_LABEL_LONG_WRAP);
 
 	//Set style for screen_label_O2_vlue. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -635,7 +664,7 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_label_temp_value, 65, 52);
 	lv_obj_set_size(ui->screen_label_temp_value, 42, 12);
 	lv_obj_set_scrollbar_mode(ui->screen_label_temp_value, LV_SCROLLBAR_MODE_OFF);
-	lv_label_set_text(ui->screen_label_temp_value, "25℃");
+	lv_label_set_text(ui->screen_label_temp_value, "00℃");
 	lv_label_set_long_mode(ui->screen_label_temp_value, LV_LABEL_LONG_WRAP);
 
 	//Set style for screen_label_temp_value. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -665,7 +694,7 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_label_PH_value, 65, 78);
 	lv_obj_set_size(ui->screen_label_PH_value, 42, 12);
 	lv_obj_set_scrollbar_mode(ui->screen_label_PH_value, LV_SCROLLBAR_MODE_OFF);
-	lv_label_set_text(ui->screen_label_PH_value, "7.02");
+	lv_label_set_text(ui->screen_label_PH_value, "0.00");
 	lv_label_set_long_mode(ui->screen_label_PH_value, LV_LABEL_LONG_WRAP);
 
 	//Set style for screen_label_PH_value. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -725,7 +754,9 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_label_host, 6, 9);
 	lv_obj_set_size(ui->screen_label_host, 111, 12);
 	lv_obj_set_scrollbar_mode(ui->screen_label_host, LV_SCROLLBAR_MODE_OFF);
-	lv_label_set_text(ui->screen_label_host, "mqtt.com:1883");
+	lv_label_set_text(ui->screen_label_host, MQTT_SERVER);
+
+
 	lv_label_set_long_mode(ui->screen_label_host, LV_LABEL_LONG_WRAP);
 
 	//Set style for screen_label_host. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -976,7 +1007,7 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_label_status2, 4, 59);
 	lv_obj_set_size(ui->screen_label_status2, 74, 10);
 	lv_obj_set_scrollbar_mode(ui->screen_label_status2, LV_SCROLLBAR_MODE_OFF);
-	lv_label_set_text(ui->screen_label_status2, "Ai-M62/已连接");
+	lv_label_set_text(ui->screen_label_status2, "Ai-M62/未连接");
 	lv_label_set_long_mode(ui->screen_label_status2, LV_LABEL_LONG_WRAP);
 
 	//Set style for screen_label_status2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -1111,7 +1142,7 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_label_status3, 4, 59);
 	lv_obj_set_size(ui->screen_label_status3, 74, 10);
 	lv_obj_set_scrollbar_mode(ui->screen_label_status3, LV_SCROLLBAR_MODE_OFF);
-	lv_label_set_text(ui->screen_label_status3, "BW16/已连接");
+	lv_label_set_text(ui->screen_label_status3, "BW16/未连接");
 	lv_label_set_long_mode(ui->screen_label_status3, LV_LABEL_LONG_WRAP);
 
 	//Set style for screen_label_status3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -1381,7 +1412,6 @@ void setup_scr_screen(lv_ui* ui) {
 	//Hidden for widget screen_cont_loading
 	lv_obj_add_flag(ui->screen_cont_loading, LV_OBJ_FLAG_HIDDEN);
 
-
 	//Write codes screen_img_loading
 	ui->screen_img_loading = lv_img_create(ui->screen_cont_loading);
 	lv_obj_set_pos(ui->screen_img_loading, 110, 70);
@@ -1397,10 +1427,58 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_img_set_pivot(ui->screen_img_loading, 50, 50);
 	lv_img_set_angle(ui->screen_img_loading, 0);
 
+	if (ui->fish_dev_connect_status) {
+		lv_obj_add_flag(ui->screen_cont_sensor_no, LV_OBJ_FLAG_HIDDEN);
+		lv_label_set_text(ui->screen_label_3, "已连接");
+	}
 
-	lv_obj_add_flag(ui->screen_cont_dev1_no, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_add_flag(ui->screen_cont_dev2_no, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_add_flag(ui->screen_cont_dev_no, LV_OBJ_FLAG_HIDDEN);
+	if (ui->ai_wb2_dev->connect_status) {
+		lv_obj_add_flag(ui->screen_cont_dev1_no, LV_OBJ_FLAG_HIDDEN);
+		lv_label_set_text(ui->screen_label_status1, "Ai-WB2/已连接");
+	}
+	if (ui->ai_m62_dev->connect_status) {
+		lv_obj_add_flag(ui->screen_cont_dev2_no, LV_OBJ_FLAG_HIDDEN);
+		lv_label_set_text(ui->screen_label_status2, "Ai-M62/已连接");
+	}
+	if (ui->bw16_dev->connect_status) {
+		lv_obj_add_flag(ui->screen_cont_dev_no, LV_OBJ_FLAG_HIDDEN);
+		lv_label_set_text(ui->screen_label_status3, "BW16/已连接");
+	}
+
+	if (ui->ai_wb2_dev->switch_status) {
+		lv_obj_add_flag(guider_ui.screen_img_wb2_open, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_clear_flag(guider_ui.screen_img_wb2_close, LV_OBJ_FLAG_HIDDEN);
+		lv_img_set_src(guider_ui.screen_img_rgb, &_RGB_close_alpha_32x32);
+	}
+	else {
+		lv_obj_add_flag(guider_ui.screen_img_wb2_close, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_clear_flag(guider_ui.screen_img_wb2_open, LV_OBJ_FLAG_HIDDEN);
+		lv_img_set_src(guider_ui.screen_img_rgb, &_RGB_open_alpha_32x32);
+	}
+
+	if (ui->ai_m62_dev->switch_status) {
+		lv_obj_clear_flag(guider_ui.screen_img_m62_close, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_flag(guider_ui.screen_img_m62_open, LV_OBJ_FLAG_HIDDEN);
+
+		lv_img_set_src(guider_ui.screen_img_rgb1, &_RGB_close_alpha_32x32);
+	}
+	else {
+		lv_obj_add_flag(guider_ui.screen_img_m62_close, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_clear_flag(guider_ui.screen_img_m62_open, LV_OBJ_FLAG_HIDDEN);
+
+		lv_img_set_src(guider_ui.screen_img_rgb1, &_RGB_open_alpha_32x32);
+	}
+
+	if (ui->bw16_dev->switch_status) {
+		lv_obj_clear_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
+		lv_img_set_src(guider_ui.screen_img_rgb3, &_RGB_close_alpha_32x32);
+	}
+	else {
+		lv_obj_add_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_clear_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
+		lv_img_set_src(guider_ui.screen_img_rgb3, &_RGB_open_alpha_32x32);
+	}
 	//Init events for screen
 	events_init_screen(ui);
 }
