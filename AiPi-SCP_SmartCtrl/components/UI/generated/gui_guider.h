@@ -122,6 +122,7 @@ extern "C" {
 		char password[64];
 		bool wifi_status;
 		bool wifi_scan_done;
+		bool system_reset;
 		int screen_type;
 		bool mqtt_connect_status;
 		char city[32];

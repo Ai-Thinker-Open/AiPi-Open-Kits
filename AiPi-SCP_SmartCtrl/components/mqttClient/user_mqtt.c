@@ -45,6 +45,7 @@ static void mqtt_incoming_data_cb(void* arg, const u8_t* data, u16_t len, u8_t f
     memset(queue_buff, 0, 512);
     sprintf(queue_buff, "{\"mqtt_msg\":{\"topic\":\"%s\",\"data\":%.*s}}", topic_buff, len, data);
     xQueueSendFromISR(queue, queue_buff, pdTRUE);
+    vPortFree(queue_buff);
 }
 /**
  * @brief
@@ -56,7 +57,6 @@ void mqtt_client_init(void)
         mqtt_client_free(AiPi_client);
     }
     AiPi_client = mqtt_client_new();
-
 }
 
 
@@ -127,8 +127,7 @@ int mqtt_app_subscribe(char* topic, int qos)
 */
 int mqtt_app_publish(char* topic, char* payload, int qos)
 {
-    static struct bflb_device_s* uartx;
-    uartx = bflb_device_get_by_name("uart1");
+
     if (mqtt_client_is_connected(AiPi_client))
     {
         return mqtt_publish(AiPi_client, topic, payload, strlen(payload), qos, 0, mqtt_request_cb, NULL);
@@ -140,10 +139,7 @@ int mqtt_app_publish(char* topic, char* payload, int qos)
 
 static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connection_status_t status)
 {
-
-
-    static struct bflb_device_s* uartx;
-    uartx = bflb_device_get_by_name("uart1");
+    BaseType_t xHigherPriorityTaskWoken;
     switch (status)
     {
         //connect OK
@@ -152,8 +148,9 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
             LOG_I("MQTT event MQTT_CONNECT_ACCEPTED");
             mqtt_set_inpub_callback(AiPi_client, mqtt_incoming_publish_cb, mqtt_incoming_data_cb, NULL);
             char* queu_buff = "{\"mqtt_connect\":1}";
-            xQueueSendFromISR(queue, queu_buff, pdTRUE);
-
+            xQueueSendFromISR(queue, queu_buff, &xHigherPriorityTaskWoken);
+            if (xHigherPriorityTaskWoken)
+                portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
         }
         break;
         /** Refused protocol version */
@@ -181,20 +178,10 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
         {
 
             LOG_I("MQTT event MQTT_CONNECT_DISCONNECTED");
-            // struct in_addr addr;
-            // mqtt_client_free(AiPi_client);
-            // vTaskDelay(100/portTICK_RATE_MS);
-            // AiPi_client = mqtt_client_new();
-            // netconn_gethostbyname(user_mqtt_client.host, &addr);
-            // struct mqtt_connect_client_info_t mqtt_client_info = {
-            //    .client_id = MQTT_CLIENT_ID,
-            //    .client_pass = user_mqtt_client.pass,
-            //    .client_user = user_mqtt_client.user_name,
-            //    .keep_alive = 120,
-            // };
-            // mqtt_client_connect(AiPi_client, &addr, user_mqtt_client.port, mqtt_event_connect_cb, NULL, &mqtt_client_info);
             char* queu_buff = "{\"mqtt_disconnect\":1}";
-            xQueueSendFromISR(queue, queu_buff, pdTRUE);
+            xQueueSendFromISR(queue, queu_buff, &xHigherPriorityTaskWoken);
+            if (xHigherPriorityTaskWoken)
+                portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
         }
         break;
         /** Timeout */

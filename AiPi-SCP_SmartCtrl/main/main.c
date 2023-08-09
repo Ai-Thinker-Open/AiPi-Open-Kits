@@ -34,7 +34,7 @@
 #include "gui_guider.h"
 #include "events_init.h"
 #include "custom.h"
-
+#include "buttom_led.h"
 //esay flashg
 
 #include "user_esflash.h"
@@ -48,7 +48,7 @@ static void bl61x_show_heap_size_task(void* arg)
 {
 
     while (1) {
-        LOG_F("[%s:%d]heap_size-------> %d", DBG_TAG, __LINE__, bl61x_get_heap_size());
+        bl61x_get_heap_size();
         vTaskDelay(3000/portTICK_PERIOD_MS);
     }
 }
@@ -67,7 +67,7 @@ int main(void)
     setup_ui(&guider_ui);
     custom_init(&guider_ui);
     events_init(&guider_ui);
-
+    aipi_scp_buttom_led_init();
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 1, NULL);
 
     xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 512, NULL, 2, NULL);
@@ -85,6 +85,6 @@ static int bl61x_get_heap_size(void)
     bflb_mem_usage(PMEM_HEAP, &info2);
 
     total_free_size = info1.free_size;
-
+    LOG_F("[%s:%d]heap_size------->KMEM_HEAP=%d  PMEM_HEAP=%d", DBG_TAG, __LINE__, info1.free_size, info2.free_size);
     return total_free_size;
 }

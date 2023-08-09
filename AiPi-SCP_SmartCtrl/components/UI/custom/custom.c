@@ -54,14 +54,14 @@ static int cjson_get_weather(char* weather_data);
 static mqtt_dev_type_t mqtt_analysis_type_for_msg(const char* json_data);
 static double mqtt_analysis_get_data_for_fish(char* json_data, char* data_paramName);
 static bool mqtt_get_rgb_data(char* json_data, uint8_t* red, uint8_t* green, uint8_t* blue);
+
 /**
  * Create a demo application
  */
-
 void custom_init(lv_ui* ui)
 {
   /* Add your codes here */
-  queue = xQueueCreate(1, 512);
+  queue = xQueueCreate(3, 1024);
   xTaskCreate(queue_receive_task, "queue_receive_task", 1024, ui, 3, NULL);
   http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
   mqtt_client_init();
@@ -92,6 +92,8 @@ static void http_hour_requst_time(TimerHandle_t timer)
 static void queue_receive_task(void* arg)
 {
   static wifi_mgmr_scan_params_t wifi_scan_config;
+
+
   char* queue_buff = NULL;
   char* ssid_list = NULL;
   char* ssid = NULL;
@@ -263,11 +265,21 @@ static void queue_receive_task(void* arg)
                 lv_obj_add_flag(ui->screen_img_wb2_open, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_clear_flag(ui->screen_img_wb2_close, LV_OBJ_FLAG_HIDDEN);
                 lv_img_set_src(ui->screen_img_rgb, &_RGB_close_alpha_32x32);
+
+                lv_color_t wb2_rgb_color = {
+                  .ch.red = ui->ai_wb2_dev->red,
+                  .ch.green = ui->ai_wb2_dev->green,
+                  .ch.blue = ui->ai_wb2_dev->blue,
+                };
+                lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb, 255, 0);
+                lv_obj_set_style_img_recolor(ui->screen_img_rgb, wb2_rgb_color, _LV_STYLE_STATE_CMP_SAME);
+
               }
               else {
                 lv_obj_add_flag(ui->screen_img_wb2_close, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_clear_flag(ui->screen_img_wb2_open, LV_OBJ_FLAG_HIDDEN);
                 lv_img_set_src(ui->screen_img_rgb, &_RGB_open_alpha_32x32);
+                lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb, 0, 0);
               }
             }
             else {
@@ -306,11 +318,19 @@ static void queue_receive_task(void* arg)
                 lv_obj_clear_flag(ui->screen_img_m62_close, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(ui->screen_img_m62_open, LV_OBJ_FLAG_HIDDEN);
                 lv_img_set_src(ui->screen_img_rgb1, &_RGB_close_alpha_32x32);
+                lv_color_t rgb_color = {
+                    .ch.red = ui->ai_m62_dev->red,
+                    .ch.green = ui->ai_m62_dev->green,
+                    .ch.blue = ui->ai_m62_dev->blue,
+                };
+                lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb1, 255, 0);
+                lv_obj_set_style_img_recolor(ui->screen_img_rgb1, rgb_color, _LV_STYLE_STATE_CMP_SAME);
               }
               else {
                 lv_obj_clear_flag(ui->screen_img_m62_open, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(ui->screen_img_m62_close, LV_OBJ_FLAG_HIDDEN);
                 lv_img_set_src(ui->screen_img_rgb1, &_RGB_open_alpha_32x32);
+                lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb1, 0, 0);
               }
 
             }
@@ -345,14 +365,24 @@ static void queue_receive_task(void* arg)
               ui->bw16_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->bw16_dev->red, &ui->bw16_dev->green, &ui->bw16_dev->blue);
 
               if (ui->bw16_dev->switch_status) {
-                lv_obj_clear_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
+
                 lv_img_set_src(ui->screen_img_rgb3, &_RGB_close_alpha_32x32);
+                lv_color_t rgb_color = {
+                  .ch.red = ui->bw16_dev->red,
+                  .ch.green = ui->bw16_dev->green,
+                  .ch.blue = ui->bw16_dev->blue,
+                };
+                lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb3, 255, 0);
+                lv_obj_set_style_img_recolor(ui->screen_img_rgb3, rgb_color, _LV_STYLE_STATE_CMP_SAME);
               }
               else {
+
                 lv_obj_clear_flag(guider_ui.screen_img_bw16_open, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(guider_ui.screen_img_bw16_close, LV_OBJ_FLAG_HIDDEN);
                 lv_img_set_src(ui->screen_img_rgb3, &_RGB_open_alpha_32x32);
+                lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb3, 0, 0);
               }
             }
             else {
@@ -365,7 +395,6 @@ static void queue_receive_task(void* arg)
                   .ch.green = ui->bw16_dev->green,
                   .ch.blue = ui->bw16_dev->blue
                 };
-
                 lv_colorwheel_set_rgb(ui->screen_rgb3_cpicker_bw16_rgb, bw16_rgb_color);
               }
               else {
@@ -383,8 +412,8 @@ static void queue_receive_task(void* arg)
       break;
       case CUSTOM_EVENT_MQTT_PUB_MSG: //MQTT 需要发布数据
       {
-        LOG_F("mqtt send :%s", queue_buff);
-        mqtt_app_publish(MQTT_CLIETN_PUB_TOPIC, queue_buff, 0);
+        if (mqtt_app_publish(MQTT_CLIETN_PUB_TOPIC, queue_buff, 0)==0)
+          LOG_F("mqtt send :%s", queue_buff);
       }
       break;
 
@@ -463,6 +492,36 @@ static custom_event_t queue_get_custom_event(char* json_data)
     return CUSTOM_EVENT_MQTT_PUB_MSG;
   }
 
+  // cJSON* buttom_red = cJSON_GetObjectItem(root, "buttom_red");
+  // if (buttom_red) {
+  //   int status = buttom_red->valueint;
+  //   cJSON_Delete(root);
+  //   return status?CUSTOM_EVENT_BUTTOM_RED_HIGH:CUSTOM_EVENT_BUTTOM_RED_LOW;
+  // }
+
+  // cJSON* buttom_green = cJSON_GetObjectItem(root, "buttom_green");
+  // if (buttom_green) {
+  //   int status = buttom_green->valueint;
+  //   cJSON_Delete(root);
+  //   return status?CUSTOM_EVENT_BUTTOM_GREEN_HIGH:CUSTOM_EVENT_BUTTOM_GREEN_LOW;
+  // }
+  // cJSON* buttom_blue = cJSON_GetObjectItem(root, "buttom_blue");
+  // if (buttom_blue) {
+  //   int status = buttom_blue->valueint;
+  //   cJSON_Delete(root);
+  //   return status?CUSTOM_EVENT_BUTTOM_BLUE_HIGH:CUSTOM_EVENT_BUTTOM_BLUE_LOW;
+  // }
+  cJSON* buttom_all_on = cJSON_GetObjectItem(root, "buttom_all_on");
+  if (buttom_all_on) {
+
+    cJSON_Delete(root);
+    return CUSTOM_EVENT_BUTTOM_ALL_ON;
+  }
+  cJSON* buttom_all_off = cJSON_GetObjectItem(root, "buttom_all_off");
+  if (buttom_all_off) {
+    cJSON_Delete(root);
+    return CUSTOM_EVENT_BUTTOM_ALL_OFF;
+  }
   cJSON_Delete(root);
 
   return 0;

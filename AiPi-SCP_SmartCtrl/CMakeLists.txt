@@ -18,7 +18,7 @@ file(GLOB_RECURSE UI "${CMAKE_CURRENT_SOURCE_DIR}/components/UI/config/*.c"
 # sdk_add_compile_definitions(-DCONFIG_EASYFLASH4)
 
 # sdk_add_compile_definitions(-DBL616_DHCP_DEBUG)
-sdk_add_include_directories(main config components/wifi components/UI components/config components/mqttClient components/voice components/cJson components/esay_flash components/http)
+sdk_add_include_directories(main config components/wifi components/UI components/config components/mqttClient components/voice components/cJson components/esay_flash components/http components/buttom_led)
 
 sdk_add_include_directories(components/UI/config components/UI/custom components/UI/generated components/UI/generated/guider_customer_fonts components/UI/generated/guider_fonts)
 

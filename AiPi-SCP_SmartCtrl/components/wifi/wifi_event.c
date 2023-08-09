@@ -42,6 +42,8 @@ static wifi_conf_t conf =
 static TaskHandle_t wifi_fw_task;
 static uint32_t sta_ConnectStatus = 0;
 extern xQueueHandle queue;
+
+extern lv_ui guider_ui;
 /**
  * @brief WiFi 任务
  *
@@ -89,7 +91,7 @@ void wifi_event_handler(uint32_t code)
 {
 
     sta_ConnectStatus = code;
-
+    BaseType_t xHigherPriorityTaskWoken;
     switch (code) {
         case CODE_WIFI_ON_INIT_DONE:
         {
@@ -106,12 +108,18 @@ void wifi_event_handler(uint32_t code)
         case CODE_WIFI_ON_SCAN_DONE:
         {
             char* scan_msg = pvPortMalloc(128);
+            memset(scan_msg, 0, 128);
             wifi_mgmr_sta_scanlist();
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_SCAN_DONE SSID numbles:%d", __func__, wifi_mgmr_sta_scanlist_nums_get());
             sprintf(scan_msg, "{\"wifi_scan\":{\"status\":0}}");
             // xQueueSend(queue, scan_msg, );
-            if (wifi_mgmr_sta_scanlist_nums_get()>0)
-                xQueueSendFromISR(queue, scan_msg, pdTRUE);
+            if (wifi_mgmr_sta_scanlist_nums_get()>0) {
+                xQueueSendFromISR(queue, scan_msg, &xHigherPriorityTaskWoken);
+                if (xHigherPriorityTaskWoken) {
+                    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+                }
+            }
+
             vPortFree(scan_msg);
         }
         break;
@@ -219,6 +227,12 @@ uint8_t wifi_connect(char* ssid, char* passwd)
                 xQueueSend(queue, queue_buff, portMAX_DELAY);
                 LOG_I("Wating wifi connet OK and get ip OK");
                 vPortFree(queue_buff);
+                if (guider_ui.system_reset) {
+                    LOG_W("system 2s reset ");
+                    vTaskDelay(2000/portTICK_PERIOD_MS);
+                    GLB_SW_System_Reset();
+                }
+
                 return 0;
             default:
                 //等待连接成功
