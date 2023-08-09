@@ -8,13 +8,16 @@
 #include "bflb_gpio.h"
 
 #include "bl616_glb.h"
-
+#include "log.h"
 // #include "fhm_onechannel_16k_20.h"
 #include "bsp_es8388.h"
+#include "dev_8388_pcm.h"
 
-struct bflb_device_s *i2s0;
-struct bflb_device_s *i2c0;
-struct bflb_device_s *dma0_ch0;
+#define GBD_TAG "Voice"
+
+struct bflb_device_s* i2s0;
+struct bflb_device_s* i2c0;
+struct bflb_device_s* dma0_ch0;
 
 
 static ES8388_Cfg_Type ES8388Cfg = {
@@ -27,10 +30,13 @@ static ES8388_Cfg_Type ES8388Cfg = {
 };
 
 #define TEMP_BUF_SIZE 10 * 1024
-#define OPEN_ADDR  (0x210000 + 0x2000)
-#define OPEN_SIZE 73856//(73856 - 22656)
-#define CLOSE_ADDR 0x224000
-#define CLOSE_SIZE 76160//(76160 - 24960)
+// #define OPEN_ADDR  (0x210000)
+// #define OPEN_SIZE 93518//(73856 - 22656)
+
+// #define CLOSE_ADDR 0x224000
+// #define CLOSE_SIZE 76160//(76160 - 24960)
+
+
 static uint16_t temp1[TEMP_BUF_SIZE];
 static uint16_t temp2[TEMP_BUF_SIZE];
 static uint32_t pcm_size = 0;
@@ -40,16 +46,30 @@ static int tmp_flag = 0;
 static uint8_t audac_dma_stop = 0;
 uint32_t read_size1 = 0;
 uint32_t read_size2 = 0;
-
+//音频的起始地址和大小
+static audio_wav_t audio_wav[] = {
+    {AUDIO_WAV_OPEN_TIP,0x210000,93518},
+    {AUDIO_WAV_LED_ALL_ON,0x230000,40238},
+    {AUDIO_WAV_LED_ALL_OFF,0x23A000,39278},
+    {AUDIO_WAV_LED_RAD,0x244000,41678},
+    {AUDIO_WAV_LED_GREEN,0x24F000,42158},
+    {AUDIO_WAV_LED_BLUE, 0x25A000,41198},
+    {AUDIO_WAV_OPENING_LED,0x265000,32558},
+    {AUDIO_WAV_SERVER_CONNECT,0x26D000,56558},
+    {AUDIO_WAV_WEATHER_CHECK,0x27B000,51278},
+    {AUDIO_WAV_WIFI_SCAN_START,0x2CC000,74318},
+    {AUDIO_WAV_WIFI_SCAN_DONE,0x341000,48398},
+    { AUDIO_WAV_LED_CLOSE,0x34F000,56078},
+};
 
 static int pcm_read(void);
-void dma_i2s_tx_start(char *buf, uint32_t size);
+void dma_i2s_tx_start(char* buf, uint32_t size);
 
-void dma0_ch0_isr(void *arg)
+void dma0_ch0_isr(void* arg)
 {
-    // printf("tc done\r\n");
+    //LOG_I("tc done");
     bflb_dma_channel_stop(dma0_ch0);
-    if(audac_dma_stop == 1)
+    if (audac_dma_stop == 1)
     {
         audac_dma_stop = 0;
         // bflb_dma_channel_stop(dma0_ch0);
@@ -59,17 +79,18 @@ void dma0_ch0_isr(void *arg)
         pcm_read();
         if (tmp_flag & 0x01) {
             dma_i2s_tx_start(temp2, read_size2);
-            printf("temp2, read_size2:%d\r\n", read_size2);
-        }else{
+            LOG_I("temp2, read_size2:%d", read_size2);
+        }
+        else {
             dma_i2s_tx_start(temp1, read_size1);
-            printf("temp1, read_size1:%d\r\n", read_size1);
+            LOG_I("temp1, read_size1:%d", read_size1);
         }
     }
 }
 
 void i2s_gpio_init()
 {
-    struct bflb_device_s *gpio;
+    struct bflb_device_s* gpio;
 
     gpio = bflb_device_get_by_name("gpio");
 
@@ -110,7 +131,7 @@ void i2s_init()
 {
     struct bflb_i2s_config_s i2s_cfg = {
         //.bclk_freq_hz = 16000 * 32 * 2, /* bclk = Sampling_rate * frame_width * channel_num */
-        .bclk_freq_hz = 24000 * 32 * 2,
+        .bclk_freq_hz = 16000 * 32 * 2,
         .role = I2S_ROLE_MASTER,
         .format_mode = I2S_MODE_LEFT_JUSTIFIED,
         .channel_mode = I2S_CHANNEL_MODE_NUM_1,
@@ -122,11 +143,11 @@ void i2s_init()
         .rx_fifo_threshold = 0,
     };
 
-    printf("i2s init\r\n");
+    LOG_I("i2s init");
     i2s0 = bflb_device_get_by_name("i2s0");
     /* i2s init */
     bflb_i2s_init(i2s0, &i2s_cfg);
-    
+
     /* enable dma */
     bflb_i2s_link_txdma(i2s0, true);
     bflb_i2s_link_rxdma(i2s0, true);
@@ -135,7 +156,7 @@ void dma_tx_init()
 {
     // static struct bflb_dma_channel_lli_pool_s tx_llipool[100];
     // static struct bflb_dma_channel_lli_transfer_s tx_transfers[2];
-    
+
 
     struct bflb_dma_channel_config_s tx_config = {
         .direction = DMA_MEMORY_TO_PERIPH,
@@ -149,9 +170,7 @@ void dma_tx_init()
         .dst_width = DMA_DATA_WIDTH_16BIT,
     };
 
-
-
-    printf("dma init\r\n");
+    LOG_I("dma init");
     dma0_ch0 = bflb_device_get_by_name("dma0_ch0");
     bflb_dma_channel_init(dma0_ch0, &tx_config);
     bflb_dma_channel_irq_attach(dma0_ch0, dma0_ch0_isr, NULL);
@@ -164,14 +183,14 @@ void dma_tx_init()
     // tx_transfers[1].dst_addr = (uint32_t)DMA_ADDR_I2S_TDR;
     // tx_transfers[1].nbytes = sizeof(temp2);
 
-    // printf("dma lli init\r\n");
+    //LOG_I("dma lli init");
     // uint32_t num = bflb_dma_channel_lli_reload(dma0_ch0, tx_llipool, 100, tx_transfers, 2);
     // bflb_dma_channel_lli_link_head(dma0_ch0, tx_llipool, num);
-    // printf("dma lli num: %d \r\n", num);
+    //LOG_I("dma lli num: %d ", num);
     // bflb_dma_channel_start(dma0_ch0);
 }
 
-void dma_i2s_tx_start(char *buf, uint32_t size)
+void dma_i2s_tx_start(char* buf, uint32_t size)
 {
     static struct bflb_dma_channel_lli_transfer_s tx_transfers[1];
     static struct bflb_dma_channel_lli_pool_s tx_llipool[100];
@@ -194,43 +213,46 @@ void mclk_out_init()
 static int pcm_read(void)
 {
     tmp_flag++;
-    if(pcm_size == 0){
+    if (pcm_size == 0) {
         audac_dma_stop = 1;
         return -1;
     }
     if (tmp_flag & 0x01) {
         if ((play_size + sizeof(temp1)) > pcm_size) {
             read_size1 = pcm_size - play_size;
-            printf("1play_size:%d, read_size:%d\r\n", play_size, pcm_size - play_size);
+            LOG_I("1play_size:%d, read_size:%d", play_size, pcm_size - play_size);
             bflb_flash_read(pcm_addr + play_size, temp1, read_size1);
             play_size = 0;
             pcm_size = 0;
             // audac_dma_stop = 1;
             // bflb_dma_channel_stop(audac_dma_hd);
-        } else {
+        }
+        else {
             read_size1 = sizeof(temp1);
-            printf("1play_size:%d, read_size:%d\r\n", play_size, read_size1);
+            LOG_I("1play_size:%d, read_size:%d", play_size, read_size1);
             bflb_flash_read(pcm_addr + play_size, temp1, read_size1);
             play_size += read_size1;
         }
-    } else {
+    }
+    else {
         if ((play_size + sizeof(temp2)) > pcm_size) {
-            printf("2play_size:%d, read_size:%d\r\n", play_size, pcm_size - play_size);
+            LOG_I("2play_size:%d, read_size:%d", play_size, pcm_size - play_size);
             read_size2 = pcm_size - play_size;
             bflb_flash_read(pcm_addr + play_size, temp2, read_size2);
             play_size = 0;
             pcm_size = 0;
             // audac_dma_stop = 1;
             // bflb_dma_channel_stop(audac_dma_hd);
-        } else {
-            printf("2play_size:%d, read_size:%d\r\n", play_size, sizeof(temp2));
+        }
+        else {
+            LOG_I("2play_size:%d, read_size:%d", play_size, sizeof(temp2));
             read_size2 = sizeof(temp2);
             bflb_flash_read(pcm_addr + play_size, temp2, read_size2);
             play_size += read_size2;
         }
     }
 
-    // printf("temp:%04x,%04x,%04x,%04x\r\n", temp[0],temp[1],temp[2],temp[3]);
+    //LOG_I("temp:%04x,%04x,%04x,%04x", temp[0],temp[1],temp[2],temp[3]);
     return 0;
 }
 
@@ -240,39 +262,34 @@ static void play_voice(uint32_t play_addr, uint32_t voice_size)
     play_size = 0;
     pcm_size = voice_size;
     pcm_addr = play_addr;
-
-
     // bflb_audac_feature_control(audac_hd, AUDAC_CMD_PLAY_STOP, 0);
     bflb_dma_channel_stop(dma0_ch0);
     // dma_tx_init();
     pcm_read();
     pcm_read();
     dma_i2s_tx_start(temp1, read_size1);
-    printf("temp1, read_size1:%d\r\n", read_size1);
+    LOG_I("temp1, read_size1:%d", read_size1);
     // bflb_dma_channel_start(dma0_ch0);
     // bflb_audac_feature_control(audac_hd, AUDAC_CMD_PLAY_START, 0);
 }
 
-void play_voice_open(void)
+void aipi_play_voices(audio_enum_t audio_numble)
 {
-    play_voice(OPEN_ADDR, OPEN_SIZE);
+    play_voice(audio_wav[audio_numble].addrss, audio_wav[audio_numble].size);
 }
-void play_voice_close(void)
-{
-    play_voice(CLOSE_ADDR, CLOSE_SIZE);
-}
+
 
 int es8388_voice_init(void)
 {
     // board_init();
 
-    printf("\n\ri2s dma test\n\r");
+    LOG_I("i2s dma test");
 
     /* gpio init */
     i2s_gpio_init();
 
     /* init ES8388 Codec */
-    printf("es8388 init\n\r");
+    LOG_I("es8388 init");
     ES8388_Init(&ES8388Cfg);
     ES8388_Set_Voice_Volume(90);
 
@@ -286,7 +303,7 @@ int es8388_voice_init(void)
     /* enable i2s tx and rx */
     bflb_i2s_feature_control(i2s0, I2S_CMD_DATA_ENABLE, I2S_CMD_DATA_ENABLE_TX | I2S_CMD_DATA_ENABLE_RX);
 
-    // printf("test end\n\r");
+    //LOG_I("test end");
 
     // while (1) {
     //     bflb_mtimer_delay_ms(10);

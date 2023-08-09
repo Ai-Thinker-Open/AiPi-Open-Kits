@@ -18,7 +18,7 @@
 #include "board.h"
 #include "buttom_led.h"
 #include "log.h"
-
+#include "dev_8388_pcm.h"
 #define GBD_TAG "BOTTUM LED"
 
 struct bflb_device_s* gpio;
@@ -50,6 +50,8 @@ static void gpio_isr(int irq, void* arg)
         if (xHigherPriorityTaskWoken)
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
         //红灯cout，用于下次led亮灭的控制
+        if (i_red%2)aipi_play_voices(AUDIO_WAV_LED_RAD);
+        else aipi_play_voices(AUDIO_WAV_LED_CLOSE);
         i_red++;
         if (i_red>255)i_red = 0;
 
@@ -64,7 +66,10 @@ static void gpio_isr(int irq, void* arg)
         xQueueSendFromISR(queue, queue_buff, &xHigherPriorityTaskWoken);
         if (xHigherPriorityTaskWoken)
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        if (i_green%2)aipi_play_voices(AUDIO_WAV_LED_GREEN);
+        else aipi_play_voices(AUDIO_WAV_LED_CLOSE);
         i_green++; if (i_green>255)i_green = 0;
+
         goto __exit;
     }
     intstatus = bflb_gpio_get_intstatus(gpio, BUTTOM_BLUE_IO);
@@ -76,7 +81,10 @@ static void gpio_isr(int irq, void* arg)
         xQueueSendFromISR(queue, queue_buff, &xHigherPriorityTaskWoken);
         if (xHigherPriorityTaskWoken)
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        if (i_blue%2)aipi_play_voices(AUDIO_WAV_LED_BLUE);
+        else aipi_play_voices(AUDIO_WAV_LED_CLOSE);
         i_blue++; if (i_blue>255) i_blue = 0;
+
         goto __exit;
     }
 
@@ -90,7 +98,7 @@ static void gpio_isr(int irq, void* arg)
         i_red = 2;
         i_green = 2;
         i_blue = 2;
-
+        aipi_play_voices(AUDIO_WAV_LED_ALL_ON);
 
         sprintf(queue_buff, "{\"board_id\":3,\"status\":1,\"RGB\":{\"R\":0,\"G\":0,\"B\":0}}");//所有设备开
         xQueueSendFromISR(queue, queue_buff, &xHigherPriorityTaskWoken);
@@ -105,7 +113,7 @@ static void gpio_isr(int irq, void* arg)
         AiPi_SCP_LED_set(LED_RED_IO, 0);
         AiPi_SCP_LED_set(LED_GREEN_IO, 0);
         AiPi_SCP_LED_set(LED_BLUE_IO, 0);
-
+        aipi_play_voices(AUDIO_WAV_LED_ALL_OFF);
         i_red = 1;
         i_green = 1;
         i_blue = 1;
@@ -158,6 +166,9 @@ void aipi_scp_buttom_led_init(void)
 static void AiPi_SCP_LED_set(uint8_t _gpio, bool value)
 {
     LOG_I("GPIO_PIN_%d is:%d", _gpio, bflb_gpio_read(gpio, _gpio));
-    if (value) bflb_gpio_set(gpio, _gpio);
+    if (value) {
+
+        bflb_gpio_set(gpio, _gpio);
+    }
     else bflb_gpio_reset(gpio, _gpio);
 }

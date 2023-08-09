@@ -36,8 +36,10 @@
 #include "custom.h"
 #include "buttom_led.h"
 //esay flashg
-
 #include "user_esflash.h"
+
+//voice
+#include "dev_8388_pcm.h"
 lv_ui guider_ui;
 
 
@@ -56,10 +58,14 @@ static void bl61x_show_heap_size_task(void* arg)
 int main(void)
 {
     board_init();
+
+    es8388_voice_init();
     tcpip_init(NULL, NULL);
     wifi_start_firmware_task();
     //init easyflash
     esay_flash_init();
+
+    aipi_play_voices(AUDIO_WAV_OPEN_TIP);
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();

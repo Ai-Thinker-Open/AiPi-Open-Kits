@@ -12,7 +12,7 @@
 #include "events_init.h"
 #include <stdio.h>
 #include "lvgl.h"
-
+#include "dev_8388_pcm.h"
 #define GBD_TAG "LV_EVENT"
 
 static xTimerHandle loading_time;
@@ -47,6 +47,7 @@ static void screen_btn_scan_event_handler(lv_event_t* e)
 			lv_obj_clear_flag(guider_ui.screen_cont_loading, LV_OBJ_FLAG_HIDDEN); //显示加载图片
 			xTimerStart(loading_time, 100/portTICK_PERIOD_MS);//开始旋转
 			wifi_mgmr_sta_scan(&config); //扫描SSID
+			aipi_play_voices(AUDIO_WAV_WIFI_SCAN_START);
 		}
 		break;
 		default:
@@ -137,7 +138,7 @@ static void screen_img_wb2_open_event_handler(lv_event_t* e)
 			};
 			lv_obj_set_style_img_recolor_opa(guider_ui.screen_img_rgb, 255, 0);
 			lv_obj_set_style_img_recolor(guider_ui.screen_img_rgb, wb2_rgb_color, _LV_STYLE_STATE_CMP_SAME);
-
+			aipi_play_voices(AUDIO_WAV_OPENING_LED);
 		}
 		break;
 		default:
@@ -164,6 +165,7 @@ static void screen_img_wb2_close_event_handler(lv_event_t* e)
 			xQueueSend(queue, queue_buff, portMAX_DELAY);
 			vPortFree(queue_buff);
 			lv_obj_set_style_img_recolor_opa(guider_ui.screen_img_rgb, 0, 0);
+			aipi_play_voices(AUDIO_WAV_LED_CLOSE);
 		}
 		break;
 		default:
@@ -222,6 +224,7 @@ static void screen_img_m62_open_event_handler(lv_event_t* e)
 			};
 			lv_obj_set_style_img_recolor_opa(guider_ui.screen_img_rgb1, 255, 0);
 			lv_obj_set_style_img_recolor(guider_ui.screen_img_rgb1, rgb_color, _LV_STYLE_STATE_CMP_SAME);
+			aipi_play_voices(AUDIO_WAV_OPENING_LED);
 		}
 		break;
 		default:
@@ -248,6 +251,7 @@ static void screen_img_m62_close_event_handler(lv_event_t* e)
 			xQueueSend(queue, queue_buff, portMAX_DELAY);
 			vPortFree(queue_buff);
 			lv_obj_set_style_img_recolor_opa(guider_ui.screen_img_rgb1, 0, 0);
+			aipi_play_voices(AUDIO_WAV_LED_CLOSE);
 		}
 		break;
 		default:
@@ -307,6 +311,7 @@ static void screen_img_bw16_open_event_handler(lv_event_t* e)
 			};
 			lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb3, 255, 0);
 			lv_obj_set_style_img_recolor(ui->screen_img_rgb3, rgb_color, _LV_STYLE_STATE_CMP_SAME);
+			aipi_play_voices(AUDIO_WAV_OPENING_LED);
 		}
 		break;
 		default:
@@ -334,6 +339,7 @@ static void screen_img_bw16_close_event_handler(lv_event_t* e)
 			xQueueSend(queue, queue_buff, portMAX_DELAY);
 			vPortFree(queue_buff);
 			lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb3, 0, 0);
+			aipi_play_voices(AUDIO_WAV_LED_CLOSE);
 		}
 		break;
 		default:
@@ -417,11 +423,13 @@ static void screen_rgb1_wb2_sw_event_handler(lv_event_t* e)
 				guider_ui.ai_wb2_dev->red = wb2_rgb.ch.red;
 				guider_ui.ai_wb2_dev->green = wb2_rgb.ch.green;
 				guider_ui.ai_wb2_dev->blue = wb2_rgb.ch.blue;
+				aipi_play_voices(AUDIO_WAV_OPENING_LED);
 			}
 			else {
 				LOG_I("wb2 RGB sw Off");
 				lv_obj_add_flag(guider_ui.screen_rgb1_cpicker_wb2_rgb, LV_OBJ_FLAG_HIDDEN);
 				guider_ui.ai_wb2_dev->switch_status = false;
+				aipi_play_voices(AUDIO_WAV_LED_CLOSE);
 			}
 
 			char* queue_buff = pvPortMalloc(64);
@@ -512,11 +520,13 @@ static void screen_rgb2_Ai_M62_sw_event_handler(lv_event_t* e)
 				guider_ui.ai_m62_dev->red = m62_rgb.ch.red;
 				guider_ui.ai_m62_dev->green = m62_rgb.ch.green;
 				guider_ui.ai_m62_dev->blue = m62_rgb.ch.blue;
+				aipi_play_voices(AUDIO_WAV_OPENING_LED);
 			}
 			else {
 				LOG_I("m62 RGB sw Off");
 				lv_obj_add_flag(guider_ui.screen_rgb2_cpicker_M62_rgb, LV_OBJ_FLAG_HIDDEN);
 				guider_ui.ai_m62_dev->switch_status = false;
+				aipi_play_voices(AUDIO_WAV_LED_CLOSE);
 			}
 			char* queue_buff = pvPortMalloc(64);
 			memset(queue_buff, 0, 64);
@@ -606,11 +616,13 @@ static void screen_rgb3_bw16_sw_event_handler(lv_event_t* e)
 				guider_ui.bw16_dev->red = BW16_rgb.ch.red;
 				guider_ui.bw16_dev->green = BW16_rgb.ch.green;
 				guider_ui.bw16_dev->blue = BW16_rgb.ch.blue;
+				aipi_play_voices(AUDIO_WAV_OPENING_LED);
 			}
 			else {
 				LOG_I("bw16 RGB sw Off");
 				lv_obj_add_flag(guider_ui.screen_rgb3_cpicker_bw16_rgb, LV_OBJ_FLAG_HIDDEN);
 				guider_ui.bw16_dev->switch_status = false;
+				aipi_play_voices(AUDIO_WAV_LED_CLOSE);
 			}
 			char* queue_buff = pvPortMalloc(64);
 			memset(queue_buff, 0, 64);

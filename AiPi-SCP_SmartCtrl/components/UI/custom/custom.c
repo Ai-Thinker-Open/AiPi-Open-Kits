@@ -29,6 +29,7 @@
 #define FISH_TEMP "temperature"
 #define FISH_O2 "oxygen"
 #define FISH_PH "pH"
+#include "dev_8388_pcm.h"
    /**********************
     *      TYPEDEFS
     **********************/
@@ -61,7 +62,7 @@ static bool mqtt_get_rgb_data(char* json_data, uint8_t* red, uint8_t* green, uin
 void custom_init(lv_ui* ui)
 {
   /* Add your codes here */
-  queue = xQueueCreate(3, 1024);
+  queue = xQueueCreate(6, 1024);
   xTaskCreate(queue_receive_task, "queue_receive_task", 1024, ui, 3, NULL);
   http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
   mqtt_client_init();
@@ -147,6 +148,8 @@ static void queue_receive_task(void* arg)
           strcpy(ui->ssid_list, ssid_list);
           ui->wifi_scan_done = true;
           vPortFree(ssid_list);
+
+          aipi_play_voices(AUDIO_WAV_WIFI_SCAN_DONE);
         }
       }
       break;
@@ -189,8 +192,8 @@ static void queue_receive_task(void* arg)
         if (https_Handle!=NULL) {
           vTaskDelete(https_Handle);
         }
-        xTaskCreate(https_get_weather_task, "https task", 1024*2, NULL, 4, &https_Handle);
 
+        xTaskCreate(https_get_weather_task, "https task", 1024*2, NULL, 4, &https_Handle);
         mqtt_start_connect(MQTT_SERVER, MQTT_PORT, MQTT_USER_NAME, MQTT_PASSWOLD);
       }
       break;
@@ -207,12 +210,16 @@ static void queue_receive_task(void* arg)
           if (ui->screen_type==0) {
             lv_label_set_text_fmt(ui->screen_label_dizhi, "%s市  %s", ui->city, ui->waether);
           }
+          aipi_play_voices(AUDIO_WAV_WEATHER_CHECK);
+
+
         }
       }
       break;
       case CUSTOM_EVENT_MQTT_CONNECT: //MQTT 连接服务器成功
       {
         LOG_F("CUSTOM_EVENT_MQTT_CONNECT queue data:%s", queue_buff);
+        aipi_play_voices(AUDIO_WAV_SERVER_CONNECT);
         mqtt_app_subscribe(FISH_MQTT_SUB_TOPIC, 0);
         mqtt_app_subscribe(MQTT_CLIETN_TOPIC, 0);
       }
