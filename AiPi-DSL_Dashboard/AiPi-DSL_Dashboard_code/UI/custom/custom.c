@@ -92,7 +92,8 @@ static void queue_receive_task(void* arg)
     else {
         LOG_E("ssid read value is NULL:%06X", SSID_KEY);
     }
-
+    vPortFree(ssid);
+    vPortFree(password);
     while (1) {
         queue_buff = pvPortMalloc(1024*2);
         memset(queue_buff, 0, 1024*2);

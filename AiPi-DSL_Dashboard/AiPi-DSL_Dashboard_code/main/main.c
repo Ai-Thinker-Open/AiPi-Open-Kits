@@ -72,6 +72,7 @@ int main(void)
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();
+
     setup_ui(&guider_ui);
     custom_init(&guider_ui);
     events_init(&guider_ui);
