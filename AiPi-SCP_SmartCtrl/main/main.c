@@ -42,7 +42,7 @@
 #include "dev_8388_pcm.h"
 lv_ui guider_ui;
 
-
+#define DBG_TAG "MAIN"
 /*****************  extern  ************/
 static int bl61x_get_heap_size(void);
 

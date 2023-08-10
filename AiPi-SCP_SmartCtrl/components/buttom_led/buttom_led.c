@@ -19,7 +19,7 @@
 #include "buttom_led.h"
 #include "log.h"
 #include "dev_8388_pcm.h"
-#define GBD_TAG "BOTTUM LED"
+#define DBG_TAG "BOTTUM LED"
 
 struct bflb_device_s* gpio;
 extern xQueueHandle queue;
@@ -42,6 +42,7 @@ static void gpio_isr(int irq, void* arg)
     if (intstatus) {
         bflb_gpio_int_clear(gpio, BUTTOM_RED_IO); //清除中断标志
         AiPi_SCP_LED_set(LED_RED_IO, i_red%2);//点亮红灯
+
         //重置所有灯的控制按钮
 
         //发送消息
@@ -62,6 +63,8 @@ static void gpio_isr(int irq, void* arg)
     if (intstatus) {
         bflb_gpio_int_clear(gpio, BUTTOM_GREEN_IO);
         AiPi_SCP_LED_set(LED_GREEN_IO, i_green%2);
+
+
         sprintf(queue_buff, "{\"board_id\":3,\"status\":%d,\"RGB\":{\"R\":0,\"G\":31,\"B\":0}}", i_green%2);
         xQueueSendFromISR(queue, queue_buff, &xHigherPriorityTaskWoken);
         if (xHigherPriorityTaskWoken)
@@ -100,7 +103,7 @@ static void gpio_isr(int irq, void* arg)
         i_blue = 2;
         aipi_play_voices(AUDIO_WAV_LED_ALL_ON);
 
-        sprintf(queue_buff, "{\"board_id\":3,\"status\":1,\"RGB\":{\"R\":0,\"G\":0,\"B\":0}}");//所有设备开
+        sprintf(queue_buff, "{\"board_id\":3,\"status\":1,\"RGB\":0}");//所有设备开
         xQueueSendFromISR(queue, queue_buff, &xHigherPriorityTaskWoken);
         if (xHigherPriorityTaskWoken)
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
@@ -118,7 +121,7 @@ static void gpio_isr(int irq, void* arg)
         i_green = 1;
         i_blue = 1;
 
-        sprintf(queue_buff, "{\"board_id\":3,\"status\":0,\"RGB\":{\"R\":0,\"G\":0,\"B\":0}}");//所有设备关
+        sprintf(queue_buff, "{\"board_id\":3,\"status\":0,\"RGB\":0}");//所有设备关
         xQueueSendFromISR(queue, queue_buff, &xHigherPriorityTaskWoken);
         if (xHigherPriorityTaskWoken)
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);

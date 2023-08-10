@@ -21,7 +21,7 @@
 #include <lwip/inet.h>
 #include "bflb_uart.h"
 
-#define GBD_TAG "MQTT"
+#define DBG_TAG "MQTT"
 
 static mqtt_client_t* AiPi_client;
 extern xQueueHandle queue;
@@ -31,6 +31,7 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
 static void mqtt_request_cb(void* arg, err_t err);
 
 static char topic_buff[128];
+
 static void mqtt_incoming_publish_cb(void* arg, const char* topic, u32_t tot_len)
 {
     // LOG_I("topic=%.*s", tot_len, topic);
@@ -148,9 +149,7 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
             LOG_I("MQTT event MQTT_CONNECT_ACCEPTED");
             mqtt_set_inpub_callback(AiPi_client, mqtt_incoming_publish_cb, mqtt_incoming_data_cb, NULL);
             char* queu_buff = "{\"mqtt_connect\":1}";
-            xQueueSendFromISR(queue, queu_buff, &xHigherPriorityTaskWoken);
-            if (xHigherPriorityTaskWoken)
-                portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+            xQueueSend(queue, queu_buff, portMAX_DELAY);
         }
         break;
         /** Refused protocol version */
@@ -176,12 +175,9 @@ static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connect
             /** Disconnected */
         case MQTT_CONNECT_DISCONNECTED:
         {
-
             LOG_I("MQTT event MQTT_CONNECT_DISCONNECTED");
             char* queu_buff = "{\"mqtt_disconnect\":1}";
-            xQueueSendFromISR(queue, queu_buff, &xHigherPriorityTaskWoken);
-            if (xHigherPriorityTaskWoken)
-                portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+            xQueueSend(queue, queu_buff, portMAX_DELAY);
         }
         break;
         /** Timeout */

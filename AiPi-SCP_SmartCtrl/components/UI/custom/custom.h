@@ -18,9 +18,10 @@ extern "C" {
 
 #define SSID_KEY "SSID"
 #define PASS_KEY "PASS"
-#define MQTT_SERVER "aligenie.xuhongv.com"
-#define MQTT_USER_NAME "admin"
-#define MQTT_PASSWOLD "xuhong123456"
+#define MQTT_SERVER "your mqtt host"
+#define MQTT_USER_NAME "mqtt user name"
+#define MQTT_PASSWOLD "mqtt passworld"
+
 #define MQTT_PORT 1883
 #define FISH_MQTT_SUB_TOPIC "/FishTank/a81710cf69dd/devPub"
 #define MQTT_CLIETN_TOPIC "topic/dev/pub"

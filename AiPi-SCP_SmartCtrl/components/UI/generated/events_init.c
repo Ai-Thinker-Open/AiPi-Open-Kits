@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include "lvgl.h"
 #include "dev_8388_pcm.h"
-#define GBD_TAG "LV_EVENT"
+#define DBG_TAG "LV_EVENT"
 
 static xTimerHandle loading_time;
 
@@ -128,7 +128,7 @@ static void screen_img_wb2_open_event_handler(lv_event_t* e)
 
 			char* queue_buff = pvPortMalloc(64);
 			memset(queue_buff, 0, 64);
-			sprintf(queue_buff, "{\"board_id\":,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_wb2_dev->switch_status, guider_ui.ai_wb2_dev->red, guider_ui.ai_wb2_dev->green, guider_ui.ai_wb2_dev->blue);
+			sprintf(queue_buff, "{\"board_id\":0,\"status\":%d,\"RGB\":{\"R\":%d,\"G\":%d,\"B\":%d}}", guider_ui.ai_wb2_dev->switch_status, guider_ui.ai_wb2_dev->red, guider_ui.ai_wb2_dev->green, guider_ui.ai_wb2_dev->blue);
 			xQueueSend(queue, queue_buff, portMAX_DELAY);
 			vPortFree(queue_buff);
 			lv_color_t wb2_rgb_color = {

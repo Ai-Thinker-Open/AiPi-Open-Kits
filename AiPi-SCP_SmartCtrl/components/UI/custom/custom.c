@@ -26,6 +26,8 @@
   /*********************
    *      DEFINES
    *********************/
+#define DBG_TAG "CUSTOM"
+
 #define FISH_TEMP "temperature"
 #define FISH_O2 "oxygen"
 #define FISH_PH "pH"
@@ -62,7 +64,7 @@ static bool mqtt_get_rgb_data(char* json_data, uint8_t* red, uint8_t* green, uin
 void custom_init(lv_ui* ui)
 {
   /* Add your codes here */
-  queue = xQueueCreate(6, 1024);
+  queue = xQueueCreate(10, 1024);
   xTaskCreate(queue_receive_task, "queue_receive_task", 1024, ui, 3, NULL);
   http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
   mqtt_client_init();
@@ -93,7 +95,6 @@ static void http_hour_requst_time(TimerHandle_t timer)
 static void queue_receive_task(void* arg)
 {
   static wifi_mgmr_scan_params_t wifi_scan_config;
-
 
   char* queue_buff = NULL;
   char* ssid_list = NULL;
@@ -289,7 +290,7 @@ static void queue_receive_task(void* arg)
                 lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb, 0, 0);
               }
             }
-            else {
+            else if (ui->screen_type==1) {
               ui->ai_wb2_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->ai_wb2_dev->red, &ui->ai_wb2_dev->green, &ui->ai_wb2_dev->blue);
               // 配置另外一个界面的UI
               if (ui->ai_wb2_dev->switch_status) {
@@ -341,7 +342,7 @@ static void queue_receive_task(void* arg)
               }
 
             }
-            else {
+            else if (ui->screen_type==2) {
               ui->ai_m62_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->ai_m62_dev->red, &ui->ai_m62_dev->green, &ui->ai_m62_dev->blue);
               //配置另外一个界面的UI
               if (ui->ai_m62_dev->switch_status) {
@@ -392,7 +393,7 @@ static void queue_receive_task(void* arg)
                 lv_obj_set_style_img_recolor_opa(ui->screen_img_rgb3, 0, 0);
               }
             }
-            else {
+            else if (ui->screen_type==3) {
               ui->bw16_dev->switch_status = mqtt_get_rgb_data(queue_buff, &ui->bw16_dev->red, &ui->bw16_dev->green, &ui->bw16_dev->blue);
               if (ui->bw16_dev->switch_status) {
                 lv_obj_add_state(ui->screen_rgb3_bw16_sw, LV_STATE_CHECKED);
@@ -423,11 +424,9 @@ static void queue_receive_task(void* arg)
           LOG_F("mqtt send :%s", queue_buff);
       }
       break;
-
       default:
         break;
     }
-
     vPortFree(queue_buff);
   }
 }

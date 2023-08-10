@@ -13,7 +13,7 @@
 #include "bsp_es8388.h"
 #include "dev_8388_pcm.h"
 
-#define GBD_TAG "Voice"
+#define DBG_TAG "VOICE"
 
 struct bflb_device_s* i2s0;
 struct bflb_device_s* i2c0;
