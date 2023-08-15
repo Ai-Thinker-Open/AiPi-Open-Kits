@@ -14,6 +14,7 @@
 | AiPi-SCP-4.3| 小安派-SCP-4.3出厂固件源码| [点击查看](AiPi-SCP-4.3/README.md) |
 | AiPi-Eyes-DU| 小安派-Eyes-DU出厂固件源码| [点击查看](AiPi-Eyes-DU/README.md) |
 | AiPi-SCP_SmartCtrl| 小安派智能监控终端 源码| [点击查看](AiPi-SCP_SmartCtrl/README.md) |
+| AiPi-Knob| 小安派-Knob旋钮源码| [点击查看](AiPi-Knob/README.md) |
 
 ## 一、克隆Ai-Thinker仓库
 在linux的终端下输入
