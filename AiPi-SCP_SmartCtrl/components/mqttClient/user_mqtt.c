@@ -20,47 +20,141 @@
 #include "custom.h"
 #include <lwip/inet.h>
 #include "bflb_uart.h"
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <lwip/errno.h>
+#include <netdb.h>
 
+#include "utils_getopt.h"
 #define DBG_TAG "MQTT"
 
-static mqtt_client_t* AiPi_client;
+
+// #define USER_MQTT
 extern xQueueHandle queue;
+int test_sockfd;
+struct mqtt_client client;
+uint8_t sendbuf[2048]; /* sendbuf should be large enough to hold multiple whole mqtt messages */
+uint8_t recvbuf[1024]; /* recvbuf should be large enough any whole mqtt message expected to be received */
 
-static  user_mqtt_client_t  user_mqtt_client;
-static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connection_status_t status);
-static void mqtt_request_cb(void* arg, err_t err);
+static TaskHandle_t client_daemon;
+static int open_socket(const char* host, const char* port);
 
-static char topic_buff[128];
-
-static void mqtt_incoming_publish_cb(void* arg, const char* topic, u32_t tot_len)
+static int open_socket(const char* host, const char* port)
 {
-    // LOG_I("topic=%.*s", tot_len, topic);
-    memset(topic_buff, 0, 128);
-    sprintf(topic_buff, "%.*s", tot_len, topic);
-}
+    struct addrinfo hints = { 0 };
+    hints.ai_family = AF_UNSPEC; /* IPv4 or IPv6 */
+    hints.ai_socktype = SOCK_STREAM; /* Must be TCP */
+    int sockfd = -1;
+    int rv;
+    struct addrinfo* p, * servinfo;
 
-static void mqtt_incoming_data_cb(void* arg, const u8_t* data, u16_t len, u8_t flags)
-{
-    // LOG_I("flags=%d DATA=%.*s", flags, len, data);
-    char* queue_buff = pvPortMalloc(512);
-    memset(queue_buff, 0, 512);
-    sprintf(queue_buff, "{\"mqtt_msg\":{\"topic\":\"%s\",\"data\":%.*s}}", topic_buff, len, data);
-    xQueueSendFromISR(queue, queue_buff, pdTRUE);
-    vPortFree(queue_buff);
+    /* get address information */
+    LOG_I("host:%s, port=%s", host, port);
+    rv = getaddrinfo(host, port, &hints, &servinfo);
+    if (rv != 0) {
+        LOG_E("Failed to open socket (getaddrinfo): %d", rv);
+        return -1;
+    }
+
+    /* open the first possible socket */
+    for (p = servinfo; p != NULL; p = p->ai_next) {
+        sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (sockfd == -1) continue;
+
+        /* connect to server */
+        rv = connect(sockfd, p->ai_addr, p->ai_addrlen);
+        if (rv == -1) {
+            close(sockfd);
+            sockfd = -1;
+            continue;
+        }
+        break;
+    }
+
+    /* free servinfo */
+    freeaddrinfo(servinfo);
+
+    /* make non-blocking */
+    if (sockfd != -1) {
+        int iMode = 1;
+        ioctlsocket(sockfd, FIONBIO, &iMode);
+    }
+
+    return sockfd;
 }
 /**
  * @brief
  *
+ * @param sig
 */
-void mqtt_client_init(void)
+static void test_close(void)
 {
-    if (AiPi_client!=NULL) {
-        mqtt_client_free(AiPi_client);
+    if (test_sockfd)
+    {
+        close(test_sockfd);
     }
-    AiPi_client = mqtt_client_new();
+    vTaskDelete(client_daemon);
+
 }
+/**
+ * @brief
+ *
+ * @param unused
+ * @param published
+*/
+static void publish_callback_1(void** unused, struct mqtt_response_publish* published)
+{
+    /* not used in this example */
 
+    char* topic_name = (char*)malloc(published->topic_name_size + 1);
+    memcpy(topic_name, published->topic_name, published->topic_name_size);
+    topic_name[published->topic_name_size] = '\0';
 
+    char* topic_msg = (char*)malloc(published->application_message_size + 1);
+    memcpy(topic_msg, published->application_message, published->application_message_size);
+    topic_msg[published->application_message_size] = '\0';
+    printf("%s:[%s]\r\n", topic_name, topic_msg);
+    char* queue_buff = pvPortMalloc(512);
+    memset(queue_buff, 0, 512);
+    sprintf(queue_buff, "{\"mqtt_msg\":{\"topic\":\"%s\",\"data\":%.*s}}", topic_name, published->application_message_size, topic_msg);
+    xQueueSendFromISR(queue, queue_buff, pdTRUE);
+    vPortFree(queue_buff);
+    free(topic_name);
+    free(topic_msg);
+}
+/**
+ * @brief
+ *
+ * @param host
+ * @param port
+*/
+void  mqtt_client_init(const char* host, int port)
+{
+    LOG_I("MQTT init start");
+    test_sockfd = open_socket(host, "1883");
+    if (test_sockfd < 0) {
+        LOG_E("Failed to open socket: %d", test_sockfd);
+        test_close();
+        return;
+    }
+    LOG_I(" test_sockfd  crater OK id=%d", test_sockfd);
+    mqtt_init(&client, test_sockfd, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf), publish_callback_1);
+
+}
+/**
+ * @brief
+ *
+ * @param client
+*/
+static void client_refresher(void* client)
+{
+    while (1)
+    {
+        mqtt_sync((struct mqtt_client*)client);
+        vTaskDelay(50/portTICK_PERIOD_MS);
+    }
+
+}
 /**
  * @brief mqtt_start_connect
  *  MQTT启动连接
@@ -72,51 +166,28 @@ void mqtt_client_init(void)
 */
 int mqtt_start_connect(char* host, uint16_t port, char* user_name, char* pass)
 {
-    struct in_addr addr;
-    netconn_gethostbyname(host, &addr);
-    struct mqtt_connect_client_info_t mqtt_client_info = {
-       .client_id = MQTT_CLIENT_ID,
-       .client_pass = pass,
-       .client_user = user_name,
-       .keep_alive = 120,
-    };
+    int ret = 0;
 
-    if (mqtt_client_is_connected(AiPi_client))
+    /* Ensure we have a clean session */
+    uint8_t connect_flags = MQTT_CONNECT_CLEAN_SESSION;
+    /* Send connection request to the broker. */
+    ret = mqtt_connect(&client, MQTT_CLIENT_ID, NULL, NULL, 0, user_name, pass, connect_flags, 400);
+    if (ret != MQTT_OK)
     {
-        mqtt_disconnect(AiPi_client);
+        LOG_E("MQTT init fail");
     }
-    strcpy(user_mqtt_client.host, host);
-    strcpy(user_mqtt_client.pass, pass);
-    strcpy(user_mqtt_client.user_name, user_name);
-    user_mqtt_client.port = port;
+    /* check that we don't have any errors */
+    if (client.error != MQTT_OK) {
+        LOG_E("error: %s", mqtt_error_str(client.error));
+        test_close();
+    }
+    xTaskCreate(client_refresher, (char*)"client_ref", 1024, &client, 10, &client_daemon);
 
-    return mqtt_client_connect(AiPi_client, &addr, port, mqtt_event_connect_cb, NULL, &mqtt_client_info);
 }
 
 void mqtt_app_diconnect(void)
 {
-    mqtt_disconnect(AiPi_client);
-
-}
-/**
- * @brief mqtt_app_subscribe
- *
- * @param topic
- * @param qos
- * @return int
-*/
-int mqtt_app_subscribe(char* topic, int qos)
-{
-
-    if (mqtt_client_is_connected(AiPi_client))
-    {
-
-        return mqtt_subscribe(AiPi_client, topic, qos, mqtt_request_cb, NULL);
-    }
-    else {
-        LOG_E("MQTT clien is no connect");
-
-    }
+    test_close();
 }
 /**
  * @brief  mqtt_app_publish
@@ -126,72 +197,31 @@ int mqtt_app_subscribe(char* topic, int qos)
  * @param qos
  * @return int
 */
-int mqtt_app_publish(char* topic, char* payload, int qos)
+int mqtt_app_publish(const char* topic, const char* payload, int qos)
 {
+    static enum MQTTPublishFlags qos_flags;
+    if (qos==0)qos_flags = MQTT_PUBLISH_QOS_0;
+    else if (qos==1)qos_flags = MQTT_PUBLISH_QOS_1;
+    else qos_flags = MQTT_PUBLISH_QOS_2;
 
-    if (mqtt_client_is_connected(AiPi_client))
-    {
-        return mqtt_publish(AiPi_client, topic, payload, strlen(payload), qos, 0, mqtt_request_cb, NULL);
+    mqtt_publish(&client, topic, payload, strlen(payload) + 1, qos_flags);
+    if (client.error != MQTT_OK) {
+        LOG_E("error: %s", mqtt_error_str(client.error));
+        test_close();
+        return -1;
     }
-    else LOG_E("MQTT clien is no connect");
-
-    return -1;
+    return 0;
 }
 
-static void mqtt_event_connect_cb(mqtt_client_t* client, void* arg, mqtt_connection_status_t status)
+/**
+ * @brief mqtt_app_subscribe
+ *
+ * @param topic
+ * @param qos
+ * @return int
+*/
+int mqtt_app_subscribe(char* topic, int qos)
 {
-    BaseType_t xHigherPriorityTaskWoken;
-    switch (status)
-    {
-        //connect OK
-        case MQTT_CONNECT_ACCEPTED:
-        {
-            LOG_I("MQTT event MQTT_CONNECT_ACCEPTED");
-            mqtt_set_inpub_callback(AiPi_client, mqtt_incoming_publish_cb, mqtt_incoming_data_cb, NULL);
-            char* queu_buff = "{\"mqtt_connect\":1}";
-            xQueueSend(queue, queu_buff, portMAX_DELAY);
-        }
-        break;
-        /** Refused protocol version */
-        case MQTT_CONNECT_REFUSED_PROTOCOL_VERSION:
-            LOG_I("MQTT event MQTT_CONNECT_REFUSED_PROTOCOL_VERSION");
-            break;
-            /** Refused identifier */
-        case MQTT_CONNECT_REFUSED_IDENTIFIER:
-            LOG_I("MQTT event MQTT_CONNECT_REFUSED_IDENTIFIER");
-            break;
-            /** Refused server */
-        case MQTT_CONNECT_REFUSED_SERVER:
-            LOG_I("MQTT event MQTT_CONNECT_REFUSED_SERVER");
-            break;
-            /** Refused user credentials */
-        case MQTT_CONNECT_REFUSED_USERNAME_PASS:
-            LOG_I("MQTT event MQTT_CONNECT_REFUSED_USERNAME_PASS");
-            break;
-            /** Refused not authorized */
-        case MQTT_CONNECT_REFUSED_NOT_AUTHORIZED_:
-            LOG_I("MQTT event MQTT_CONNECT_REFUSED_NOT_AUTHORIZED_");
-            break;
-            /** Disconnected */
-        case MQTT_CONNECT_DISCONNECTED:
-        {
-            LOG_I("MQTT event MQTT_CONNECT_DISCONNECTED");
-            char* queu_buff = "{\"mqtt_disconnect\":1}";
-            xQueueSend(queue, queu_buff, portMAX_DELAY);
-        }
-        break;
-        /** Timeout */
-        case MQTT_CONNECT_TIMEOUT:
-            LOG_I("MQTT event MQTT_CONNECT_TIMEOUT");
-            break;
-            /* code */
-        default:
-            break;
-    }
-}
-
-
-static void mqtt_request_cb(void* arg, err_t err)
-{
-    LOG_I("mqtt_request MSG=%d", err);
+    mqtt_subscribe(&client, topic, 0);
+    return 0;
 }

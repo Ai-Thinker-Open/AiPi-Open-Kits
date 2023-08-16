@@ -144,7 +144,7 @@ extern int* __errno(void);
 #define SNTP_SET_SYSTEM_TIME_NTP sntp_set_time
 
 #define LWIP_MQTT 1
-#define MQTT_CONNECT_TIMOUT 120   //set mqtt connect time out
+#define MQTT_CONNECT_TIMOUT 60   //set mqtt connect time out
 #define MQTT_VAR_HEADER_BUFFER_LEN 256 //set mqtt recv buff len
 
 #endif /* LWIP_HDR_LWIPOPTS_H__ */

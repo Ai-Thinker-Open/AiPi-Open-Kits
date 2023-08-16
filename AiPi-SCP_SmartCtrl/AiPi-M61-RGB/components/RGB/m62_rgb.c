@@ -23,13 +23,25 @@
 
 #define DBG_TAG "RGB"
 
+// #define Ai_M62
+
+#ifdef Ai_M62
+#define RGB_RED GPIO_PIN_1
+#define RGB_G GPIO_PIN_30
+#define RGB_B GPIO_PIN_0
+
+#define RGB_RED_PWM_CH PWM_CH1
+#define RGB_GREEN_PWM_CH PWM_CH2
+#define RGB_BLUE_PWM_CH PWM_CH0
+#else
 #define RGB_RED GPIO_PIN_12
 #define RGB_G GPIO_PIN_14
 #define RGB_B GPIO_PIN_15
-
 #define RGB_RED_PWM_CH PWM_CH0
 #define RGB_GREEN_PWM_CH PWM_CH2
 #define RGB_BLUE_PWM_CH PWM_CH3
+
+#endif
 
 struct bflb_device_s* pwm;
 

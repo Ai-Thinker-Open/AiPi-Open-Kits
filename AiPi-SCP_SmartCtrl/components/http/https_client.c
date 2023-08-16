@@ -450,7 +450,6 @@ void https_get_weather_task(void* arg)
     //
     char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
 
-
     sprintf(queue_buff, "{\"weather\":%s}", buff);
     xQueueSend(queue, queue_buff, portMAX_DELAY);
     vPortFree(buff);
@@ -460,7 +459,7 @@ void https_get_weather_task(void* arg)
     vTaskSuspend(https_Handle);
 
     while (1) {
-        mqtt_app_diconnect();
+        // mqtt_app_diconnect();
         queue_buff = pvPortMalloc(1024*2);
         //请求一次错误的响应，只获取时间
         char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
