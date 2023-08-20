@@ -150,6 +150,9 @@ static void src_home_btn_connect_mqtt_event_handler(lv_event_t* e)
 			lv_obj_clear_flag(guider_ui.src_home_cont_5, LV_OBJ_FLAG_HIDDEN);
 			xTimerStart(loading_time, 100/portTICK_PERIOD_MS);
 
+			mqtt_client_init(lv_textarea_get_text(guider_ui.src_home_ta_mqHost), atoi(lv_textarea_get_text(guider_ui.src_home_ta_mqPort)));
+			mqtt_client_register_event();
+			vTaskDelay(500/portTICK_PERIOD_MS);
 			if (!mqtt_start_connect(lv_textarea_get_text(guider_ui.src_home_ta_mqHost), atoi(lv_textarea_get_text(guider_ui.src_home_ta_mqPort)), lv_textarea_get_text(guider_ui.src_home_ta_mqUsername), lv_textarea_get_text(guider_ui.src_home_ta_mqPort))) {
 				lv_event_send(guider_ui.src_home_img_loding, LV_EVENT_CLICKED, NULL);
 				lv_event_send(guider_ui.src_home_imgbtn_10, LV_EVENT_CLICKED, NULL);
@@ -160,7 +163,6 @@ static void src_home_btn_connect_mqtt_event_handler(lv_event_t* e)
 				lv_label_set_text(guider_ui.src_home_label_14, "mqtt disconnect");
 				lv_obj_set_style_text_color(guider_ui.src_home_label_14, lv_color_make(0xff, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
 			}
-
 		}
 		break;
 		default:

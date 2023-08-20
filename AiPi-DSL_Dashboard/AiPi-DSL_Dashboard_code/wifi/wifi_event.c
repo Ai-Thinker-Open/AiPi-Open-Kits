@@ -15,7 +15,6 @@
 #include <lwip/tcpip.h>
 #include <lwip/sockets.h>
 #include <lwip/netdb.h>
-#include "sntp.h"
 
 #include "bl_fw_api.h"
 #include "wifi_mgmr_ext.h"

@@ -52,7 +52,7 @@ static void bl61x_show_heap_size_task(void* arg)
 {
 
     while (1) {
-        LOG_F("[%s:%d]heap_size-------> %d", DBG_TAG, __LINE__, bl61x_get_heap_size());
+        bl61x_get_heap_size();
         vTaskDelay(3000/portTICK_PERIOD_MS);
     }
 }
@@ -72,7 +72,6 @@ int main(void)
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();
-
     setup_ui(&guider_ui);
     custom_init(&guider_ui);
     events_init(&guider_ui);
@@ -98,6 +97,6 @@ static int bl61x_get_heap_size(void)
     bflb_mem_usage(PMEM_HEAP, &info2);
 
     total_free_size = info1.free_size;
-
+    LOG_F("heap size  KMEM heap=%d   PMEM heap=%d", info1.free_size, info2.free_size);
     return total_free_size;
 }

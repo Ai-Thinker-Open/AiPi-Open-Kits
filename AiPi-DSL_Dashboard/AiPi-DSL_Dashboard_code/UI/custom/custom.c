@@ -92,8 +92,7 @@ static void queue_receive_task(void* arg)
     else {
         LOG_E("ssid read value is NULL:%06X", SSID_KEY);
     }
-    vPortFree(ssid);
-    vPortFree(password);
+
     while (1) {
         queue_buff = pvPortMalloc(1024*2);
         memset(queue_buff, 0, 1024*2);
@@ -469,7 +468,7 @@ void custom_init(lv_ui* ui)
     queue = xQueueCreate(1, 1024*2);
     xTaskCreate(queue_receive_task, "queue_receive_task", 1024*3, ui, 3, NULL);
     http_timers = xTimerCreate("http_timers", pdMS_TO_TICKS(1000), pdTRUE, 0, http_hour_requst_time);
-    mqtt_client_init();
+    // mqtt_client_init();
 }
 
 static custom_event_t cjson__analysis_type(char* json_data)
