@@ -27,4 +27,5 @@ target_sources(app PRIVATE ${sources})
 sdk_set_main_file(main/main.c)
 
 # 设置工程名称，这个配置决定了编译出来的文件名。(Set the project name, which determines the compiled file name)
-project(Project_basic)
+get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+project(${PROJECT_NAME})
