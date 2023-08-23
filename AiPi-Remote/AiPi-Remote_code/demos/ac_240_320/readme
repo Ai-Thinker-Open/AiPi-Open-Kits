@@ -1,0 +1,42 @@
+源码使用说明：
+1、源码只包含UI界面部分，不包含event，图片只支持RGB565，不支持交换色。
+2、注意设置LVGL组件的inlcude路径，如果路径不对，编译时会提示找不到lvgl.h文件。
+3、关于组件开关，请注意打开LV_USE_{XXX}宏，{XXX}为用到的界面组件，不用到可以不打开。参考SDK的examples\lvgl路径下的示例lv_conf.h文件。
+4、关于字体，请注意打开LV_FONT_MONTSERRAT_{n}宏，{n}为用到的字号，不用到可以不打开。参考SDK的examples\lvgl路径下的示例lv_conf.h文件。
+   目前只支持官方内置的字体，中文或其他字体开发者自行导入字体库，自行修改使用的字体。
+5、生成的源码放在examples\lvgl\demos下的子目录，跟music、stresss、widgets等目录平级，可以正常编译。
+6、有任何使用问题、改进建议，请联系IoT云事业部。
+
+
+假设将源码拷贝到examples\lvgl\demos\test目录，修改如下：
+1、将源码拷贝到examples\lvgl\demos\test目录中。
+2、在examples\lvgl\demos\lv_demos.h添加头文件引用。
+   #include "test/ui.h"
+3、在examples\lvgl\main.c文件中增加调用UI初始化函数ui_init(),这个函数声明在ui.h，定义在ui.c中。。
+   完整的main函数参考如下：
+   int main(void)
+   {
+       board_init();
+
+       printf("lvgl case\r\n");
+
+       /* lvgl init */
+       lv_log_register_print_cb(lv_log_print_g_cb);
+       lv_init();
+       lv_port_disp_init();
+       lv_port_indev_init();
+
+       ui_init();   //这个函数声明在ui.h，定义在ui.c中。
+
+       lv_task_handler();
+
+       printf("lvgl success\r\n");
+
+       while (1) {
+           lv_task_handler();
+           bflb_mtimer_delay_ms(1);
+       }
+   }
+
+4、make即可。如果遇到问题，参考上述"源码使用说明"一节内容。
+

@@ -1,0 +1,33 @@
+{
+    "hvad": {
+        "energy_threshold": 2048,
+        "enable": 1,
+        "time_to_sleep": 600,
+        "trig_num": 3,
+        "eage_det": 15
+    },
+    "lasr": {
+        "lasr_wkp": {
+            "lp_threshold": -30.0,
+            "sleep_std_threshold": -30.0,
+            "std_threshold": -30.0,
+            "sleep_lp_threshold": -30.0
+        },
+        "lasr_asr": {
+            "lp_threshold": -30.0,
+            "std_threshold": -30.0,
+            "timeout": 10
+        }
+    },
+    "log": {
+        "enable": 0,
+        "set_level": 2,
+        "arpt_enable": 0
+    },
+    "record": {
+        "save_asr_only": 0,
+        "enable": 0
+    },
+    "version": "v1.0",
+    "name": "Unisound VUI config"
+}
