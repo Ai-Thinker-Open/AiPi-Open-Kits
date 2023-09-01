@@ -108,12 +108,12 @@ static char* cjson_analysis_ssid(char* json_data)
  * @brief cjson_analysis_password
  *
  * @param json_data
- * @return char*
+ * @return char* 返回密码字符串
 */
 static char* cjson_analysis_password(char* json_data)
 {
     static char* pass_str;
-    pass_str = pvPortMalloc(32);
+    pass_str = pvPortMalloc(32); // 申请32字节的内存
     memset(pass_str, 0, 32);
     cJSON* root = cJSON_Parse(json_data);
     if (root==NULL) {

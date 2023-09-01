@@ -475,4 +475,3 @@ void ble_hid_task(void* arg)
         ble_hid_dev_send(kb_num);
     }
 }
-

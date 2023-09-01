@@ -13,13 +13,9 @@
 #define SYS_STATUS_H
 
 
-
-
 #define MQTT_SERVER "your mqtt host"
 #define MQTT_USER_NAME "mqtt user name"
 #define MQTT_PASSWOLD "mqtt passworld"
-
-
 
 #define MQTT_PORT 1883
 #define FISH_MQTT_SUB_TOPIC "/FishTank/a81710cf69dd/devPub"
@@ -39,4 +35,5 @@ typedef enum {
 }custom_event_t;
 
 void system_status_init(void);
+
 #endif

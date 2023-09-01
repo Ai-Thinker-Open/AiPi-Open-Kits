@@ -40,6 +40,19 @@ lv_group_t* get_encoder_group(void);
 
 /**
  * @brief encoder_timer_cb
+ *   旋钮单独使用一个中断来识别会导致旋转方向识别不稳定，大概率出现误触，
+ *   使用的定时器以1ms为单位计算另外一个输入的电平时间可以有效减小误触
+ *   顺时针方向波形：
+ * A:  _______      _______
+ *            |____|       |_____
+ * B:  __________      _______
+ *               |____|       |____
+ *
+ * 逆时针方向波形：
+ * A: ________      _______
+ *            |____|       |_____
+ * B:_______      ______
+ *          |____|      |________
  *
  * @param xTimer
 */
@@ -49,32 +62,31 @@ static void encoder_timer_cb(TimerHandle_t xTimer)
     int timer_id = pvTimerGetTimerID(xTimer);
 
     switch (timer_id) {
-        case 0:
-            if (bflb_gpio_read(gpio, ENCODER_B)&&bflb_gpio_read(gpio, ENCODER_A)==0) timer_cont++;
+        case 0: //顺时针方向定时器
+            if (bflb_gpio_read(gpio, ENCODER_B)&&bflb_gpio_read(gpio, ENCODER_A)==0) timer_cont++; //当 A和B都满足顺时针状态时，开始增加及时
             else {
                 xTimerStop(ENCODER_1_timer, portMAX_DELAY);
                 // LOG_I("encoder B io Higt timer=%d ms", timer_cont);
-                if (timer_cont>4)xTaskNotify(encoder_task, 1, eSetValueWithOverwrite);
+                if (timer_cont>4)xTaskNotify(encoder_task, 1, eSetValueWithOverwrite); //当时B的高电平时间超过4ms,则方向为顺时针
                 timer_cont = 0;
             }
             break;
-        case 1:
-            if (bflb_gpio_read(gpio, ENCODER_B)==0&&bflb_gpio_read(gpio, ENCODER_A)==0) timer_cont++;
+        case 1: //逆时针方向定时器
+            if (bflb_gpio_read(gpio, ENCODER_B)==0&&bflb_gpio_read(gpio, ENCODER_A)==0) timer_cont++; //当 A和B都满足逆时针状态时，开始增加及时
             else {
                 xTimerStop(ENCODER_2_timer, portMAX_DELAY);
                 // LOG_I("encoder B  io low timer=%d ms", timer_cont);
-                if (timer_cont>4)xTaskNotify(encoder_task, 2, eSetValueWithOverwrite);
+                if (timer_cont>4)xTaskNotify(encoder_task, 2, eSetValueWithOverwrite);//当时B的低电平时间超过4ms,则方向为顺时针
                 timer_cont = 0;
             }
             break;
-        case 2:
+        case 2://按钮定时器
             if (bflb_gpio_read(gpio, ENCODER_PUSH)==0) {
                 timer_cont++;
                 if (timer_cont>300) {
                     timer_cont = 0;
                     xTimerStop(ENCODER_3_timer, portMAX_DELAY);
                     xTaskNotify(encoder_task, 4, eSetValueWithOverwrite);
-
                 }
             }
             else {

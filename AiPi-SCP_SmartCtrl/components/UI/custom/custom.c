@@ -120,7 +120,13 @@ static void queue_receive_task(void* arg)
     queue_buff = pvPortMalloc(1024);
     memset(queue_buff, 0, 1024);
     queu_ret = xQueueReceive(queue, queue_buff, pdMS_TO_TICKS(100));//读取
+
     if (queu_ret==pdTRUE)
+    {
+      if (queue_buff==NULL) {
+        vPortFree(queue_buff);
+        continue;
+      }
       switch (queue_get_custom_event(queue_buff))
       {
 
@@ -428,6 +434,7 @@ static void queue_receive_task(void* arg)
         default:
           break;
       }
+    }
     vPortFree(queue_buff);
   }
 }
@@ -517,6 +524,7 @@ static custom_event_t queue_get_custom_event(const char* json_data)
 
   return 0;
 }
+
 
 /**
  * @brief cjson_analysis_wifi_scan

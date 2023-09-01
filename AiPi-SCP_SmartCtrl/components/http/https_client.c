@@ -322,6 +322,7 @@ exit:
     ret = connect(sock_client, (struct sockaddr*)&dest, sizeof(dest));
     if (ret!=0) {
         LOG_E("... socket connect failed errno=%d", errno);
+        shutdown(sock_client, SHUT_RDWR);
         close(sock_client);
         goto __exit;
     }
@@ -333,6 +334,7 @@ exit:
     ret = write(sock_client, https_request_handle, strlen(https_request_handle));
     if (ret< 0) {
         LOG_E("HTTP send Handler failed error=%d", ret);
+        shutdown(sock_client, SHUT_RDWR);
         close(sock_client);
         goto __exit;
     }
@@ -454,6 +456,7 @@ void https_get_weather_task(void* arg)
     xQueueSend(queue, queue_buff, portMAX_DELAY);
     vPortFree(buff);
     vPortFree(queue_buff);
+
     xTimerStart(http_timers, portMAX_DELAY);
     LOG_I("Time start 1 hour times ....");
     vTaskSuspend(https_Handle);
@@ -463,6 +466,10 @@ void https_get_weather_task(void* arg)
         queue_buff = pvPortMalloc(1024*2);
         //请求一次错误的响应，只获取时间
         char* buff = https_get_data(https_get_request(HTTP_HOST, HTTP_PATH));
+        if (buff==NULL) {
+            vPortFree(queue_buff);
+            continue;
+        }
         memset(queue_buff, 0, 1024*2);
         sprintf(queue_buff, "{\"weather\":%s}", buff);
         xQueueSend(queue, queue_buff, portMAX_DELAY);
