@@ -17,7 +17,8 @@
 #include "bflb_dac.h"
 #include "StateMachine.h"
 #include "kvm_dev.h"
-
+#include "easyflash.h"
+#include "log.h"
 #define DBG_TAG "KVM_DEV"
 //USB 通道切换IO
 #define KVM_USB_EN GPIO_PIN_16
@@ -39,6 +40,33 @@
 struct bflb_device_s* gpio;
 struct bflb_device_s* dac;
 
+
+static void gpio_isr(int irq, void* arg)
+{
+    BaseType_t xHigherPriorityTaskWoken;
+
+    xHigherPriorityTaskWoken = pdFALSE;
+    bool  intstatus = bflb_gpio_get_intstatus(gpio, KVM_HDMI_CTRL_CH1);
+    if (intstatus) {
+        bflb_gpio_int_clear(gpio, KVM_HDMI_CTRL_CH1);
+        xTaskNotifyFromISR(StateMachine_Handle, KVM_HDMI_CH_1, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
+    }
+
+    intstatus = bflb_gpio_get_intstatus(gpio, KVM_HDMI_CTRL_CH2);
+    if (intstatus) {
+
+        bflb_gpio_int_clear(gpio, KVM_HDMI_CTRL_CH2);
+        xTaskNotifyFromISR(StateMachine_Handle, KVM_HDMI_CH_2, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
+    }
+
+    intstatus = bflb_gpio_get_intstatus(gpio, KVM_HDMI_CTRL_CH3);
+    if (intstatus) {
+
+        bflb_gpio_int_clear(gpio, KVM_HDMI_CTRL_CH3);
+        xTaskNotifyFromISR(StateMachine_Handle, KVM_HDMI_CH_3, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
+    }
+
+}
 void aipi_kvm_dev_init(void)
 {
     gpio = bflb_device_get_by_name("gpio");
@@ -53,16 +81,26 @@ void aipi_kvm_dev_init(void)
     bflb_gpio_init(gpio, KVM_HDMI_IN_CH1, GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
     bflb_gpio_init(gpio, KVM_HDMI_IN_CH2, GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
     bflb_gpio_init(gpio, KVM_HDMI_IN_CH3, GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
+
     //HDMI 按键识别初始化
-    bflb_gpio_init(gpio, KVM_HDMI_CTRL_CH1, GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
-    bflb_gpio_init(gpio, KVM_HDMI_CTRL_CH2, GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
-    bflb_gpio_init(gpio, KVM_HDMI_CTRL_CH3, GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
+    bflb_gpio_int_init(gpio, KVM_HDMI_CTRL_CH1, GPIO_INT_TRIG_MODE_SYNC_FALLING_EDGE);
+    bflb_gpio_int_init(gpio, KVM_HDMI_CTRL_CH2, GPIO_INT_TRIG_MODE_SYNC_FALLING_EDGE);
+    bflb_gpio_int_init(gpio, KVM_HDMI_CTRL_CH3, GPIO_INT_TRIG_MODE_SYNC_FALLING_EDGE);
+    bflb_gpio_int_mask(gpio, KVM_HDMI_CTRL_CH1, false);
+    bflb_gpio_int_mask(gpio, KVM_HDMI_CTRL_CH2, false);
+    bflb_gpio_int_mask(gpio, KVM_HDMI_CTRL_CH3, false);
+    bflb_irq_attach(gpio->irq_num, gpio_isr, gpio);
+    bflb_irq_enable(gpio->irq_num);
     //HDMI DAC初始化
     bflb_dac_init(dac, DAC_CLK_DIV_16);
-    // bflb_gpio_init(gpio, KVM_HDIM_CTRL_DAC, GPIO_ANALOG | GPIO_SMT_EN | GPIO_DRV_0);
 
     bflb_dac_channel_enable(dac, DAC_CHANNEL_A);
 
+    char* kvm_ch = flash_get_data(KVM_CH, 1);
+    LOG_I("KVM start read kvm channel:KVM_HDMI_CH%d", *kvm_ch+1);
+    aipi_kvm_set_HDIM_channel(*kvm_ch);
+    aipi_kvm_set_usb_channel(*kvm_ch);
+    vPortFree(kvm_ch);
 }
 /**
  * @brief aipi_kvm_set_usb_channel
@@ -74,7 +112,9 @@ void aipi_kvm_set_usb_channel(kvm_usb_ch_t kvm_usb_ch)
     //关闭切换输入
     bflb_gpio_set(gpio, KVM_USB_EN);
     bflb_gpio_set(gpio, KVM_USB_HUB_EN);
-    vTaskDelay(200/portTICK_PERIOD_MS);
+    // vTaskDelay(200/portTICK_PERIOD_MS);
+    bflb_mtimer_delay_ms(200);
+    LOG_I("KVM redy set USB ch%d", kvm_usb_ch+1);
     switch (kvm_usb_ch)
     {
         case KVM_USB_CH_1:
@@ -101,7 +141,8 @@ void aipi_kvm_set_usb_channel(kvm_usb_ch_t kvm_usb_ch)
     }
     //使能输入
     bflb_gpio_reset(gpio, KVM_USB_EN);
-    vTaskDelay(200/portTICK_PERIOD_MS);
+    bflb_mtimer_delay_ms(200);
+    // vTaskDelay(200/portTICK_PERIOD_MS);
     //打开HUB
     bflb_gpio_reset(gpio, KVM_USB_HUB_EN);
 }
@@ -116,10 +157,12 @@ void aipi_kvm_set_HDIM_channel(kvm_hdmi_ch_t kvm_ch)
     // digital_val= (val-0.2)*4095/(1.8V-0.2V) 
     uint16_t  digital_val = 0;
     uint16_t val = 0;
+    LOG_I("KVM redy set ch%d", kvm_ch+1);
     switch (kvm_ch)
     {
         case KVM_HDMI_CH_1:
             val = 2;
+
             break;
         case KVM_HDMI_CH_2:
         {
@@ -134,4 +177,6 @@ void aipi_kvm_set_HDIM_channel(kvm_hdmi_ch_t kvm_ch)
     }
     digital_val = (val-2)*4095/(18-2);
     bflb_dac_set_value(dac, DAC_CHANNEL_A, digital_val); //200mV，满值 0.2~1.8V
+
+    flash_erase_set(KVM_CH, &kvm_ch);
 }

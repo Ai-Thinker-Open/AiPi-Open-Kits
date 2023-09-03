@@ -18,7 +18,9 @@
 #include "log.h"
 #include "mem.h"
 #include "kvm_dev.h"
-
+#include "easyflash.h"
+#include "bflb_mtd.h"
+#include "StateMachine.h"
 #define DBG_TAG "MAIN"
 
 static int bl61x_get_heap_size(void)
@@ -37,8 +39,6 @@ static int bl61x_get_heap_size(void)
 }
 static void bl61x_show_heap_size_task(void* arg)
 {
-    aipi_kvm_set_usb_channel(KVM_USB_CH_3);
-    aipi_kvm_set_HDIM_channel(KVM_HDMI_CH_3);
     while (1) {
         bl61x_get_heap_size();
         vTaskDelay(3000/portTICK_PERIOD_MS);
@@ -48,8 +48,10 @@ static void bl61x_show_heap_size_task(void* arg)
 int main(void)
 {
     board_init();
+    bflb_mtd_init();
+    easyflash_init();
     aipi_kvm_dev_init();
     xTaskCreate(bl61x_show_heap_size_task, (char*)"heap", 512, NULL, 2, NULL);
-
+    StateMachineTask_start();
     vTaskStartScheduler();
 }
