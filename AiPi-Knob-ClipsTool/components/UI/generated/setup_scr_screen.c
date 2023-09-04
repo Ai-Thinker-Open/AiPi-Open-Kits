@@ -9,7 +9,7 @@
 #include "gui_guider.h"
 #include "events_init.h"
 #include "custom.h"
-
+#include "ble_hid_dev.h"
 static lv_obj_t* g_kb_screen;
 static void kb_screen_event_cb(lv_event_t* e)
 {
@@ -236,7 +236,7 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_label_4, 28, 174);
 	lv_obj_set_size(ui->screen_label_4, 182, 25);
 	lv_obj_set_scrollbar_mode(ui->screen_label_4, LV_SCROLLBAR_MODE_OFF);
-	lv_label_set_text(ui->screen_label_4, "AiPi-KnobCilpsTool");
+	lv_label_set_text(ui->screen_label_4, BLE_DEV_NAME);
 	lv_label_set_long_mode(ui->screen_label_4, LV_LABEL_LONG_WRAP);
 
 	//Set style for screen_label_4. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT

@@ -33,7 +33,7 @@
 
 #define GBD_TAG "BLE HID"
 
-#define BLE_DEV_NAME "AiPi-CilpsTool"
+
 
 #define BLE_USE_WINDOWS_BEACON 
 

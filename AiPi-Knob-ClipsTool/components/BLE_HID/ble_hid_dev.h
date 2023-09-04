@@ -10,6 +10,9 @@
 */
 #ifndef BLE_HID_DEV_H
 #define BLE_HID_DEV_H
+
+#define BLE_DEV_NAME "AiPi-CilpsTool"
+
 typedef enum {
     BLE_STATUS_ENABLE = 0,
     BLE_STATUS_CONNECT,
