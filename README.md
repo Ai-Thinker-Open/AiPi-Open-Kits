@@ -16,6 +16,7 @@
 | AiPi-SCP_SmartCtrl| 小安派智能监控终端 源码| [点击查看](AiPi-SCP_SmartCtrl/README.md) |
 | AiPi-Knob| 小安派-Knob旋钮源码| [点击查看](AiPi-Knob/README.md) |
 | AiPi-Remote| 小安派-Remote 源码| [点击查看](AiPi-Remote/README.md) |
+| AiPi-Knob-ClipsTool| 小安派-AiPi-Knob-ClipsTool 剪辑助手源码| [点击查看](AiPi-Knob-ClipsTool/README.md) |
 
 ## 一、克隆Ai-Thinker仓库
 在linux的终端下输入
