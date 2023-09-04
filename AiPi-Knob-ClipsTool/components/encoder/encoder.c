@@ -83,14 +83,14 @@ static void encoder_timer_cb(TimerHandle_t xTimer)
         case 2://按钮定时器
             if (bflb_gpio_read(gpio, ENCODER_PUSH)==0) {
                 timer_cont++;
-                if (timer_cont>300) {
+                if (timer_cont>300) { //大于3s 即为长按
                     timer_cont = 0;
                     xTimerStop(ENCODER_3_timer, portMAX_DELAY);
-                    xTaskNotify(encoder_task, 4, eSetValueWithOverwrite);
+                    xTaskNotify(encoder_task, 4, eSetValueWithOverwrite);//发送任务通知
                 }
             }
             else {
-                if (timer_cont< 250) {
+                if (timer_cont< 250) {//否则识别为点击
 
                     xTimerStop(ENCODER_3_timer, portMAX_DELAY);
                     xTaskNotify(encoder_task, 3, eSetValueWithOverwrite);

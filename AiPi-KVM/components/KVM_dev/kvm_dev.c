@@ -40,7 +40,12 @@
 struct bflb_device_s* gpio;
 struct bflb_device_s* dac;
 
-
+/**
+ * @brief gpio_isr
+ *
+ * @param irq
+ * @param arg
+*/
 static void gpio_isr(int irq, void* arg)
 {
     BaseType_t xHigherPriorityTaskWoken;
@@ -67,6 +72,10 @@ static void gpio_isr(int irq, void* arg)
     }
 
 }
+/**
+ * @brief
+ *
+*/
 void aipi_kvm_dev_init(void)
 {
     gpio = bflb_device_get_by_name("gpio");

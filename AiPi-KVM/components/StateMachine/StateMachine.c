@@ -22,12 +22,19 @@
 void* StateMachine_Handle = NULL;
 
 static void StateMachineTaskHandle(void* arg);
-
+/**
+ * @brief
+ *
+*/
 void StateMachineTask_start(void)
 {
     xTaskCreate(StateMachineTaskHandle, "StateMachineTask", 1024, NULL, 1, (xTaskHandle*)&StateMachine_Handle);
 }
-
+/**
+ * @brief
+ *
+ * @param arg
+*/
 static void StateMachineTaskHandle(void* arg)
 {
     uint32_t State;
