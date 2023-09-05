@@ -17,6 +17,7 @@
 | AiPi-Knob| 小安派-Knob旋钮源码| [点击查看](AiPi-Knob/README.md) |
 | AiPi-Remote| 小安派-Remote 源码| [点击查看](AiPi-Remote/README.md) |
 | AiPi-Knob-ClipsTool| 小安派-AiPi-Knob-ClipsTool 剪辑助手源码| [点击查看](AiPi-Knob-ClipsTool/README.md) |
+| AiPi-KVM| 小安派-KVM 三进一出切换器源码| [点击查看](AiPi-KVM/README.md) |
 
 ## 一、克隆Ai-Thinker仓库
 在linux的终端下输入
@@ -51,9 +52,8 @@ make flash COMX=/dev/ttyUSB0  //烧录命令
 ```
 ***注意：启动烧录命令后会出现“Please Press Reset Key!”，需要在模组上按下RST键继续完成烧录***
 
-
-
 ## 示例——烧录AiPi-Cam
+
 ### 1.准备AiPi-Cam-D与USB转TTL，接线如下
 |AiPi-Cam-D|连线  | USB转TTL     |
 | :----: | :----: | :----:  |
