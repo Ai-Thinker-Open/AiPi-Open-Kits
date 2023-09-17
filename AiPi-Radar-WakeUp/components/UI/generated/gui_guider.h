@@ -51,6 +51,22 @@ extern "C" {
 		lv_obj_t* Home_img_wifi;
 		lv_obj_t* Home_cont_loding;
 		lv_obj_t* Home_img_loding;
+		lv_obj_t* tile_lock;
+		lv_obj_t* Home_label_pin;
+		lv_obj_t* Home_ta_PIN;
+		lv_obj_t* Home_label_timer;
+		lv_obj_t* Home_ta_min;
+		lv_obj_t* Home_ta_sec;
+		lv_obj_t* Home_label_2;
+		lv_obj_t* Home_label_3;
+		lv_obj_t* Home_btn_3;
+		lv_obj_t* Home_btn_3_label;
+		lv_obj_t* Home_label_Tile;
+		char ssid[32];
+		char pass[64];
+		char PIN[64];
+		uint16_t timerout;
+		void* rd_01_nodet_time;
 	}lv_ui;
 
 	void ui_init_style(lv_style_t* style);
@@ -58,16 +74,10 @@ extern "C" {
 	void setup_ui(lv_ui* ui);
 	extern lv_ui guider_ui;
 
+	void setup_scr_Home(lv_ui* ui);
 	extern	int Home_digital_clock_1_hour_value;
 	extern	int Home_digital_clock_1_min_value;
 	extern	int Home_digital_clock_1_sec_value;
-	extern	int  src_home_digital_date_day_value;
-	extern	int  src_home_digital_date_wday_value;
-	extern	int  src_home_digital_date_mont_value;
-	extern	int  src_home_digital_date_yesr_value;
-
-	void setup_scr_Home(lv_ui* ui);
-
 	LV_IMG_DECLARE(_loading_alpha_100x100);
 	LV_IMG_DECLARE(_tianqiqing_i_alpha_20x20);
 	LV_IMG_DECLARE(_tianqiqing_i_baoyu_alpha_20x20);

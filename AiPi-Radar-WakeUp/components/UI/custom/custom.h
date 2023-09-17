@@ -16,6 +16,7 @@ extern "C" {
 
 #include "gui_guider.h"
     extern void* custom_status_task;
+    extern int system_new_start;
 
     typedef enum {
         CUSTOM_STATE_NONE = 0,
@@ -33,9 +34,13 @@ extern "C" {
         CUSTOM_STATE_RADAR_NDET,
     }custom_state_t;
 
+    typedef struct {
+        char city[16];
+        char wea[64];
+        char tem_day[2];
+    } weather_t;
     void custom_init(lv_ui* ui);
-    void flash_erase_set(char* key, char* value);
-    char* flash_get_data(char* key, uint32_t len);
+
 #ifdef __cplusplus
 }
 #endif

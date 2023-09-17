@@ -9,23 +9,28 @@
 #include "gui_guider.h"
 #include "events_init.h"
 #include "custom.h"
+#include "https_client.h"
 
 int Home_digital_clock_1_hour_value = 11;
 int Home_digital_clock_1_min_value = 25;
 int Home_digital_clock_1_sec_value = 50;
-int  src_home_digital_date_day_value = 13;
-int  src_home_digital_date_wday_value = 3;
-int  src_home_digital_date_mont_value = 9;
-int  src_home_digital_date_yesr_value = 2023;
+
+char* week_day[7] = { "日","一","二","三","四","五","六" };
+
 void Home_digital_clock_1_timer(lv_timer_t* timer)
 {
 	clock_count_24(&Home_digital_clock_1_hour_value, &Home_digital_clock_1_min_value, &Home_digital_clock_1_sec_value);
 	if (lv_obj_is_valid(guider_ui.Home_digital_clock_1))
 	{
 		lv_dclock_set_text_fmt(guider_ui.Home_digital_clock_1, "%02d:%02d:%02d", Home_digital_clock_1_hour_value, Home_digital_clock_1_min_value, Home_digital_clock_1_sec_value);
+		lv_label_set_text_fmt(guider_ui.Home_label_date, "%04d年%02d月%02d日", date_yesr_value, date_mont_value, date_day_value);
+		lv_label_set_text_fmt(guider_ui.Home_label_wday, "星期%s", week_day[date_wday_value]);
 	}
 }
 static lv_obj_t* g_kb_Home;
+
+static lv_obj_t* g_kb_numble;
+
 static void kb_Home_event_cb(lv_event_t* e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
@@ -34,6 +39,7 @@ static void kb_Home_event_cb(lv_event_t* e)
 		lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
 	}
 }
+
 __attribute__((unused)) static void ta_Home_event_cb(lv_event_t* e)
 {
 
@@ -64,8 +70,14 @@ void setup_scr_Home(lv_ui* ui) {
 	lv_obj_add_event_cb(g_kb_Home, kb_Home_event_cb, LV_EVENT_ALL, NULL);
 	lv_obj_add_flag(g_kb_Home, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_set_style_text_font(g_kb_Home, &lv_font_Amiko_Regular_18, LV_PART_MAIN|LV_STATE_DEFAULT);
-	lv_obj_set_scrollbar_mode(ui->Home, LV_SCROLLBAR_MODE_OFF);
 
+	g_kb_numble = lv_keyboard_create(ui->Home);
+	lv_obj_add_event_cb(g_kb_numble, kb_Home_event_cb, LV_EVENT_ALL, NULL);
+	lv_keyboard_set_mode(g_kb_numble, LV_KEYBOARD_MODE_NUMBER);
+	lv_obj_add_flag(g_kb_numble, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_set_style_text_font(g_kb_numble, &lv_font_Amiko_Regular_18, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	lv_obj_set_scrollbar_mode(ui->Home, LV_SCROLLBAR_MODE_OFF);
 	//Set style for Home. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
 	lv_obj_set_style_bg_color(ui->Home, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_grad_color(ui->Home, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -97,7 +109,7 @@ void setup_scr_Home(lv_ui* ui) {
 	lv_obj_set_style_bg_opa(ui->Home_tileview_1, 111, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 
 	//add new tile tile_config
-	ui->tile_config = lv_tileview_add_tile(ui->Home_tileview_1, 0, 1, LV_DIR_TOP);
+	ui->tile_config = lv_tileview_add_tile(ui->Home_tileview_1, 0, 1, LV_DIR_TOP | LV_DIR_BOTTOM);
 
 	//Write codes Home_label_ssd
 	ui->Home_label_ssd = lv_label_create(ui->tile_config);
@@ -497,10 +509,10 @@ void setup_scr_Home(lv_ui* ui) {
 	//Write codes Home_label_weather
 	ui->Home_label_weather = lv_label_create(ui->Home_cont_weather);
 	lv_obj_set_pos(ui->Home_label_weather, 41, 104);
-	lv_obj_set_size(ui->Home_label_weather, 55, 11);
+	lv_obj_set_size(ui->Home_label_weather, 44, 11);
 	lv_obj_set_scrollbar_mode(ui->Home_label_weather, LV_SCROLLBAR_MODE_OFF);
 	lv_label_set_text(ui->Home_label_weather, "雷雨");
-	lv_label_set_long_mode(ui->Home_label_weather, LV_LABEL_LONG_WRAP);
+	lv_label_set_long_mode(ui->Home_label_weather, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
 	//Set style for Home_label_weather. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
 	lv_obj_set_style_radius(ui->Home_label_weather, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -1085,6 +1097,307 @@ void setup_scr_Home(lv_ui* ui) {
 	lv_img_set_src(ui->Home_img_wifi, &_no_internet_alpha_16x16);
 	lv_img_set_pivot(ui->Home_img_wifi, 50, 50);
 	lv_img_set_angle(ui->Home_img_wifi, 0);
+
+	//add new tile tile_lock
+	ui->tile_lock = lv_tileview_add_tile(ui->Home_tileview_1, 0, 2, LV_DIR_TOP);
+
+	//Write codes Home_label_pin
+	ui->Home_label_pin = lv_label_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_label_pin, 40, 50);
+	lv_obj_set_size(ui->Home_label_pin, 44, 17);
+	lv_obj_set_scrollbar_mode(ui->Home_label_pin, LV_SCROLLBAR_MODE_OFF);
+	lv_label_set_text(ui->Home_label_pin, "PIN:");
+	lv_label_set_long_mode(ui->Home_label_pin, LV_LABEL_LONG_WRAP);
+
+	//Set style for Home_label_pin. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_label_pin, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_label_pin, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_label_pin, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_label_pin, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_label_pin, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_label_pin, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_label_pin, &lv_font_montserratMedium_12, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(ui->Home_label_pin, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_line_space(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_label_pin, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Write codes Home_ta_PIN
+	ui->Home_ta_PIN = lv_textarea_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_ta_PIN, 49, 68);
+	lv_obj_set_size(ui->Home_ta_PIN, 141, 25);
+	lv_obj_set_scrollbar_mode(ui->Home_ta_PIN, LV_SCROLLBAR_MODE_OFF);
+
+	//Set style for Home_ta_PIN. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_ta_PIN, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_ta_PIN, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_ta_PIN, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_ta_PIN, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_ta_PIN, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_ta_PIN, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_ta_PIN, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_ta_PIN, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_ta_PIN, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_ta_PIN, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_ta_PIN, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(ui->Home_ta_PIN, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_width(ui->Home_ta_PIN, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_opa(ui->Home_ta_PIN, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_ta_PIN, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_ta_PIN, &lv_font_montserratMedium_12, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(ui->Home_ta_PIN, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_ta_PIN, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_ta_PIN, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_ta_PIN, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_ta_PIN, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui->Home_ta_PIN, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Set style for Home_ta_PIN. Part: LV_PART_SCROLLBAR, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_ta_PIN, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_ta_PIN, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_ta_PIN, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_textarea_set_password_mode(ui->Home_ta_PIN, true);
+	// lv_textarea_set_text(ui->Home_ta_PIN, "123456");
+	lv_textarea_set_text(ui->Home_ta_PIN, "123456");
+	//use keyboard on Home_ta_PIN
+
+	lv_obj_add_event_cb(ui->Home_ta_PIN, ta_Home_event_cb, LV_EVENT_ALL, g_kb_numble);
+
+	//Write codes Home_label_timer
+	ui->Home_label_timer = lv_label_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_label_timer, 40, 102);
+	lv_obj_set_size(ui->Home_label_timer, 90, 18);
+	lv_obj_set_scrollbar_mode(ui->Home_label_timer, LV_SCROLLBAR_MODE_OFF);
+	lv_label_set_text(ui->Home_label_timer, "TimeOut:");
+	lv_label_set_long_mode(ui->Home_label_timer, LV_LABEL_LONG_WRAP);
+
+	//Set style for Home_label_timer. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_label_timer, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_label_timer, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_label_timer, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_label_timer, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_label_timer, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_label_timer, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_label_timer, &lv_font_montserratMedium_12, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(ui->Home_label_timer, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_line_space(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_label_timer, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui->Home_label_timer, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Write codes Home_ta_min
+	ui->Home_ta_min = lv_textarea_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_ta_min, 55, 123);
+	lv_obj_set_size(ui->Home_ta_min, 38, 25);
+	lv_obj_set_scrollbar_mode(ui->Home_ta_min, LV_SCROLLBAR_MODE_OFF);
+
+	//Set style for Home_ta_min. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_ta_min, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_ta_min, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_ta_min, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_ta_min, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_ta_min, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_ta_min, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_ta_min, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_ta_min, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_ta_min, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_ta_min, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_ta_min, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(ui->Home_ta_min, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_width(ui->Home_ta_min, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_opa(ui->Home_ta_min, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_ta_min, lv_color_make(0xfb, 0xfb, 0xfb), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_ta_min, &lv_font_montserratMedium_12, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(ui->Home_ta_min, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_ta_min, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_ta_min, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_ta_min, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_ta_min, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui->Home_ta_min, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Set style for Home_ta_min. Part: LV_PART_SCROLLBAR, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_ta_min, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_ta_min, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_ta_min, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_textarea_set_text(ui->Home_ta_min, "00");
+
+	//use keyboard on Home_ta_min
+	lv_obj_add_event_cb(ui->Home_ta_min, ta_Home_event_cb, LV_EVENT_ALL, g_kb_numble);
+
+	//Write codes Home_ta_sec
+	ui->Home_ta_sec = lv_textarea_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_ta_sec, 112, 123);
+	lv_obj_set_size(ui->Home_ta_sec, 38, 25);
+	lv_obj_set_scrollbar_mode(ui->Home_ta_sec, LV_SCROLLBAR_MODE_OFF);
+
+	//Set style for Home_ta_sec. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_ta_sec, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_ta_sec, lv_color_make(0x00, 0x00, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_ta_sec, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_ta_sec, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_ta_sec, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_ta_sec, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_ta_sec, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_ta_sec, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_ta_sec, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_ta_sec, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_ta_sec, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(ui->Home_ta_sec, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_width(ui->Home_ta_sec, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_opa(ui->Home_ta_sec, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_ta_sec, lv_color_make(0xfe, 0xfe, 0xfe), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_ta_sec, &lv_font_montserratMedium_12, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(ui->Home_ta_sec, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_ta_sec, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_ta_sec, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_ta_sec, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_ta_sec, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui->Home_ta_sec, 4, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Set style for Home_ta_sec. Part: LV_PART_SCROLLBAR, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_ta_sec, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_ta_sec, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_ta_sec, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
+	lv_textarea_set_text(ui->Home_ta_sec, "20");
+
+	//use keyboard on Home_ta_sec
+	lv_obj_add_event_cb(ui->Home_ta_sec, ta_Home_event_cb, LV_EVENT_ALL, g_kb_numble);
+
+	//Write codes Home_label_2
+	ui->Home_label_2 = lv_label_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_label_2, 91, 124);
+	lv_obj_set_size(ui->Home_label_2, 20, 23);
+	lv_obj_set_scrollbar_mode(ui->Home_label_2, LV_SCROLLBAR_MODE_OFF);
+	lv_label_set_text(ui->Home_label_2, ":");
+	lv_label_set_long_mode(ui->Home_label_2, LV_LABEL_LONG_WRAP);
+
+	//Set style for Home_label_2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_label_2, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_label_2, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_label_2, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_label_2, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_label_2, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_label_2, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_label_2, &lv_font_montserratMedium_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_line_space(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_label_2, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui->Home_label_2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Write codes Home_label_3
+	ui->Home_label_3 = lv_label_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_label_3, 150, 130);
+	lv_obj_set_size(ui->Home_label_3, 34, 14);
+	lv_obj_set_scrollbar_mode(ui->Home_label_3, LV_SCROLLBAR_MODE_OFF);
+	lv_label_set_text(ui->Home_label_3, "秒/S");
+	lv_label_set_long_mode(ui->Home_label_3, LV_LABEL_LONG_WRAP);
+
+	//Set style for Home_label_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_label_3, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_label_3, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_label_3, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_label_3, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_label_3, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_label_3, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_label_3, &lv_font_simhei_12, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_line_space(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_label_3, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui->Home_label_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Write codes Home_btn_3
+	ui->Home_btn_3 = lv_btn_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_btn_3, 86, 198);
+	lv_obj_set_size(ui->Home_btn_3, 58, 28);
+	lv_obj_set_scrollbar_mode(ui->Home_btn_3, LV_SCROLLBAR_MODE_OFF);
+
+	//Set style for Home_btn_3. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_btn_3, 5, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_btn_3, lv_color_make(0x30, 0x30, 0x30), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_btn_3, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_btn_3, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_btn_3, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_btn_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_btn_3, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_btn_3, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_btn_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_btn_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_btn_3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(ui->Home_btn_3, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_width(ui->Home_btn_3, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_opa(ui->Home_btn_3, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_btn_3, lv_color_make(0xf3, 0xf3, 0xf3), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_btn_3, &lv_font_simhei_12, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_btn_3, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
+	ui->Home_btn_3_label = lv_label_create(ui->Home_btn_3);
+	lv_label_set_text(ui->Home_btn_3_label, "确定");
+	lv_obj_set_style_pad_all(ui->Home_btn_3, 0, LV_STATE_DEFAULT);
+	lv_obj_align(ui->Home_btn_3_label, LV_ALIGN_CENTER, 0, 0);
+
+	//Write codes Home_label_Tile
+	ui->Home_label_Tile = lv_label_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_label_Tile, 69, 12);
+	lv_obj_set_size(ui->Home_label_Tile, 110, 16);
+	lv_obj_set_scrollbar_mode(ui->Home_label_Tile, LV_SCROLLBAR_MODE_OFF);
+	lv_label_set_text(ui->Home_label_Tile, "雷达检测配置");
+	lv_label_set_long_mode(ui->Home_label_Tile, LV_LABEL_LONG_WRAP);
+
+	//Set style for Home_label_Tile. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_label_Tile, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_label_Tile, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_label_Tile, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_label_Tile, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_label_Tile, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_label_Tile, lv_color_make(0xe2, 0x9c, 0x00), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_label_Tile, &lv_font_simhei_16, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(ui->Home_label_Tile, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_line_space(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(ui->Home_label_Tile, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 
 	//Write codes Home_cont_loding
 	ui->Home_cont_loding = lv_obj_create(ui->Home);

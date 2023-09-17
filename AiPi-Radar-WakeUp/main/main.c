@@ -72,6 +72,8 @@ int main(void)
     //init easyflash
     bflb_mtd_init();
     easyflash_init();
+    system_new_start = true;
+
     /* lvgl init */
     lv_log_register_print_cb(lv_log_print_g_cb);
     lv_init();

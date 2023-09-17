@@ -17,10 +17,17 @@ extern "C" {
 #define HTTP_HOST "v0.yiketianqi.com"
 #define HTTP_PATH "free/week?unescape=1&appid=17769781&appsecret=5IbudTJx"
 
+    extern int clock_1_hour_value;
+    extern int clock_1_min_value;
+    extern int clock_1_sec_value;
+
+    extern int date_day_value;
+    extern int date_wday_value;
+    extern int date_mont_value;
+    extern int date_yesr_value;
+
     char* https_get_request(const char* host, const char* https_url);
     void https_get_weather_task(void* arg);
-    char* compare_wea_output_img_100x100(const char* weather_data);
-
     char* https_get_data(const char* https_request_data);
 #ifdef __cplusplus
 }

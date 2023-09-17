@@ -15,15 +15,16 @@ extern "C" {
 #include "font/lv_font.h"
 #endif
 
-LV_FONT_DECLARE(lv_font_montserratMedium_12)
-LV_FONT_DECLARE(lv_font_montserratMedium_16)
-LV_FONT_DECLARE(lv_font_simhei_16)
-LV_FONT_DECLARE(lv_font_simhei_40)
-LV_FONT_DECLARE(lv_font_simhei_11)
-LV_FONT_DECLARE(lv_font_Antonio_Regular_40)
-LV_FONT_DECLARE(lv_font_simhei_14)
-LV_FONT_DECLARE(lv_font_Amiko_Regular_18)
-
+    LV_FONT_DECLARE(lv_font_montserratMedium_12)
+        LV_FONT_DECLARE(lv_font_montserratMedium_16)
+        LV_FONT_DECLARE(lv_font_montserratMedium_20)
+        LV_FONT_DECLARE(lv_font_simhei_16)
+        LV_FONT_DECLARE(lv_font_simhei_40)
+        LV_FONT_DECLARE(lv_font_simhei_11)
+        LV_FONT_DECLARE(lv_font_Antonio_Regular_40)
+        LV_FONT_DECLARE(lv_font_simhei_14)
+        LV_FONT_DECLARE(lv_font_Amiko_Regular_18)
+        LV_FONT_DECLARE(lv_font_simhei_12)
 
 #ifdef __cplusplus
 }

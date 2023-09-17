@@ -13,6 +13,9 @@
 
 #define RD_01_IO 3
 
+extern int rd_01_detected;
+extern void* rd_01_nodet_time;
+
 void Rd_01_recv_init(void);
 
 #endif

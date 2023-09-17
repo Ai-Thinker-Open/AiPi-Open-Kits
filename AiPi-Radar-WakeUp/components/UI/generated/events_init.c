@@ -12,8 +12,10 @@
 #include "task.h"
 #include "log.h"
 #include "custom.h"
-
+#include "wifi_event.h"
 #define DBG_TAG "LV-EVENT"
+
+
 
 static xTimerHandle  loding_time;
 //定时器旋转图片
@@ -86,9 +88,45 @@ static void Home_img_loding_event_handler(lv_event_t* e)
     }
 }
 
+static void Home_img_btn_3_event_handler(lv_event_t* e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui* ui = lv_event_get_user_data(e);
+    uint16_t timer_out_min = 0;
+    uint8_t timerout_sec = 0;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    switch (code)
+    {
+        case LV_EVENT_CLICKED:
+        {
+            //获取PIN 码
+            strcpy(ui->PIN, lv_textarea_get_text(ui->Home_ta_PIN));
+            flash_erase_set("PIN", ui->PIN);
+            //读取锁屏时间
+            timer_out_min = atoi(lv_textarea_get_text(ui->Home_ta_min));
+            timerout_sec = atoi(lv_textarea_get_text(ui->Home_ta_sec));
+
+            if (timer_out_min>0) {
+                ui->timerout = timer_out_min*60+timerout_sec;
+            }
+            else
+                ui->timerout = timerout_sec;
+
+            LOG_I("Lock PC time=%d s", ui->timerout);
+            if (xTimerIsTimerActive(ui->rd_01_nodet_time)!=pdFALSE)
+                xTimerStopFromISR(ui->rd_01_nodet_time, &xHigherPriorityTaskWoken);
+            xTimerChangePeriodFromISR(ui->rd_01_nodet_time, pdMS_TO_TICKS(ui->timerout*1000), &xHigherPriorityTaskWoken);//重新设置锁屏的时间
+        }
+        break;
+        default:
+            break;
+    }
+}
+
 void events_init_Home(lv_ui* ui)
 {
     lv_obj_add_event_cb(ui->Home_btn_connect, Home_btn_connect_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->Home_btn_2, Home_btn_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->Home_img_loding, Home_img_loding_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->Home_btn_3, Home_img_btn_3_event_handler, LV_EVENT_ALL, ui);
 }

@@ -24,6 +24,7 @@
 #include "bflb_mtimer.h"
 
 #include "bl616_glb.h"
+#include "wifi_event.h"
 #include "rfparam_adapter.h"
 #include "custom.h"
 #include "board.h"
@@ -34,6 +35,10 @@
 #define WIFI_STACK_SIZE     (1024*4)
 #define TASK_PRIORITY_FW    (16)
 
+
+char ip_addr_str[16] = { 0 };
+char ap_ssid[32] = { 0 };
+char ap_password[64] = { 0 };
 static wifi_conf_t conf =
 {
     .country_code = "CN",
@@ -188,11 +193,26 @@ uint8_t wifi_connect(char* ssid, char* passwd)
                 xTaskNotify(custom_status_task, CUSTOM_STATE_WIFI_DISCONNECT, eSetValueWithOverwrite);
                 return 4;
             case CODE_WIFI_ON_CONNECTED:	//连接成功(表示wifi sta状态的时候表示同时获取IP(DHCP)成功，或者使用静态IP)
-                LOG_I("Wating wifi connet OK");
-                xTaskNotify(custom_status_task, CUSTOM_STATE_WIFI_OK, eSetValueWithOverwrite);
+                // LOG_I("Wating wifi connet OK");
+                // xTaskNotify(custom_status_task, CUSTOM_STATE_WIFI_OK, eSetValueWithOverwrite);
                 break;
             case CODE_WIFI_ON_GOT_IP:
+                wifi_sta_ip4_addr_get(&ipv4_addr, NULL, NULL, NULL);
+                memset(ip_addr_str, 0, 16);
+                memset(ap_ssid, 0, 32);
+                memset(ap_password, 0, 64);
+                //缓存
+                strcpy(ip_addr_str, inet_ntoa(ipv4_addr));
+                strcpy(ap_ssid, ssid);
+                strcpy(ap_password, passwd);
+                //写入flash
+                flash_erase_set(SSID_KEY, ssid);
+                flash_erase_set(PASS_KEY, passwd);
+                strcpy(guider_ui.ssid, ssid);
+                strcpy(guider_ui.pass, passwd);
+                //发送事件
                 xTaskNotify(custom_status_task, CUSTOM_STATE_WIFI_IP, eSetValueWithOverwrite);
+
                 return 0;
             default:
                 //等待连接成功
@@ -202,4 +222,63 @@ uint8_t wifi_connect(char* ssid, char* passwd)
     }
 
     return 14; //连接超时
+}
+
+/**
+ * @brief
+ *
+ * @param key
+ * @param value
+*/
+void flash_erase_set(char* key, char* value)
+{
+    size_t len = 0;
+    int value_len = strlen(value);
+    ef_set_and_save_env(key, value);
+    // bflb_flash_read(key, flash_data, strlen(value));
+    // printf("writer data:%s\r\n", flash_data);
+    memset(value, 0, strlen(value));
+    ef_get_env_blob(key, value, value_len, &len);
+}
+/**
+ * @brief
+ *
+ * @param key
+ * @return char*
+*/
+char* flash_get_data(char* key, uint32_t len)
+{
+    static char* flash_data;
+    flash_data = pvPortMalloc(len);
+    memset(flash_data, 0, len);
+
+    ef_get_env_blob(key, flash_data, len, (size_t)&len);
+
+    return flash_data;
+}
+/**
+ * @brief system_start_auto_connenct
+ *     系统启动自动连接WiFi，
+ * @param enable true:启动连接  flase: 不连接
+*/
+void system_start_auto_connenct(int enable)
+{
+    if (!enable) return;
+
+    char* ssid = NULL;
+    char* password = NULL;
+    //启动自动连接WiFi
+    ssid = flash_get_data(SSID_KEY, 32); //读取SSID
+    password = flash_get_data(PASS_KEY, 64);//读取PASS
+    if (ssid!=NULL)
+    {
+        LOG_I("read flash ssid:%s password:%s", ssid, password);
+        wifi_connect(ssid, password);
+    }
+    else {
+        LOG_E("ssid read value is NULL:%06X", SSID_KEY);
+    }
+
+    vPortFree(ssid);
+    vPortFree(password);
 }

@@ -36,6 +36,14 @@
 #include "log.h"
 
 #include "https_client.h"
+int clock_1_hour_value = 11;
+int clock_1_min_value = 25;
+int clock_1_sec_value = 50;
+
+int date_day_value = 13;
+int date_wday_value = 3;
+int date_mont_value = 9;
+int date_yesr_value = 2023;
 
 // #define REQUEST_HTTPS
 #define REQUEST_HTTP
@@ -366,44 +374,44 @@ static void get_https_date(char* date)
 
     char* date_data = date + 6;
     char* date_wday = strtok(date_data, ",");
-    if (strcmp(date_wday, "Sun")==0)src_home_digital_date_wday_value = 0;
-    if (strcmp(date_wday, "Mon")==0)src_home_digital_date_wday_value = 1;
-    if (strcmp(date_wday, "Tue")==0)src_home_digital_date_wday_value = 2;
-    if (strcmp(date_wday, "Wed")==0)src_home_digital_date_wday_value = 3;
-    if (strcmp(date_wday, "Thu")==0)src_home_digital_date_wday_value = 4;
-    if (strcmp(date_wday, "Fri")==0)src_home_digital_date_wday_value = 5;
-    if (strcmp(date_wday, "Sat")==0)src_home_digital_date_wday_value = 6;
+    if (strcmp(date_wday, "Sun")==0)date_wday_value = 0;
+    if (strcmp(date_wday, "Mon")==0)date_wday_value = 1;
+    if (strcmp(date_wday, "Tue")==0)date_wday_value = 2;
+    if (strcmp(date_wday, "Wed")==0)date_wday_value = 3;
+    if (strcmp(date_wday, "Thu")==0)date_wday_value = 4;
+    if (strcmp(date_wday, "Fri")==0)date_wday_value = 5;
+    if (strcmp(date_wday, "Sat")==0)date_wday_value = 6;
     date_data += 5;
 
     char* date_day = strtok(date_data, " ");
-    src_home_digital_date_day_value = atoi(date_day);
+    date_day_value = atoi(date_day);
     int i = 0;
     while (date_day!=NULL) {
         date_day = strtok(NULL, " ");
         if (i==0) {
-            if (strcmp(date_day, "Jan")==0)src_home_digital_date_mont_value = 1;
-            if (strcmp(date_day, "Feb")==0)src_home_digital_date_mont_value = 2;
-            if (strcmp(date_day, "Mar")==0)src_home_digital_date_mont_value = 3;
-            if (strcmp(date_day, "Apr")==0)src_home_digital_date_mont_value = 4;
-            if (strcmp(date_day, "May")==0)src_home_digital_date_mont_value = 5;
-            if (strcmp(date_day, "Jun")==0)src_home_digital_date_mont_value = 6;
-            if (strcmp(date_day, "Jul")==0)src_home_digital_date_mont_value = 7;
-            if (strcmp(date_day, "Aug")==0)src_home_digital_date_mont_value = 8;
-            if (strcmp(date_day, "Sept")==0)src_home_digital_date_mont_value = 9;
-            if (strcmp(date_day, "Oct")==0)src_home_digital_date_mont_value = 10;
-            if (strcmp(date_day, "Nov")==0)src_home_digital_date_mont_value = 11;
-            if (strcmp(date_day, "Dec")==0)src_home_digital_date_mont_value = 12;
+            if (strcmp(date_day, "Jan")==0)date_mont_value = 1;
+            if (strcmp(date_day, "Feb")==0)date_mont_value = 2;
+            if (strcmp(date_day, "Mar")==0)date_mont_value = 3;
+            if (strcmp(date_day, "Apr")==0)date_mont_value = 4;
+            if (strcmp(date_day, "May")==0)date_mont_value = 5;
+            if (strcmp(date_day, "Jun")==0)date_mont_value = 6;
+            if (strcmp(date_day, "Jul")==0)date_mont_value = 7;
+            if (strcmp(date_day, "Aug")==0)date_mont_value = 8;
+            if (strcmp(date_day, "Sept")==0)date_mont_value = 9;
+            if (strcmp(date_day, "Oct")==0)date_mont_value = 10;
+            if (strcmp(date_day, "Nov")==0)date_mont_value = 11;
+            if (strcmp(date_day, "Dec")==0)date_mont_value = 12;
         }
-        if (i==1) src_home_digital_date_yesr_value = atoi(date_day);
+        if (i==1) date_yesr_value = atoi(date_day);
 
         if (i==2) {
             char* date_s = strtok(date_day, ":");
-            // src_home_digital_clock_1_hour_value = atoi(date_s)+8;
+            clock_1_hour_value = atoi(date_s)+8;
             for (size_t j = 0; j < 2; j++)
             {
                 date_s = strtok(NULL, ":");
-                // if (j==0) src_home_digital_clock_1_min_value = atoi(date_s);
-                // else src_home_digital_clock_1_sec_value = atoi(date_s);
+                if (j==0) clock_1_min_value = atoi(date_s);
+                else clock_1_sec_value = atoi(date_s);
             }
         }
         i++;

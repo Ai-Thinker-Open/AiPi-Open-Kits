@@ -16,16 +16,16 @@
 #include "log.h"
 #include "bflb_gpio.h"
 #include "rd_01_recv.h"
-
+#include "custom.h"
 #define DBG_TAG "Rd-01"
 
 #define RD01_DET_TIME 1*10      //有人检测计时1S 
 #define RD01_NDET_TIME 20*10    //有人检测计时20S 
 
 xTimerHandle rd_01_det_time;
-xTimerHandle rd_01_nodet_time;
+void* rd_01_nodet_time;
 
-static bool rd_01_detected = true;
+int rd_01_detected = 1;
 
 struct bflb_device_s* gpio;
 
@@ -69,12 +69,14 @@ static void rd_01_detected_time_cb(xTaskHandle xtimer)
     if (timer_id) {
 
         LOG_I("Rd-01  detected by someone set PC Sleep");
-        rd_01_detected = false;
+
+        xTaskNotify(custom_status_task, CUSTOM_STATE_RADAR_NDET, eSetValueWithOverwrite);
     }
     else {
 
         LOG_I("Rd-01  detected by someone set PC Wake up");
-        rd_01_detected = true;
+
+        xTaskNotify(custom_status_task, CUSTOM_STATE_RADAR_DET, eSetValueWithOverwrite);
     }
 
 }
