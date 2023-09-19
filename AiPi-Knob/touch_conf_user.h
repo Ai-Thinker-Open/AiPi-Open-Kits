@@ -15,6 +15,7 @@
 /* Select Touch Type */
 #define ENCODER_ENABLE
 // #define TOUCH_I2C_CST816D
+
 /* touch interface */
 #define TOUCH_INTERFACE_SPI 1
 #define TOUCH_INTERFACE_I2C 2

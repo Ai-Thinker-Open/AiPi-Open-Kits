@@ -9,11 +9,17 @@
 
 
 #define TEMP_BUF_SIZE 25 * 1024
+#define OPEN_ADDR 0x450000//0x212000//0x210000 
+#define OPEN_SIZE (73856)
+#define CLOSE_ADDR 0x464000
+#define CLOSE_SIZE (76160)
 
 #define WASH_DONE_ADDR 0x450000
 #define WASH_DONE_SIZE (76160)
 #define WINDOWS_ADDR 0x464000
-#define WINDOWS_SIZE (215866)
+#define WINDOWS_SIZE (123356)//(128852)//(170000)
+#define GOCLASS_ADDR 0x464000
+#define GOCLASS_SIZE (215866)//(210290)
 
 static ATTR_PSRAM_SECTION uint8_t temp1[TEMP_BUF_SIZE];
 static ATTR_PSRAM_SECTION uint8_t temp2[TEMP_BUF_SIZE];
@@ -24,15 +30,15 @@ static int tmp_flag = 0;
 uint8_t audac_dma_stop = 0;
 
 
-struct bflb_device_s* audac_dma_hd;
-struct bflb_device_s* audac_hd;
+struct bflb_device_s *audac_dma_hd;
+struct bflb_device_s *audac_hd;
 
-void audio_dma_callback(void* arg)
+void audio_dma_callback(void *arg)
 {
     static uint32_t num = 0;
     num++;
     // printf("scyle_n:%d\r\n", num);
-    if (audac_dma_stop == 1)
+    if(audac_dma_stop == 1)
     {
         audac_dma_stop = 0;
         bflb_dma_channel_stop(audac_dma_hd);
@@ -51,7 +57,7 @@ void audio_dma_callback(void* arg)
 /* audio gpio init*/
 void audac_gpio_init(void)
 {
-    struct bflb_device_s* gpio;
+    struct bflb_device_s *gpio;
 
     gpio = bflb_device_get_by_name("gpio");
 
@@ -110,7 +116,7 @@ void audac_dma_init(void)
 static void audac_init(uint8_t sampling_rate)
 {
     struct bflb_audac_init_config_s audac_init_cfg = {
-        .sampling_rate = AUDAC_SAMPLING_RATE_24K,
+        .sampling_rate = sampling_rate,
         .output_mode = AUDAC_OUTPUT_MODE_PWM,
         .source_channels_num = AUDAC_SOURCE_CHANNEL_SINGLE,
         .mixer_mode = AUDAC_MIXER_MODE_ONLY_L,
@@ -135,7 +141,7 @@ static void audac_init(uint8_t sampling_rate)
     audac_hd = bflb_device_get_by_name("audac");
     bflb_audac_init(audac_hd, &audac_init_cfg);
     // bflb_audac_feature_control(audac_hd, AUDAC_CMD_SET_VOLUME_VAL, (size_t)(-15 * 2));
-    bflb_audac_feature_control(audac_hd, AUDAC_CMD_SET_VOLUME_VAL, (size_t)(-20));
+    bflb_audac_feature_control(audac_hd, AUDAC_CMD_SET_VOLUME_VAL, (size_t)(-15));
     bflb_audac_volume_init(audac_hd, &audac_volume_cfg);
     /* audac enable dma */
     bflb_audac_link_rxdma(audac_hd, true);
@@ -145,7 +151,7 @@ static void audac_init(uint8_t sampling_rate)
 
 int pcm_read(void)
 {
-
+    
     uint32_t read_size;
 
     if (tmp_flag & 0x01) {
@@ -157,14 +163,12 @@ int pcm_read(void)
             play_size = 0;
             audac_dma_stop = 1;
             // bflb_dma_channel_stop(audac_dma_hd);
-        }
-        else {
+        } else {
             printf("1play_size:%d, read_size:%d, read_status:%d\r\n", play_size, sizeof(temp1), bflb_flash_read(pcm_addr + play_size, temp1, sizeof(temp1)));
-
+            
             play_size += sizeof(temp1);
         }
-    }
-    else {
+    } else {
         // audac_dma_init(temp1);
         // bflb_dma_channel_start(audac_dma_hd);
         if ((play_size + sizeof(temp2)) > pcm_size) {
@@ -173,10 +177,9 @@ int pcm_read(void)
             play_size = 0;
             audac_dma_stop = 1;
             // bflb_dma_channel_stop(audac_dma_hd);
-        }
-        else {
+        } else {
             printf("2play_size:%d, read_size:%d, read_status:%d\r\n", play_size, sizeof(temp2), bflb_flash_read(pcm_addr + play_size, temp2, sizeof(temp2)));
-
+            
             play_size += sizeof(temp2);
         }
     }
@@ -203,11 +206,18 @@ void play_voice(uint32_t play_addr, uint32_t voice_size)
     // bflb_audac_feature_control(audac_hd, AUDAC_CMD_PLAY_START, 0);
 }
 
-
+void play_voice_open(void)
+{
+    play_voice(OPEN_ADDR, OPEN_SIZE);
+}
+void play_voice_close(void)
+{
+    play_voice(CLOSE_ADDR, CLOSE_SIZE);
+}
 void play_vocie_windows(void)
 {
-    audac_init(AUDAC_SAMPLING_RATE_16K);
-    play_voice(WINDOWS_ADDR, WINDOWS_SIZE);
+    audac_init(AUDAC_SAMPLING_RATE_24K);
+    play_voice(GOCLASS_ADDR, GOCLASS_SIZE);
 }
 void play_vocie_wash_done(void)
 {
