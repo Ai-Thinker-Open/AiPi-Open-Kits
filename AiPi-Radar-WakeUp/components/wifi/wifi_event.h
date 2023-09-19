@@ -24,4 +24,6 @@ uint8_t wifi_connect(char* ssid, char* passwd);
 void flash_erase_set(char* key, char* value);
 char* flash_get_data(char* key, uint32_t len);
 void system_start_auto_connenct(int enable);
+void flash_erase_set_numble(char* KEY, uint32_t numble);
+uint32_t flash_get_data_numble(char* key);
 #endif

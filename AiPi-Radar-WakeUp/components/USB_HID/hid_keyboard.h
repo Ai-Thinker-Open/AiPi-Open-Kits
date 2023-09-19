@@ -26,9 +26,10 @@ typedef enum {
 
 void hid_keyboard_init(void);
 void usb_hid_keyboard_send(char Keyboard_ctrl, char keybord_key);
-#if 0
+#if 1
 void usb_hid_keyboard_setSleep(void);
 void usb_hid_keyboard_setWakeup(void);
+void usb_hid_keyboard_stop_send(void);
 #endif
 void usb_hid_keyboard_inputpassword(char* PIN);
 void usb_hid_keyboard_lock(void);

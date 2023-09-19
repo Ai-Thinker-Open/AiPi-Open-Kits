@@ -76,7 +76,7 @@ static void custom_state_task(void* arg)
     ui->rd_01_nodet_time = rd_01_nodet_time;
     gpio = bflb_device_get_by_name("gpio");
 
-    bflb_gpio_init(gpio, GPIO_PIN_14, GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
+    bflb_gpio_init(gpio, GPIO_PIN_14, GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_SMT_EN | GPIO_DRV_0);
     //启动时自动连接WiFi
     system_start_auto_connenct(true);
 
@@ -194,16 +194,19 @@ static void custom_state_task(void* arg)
             case CUSTOM_STATE_RADAR_DET:
             {
                 LOG_I("Ra-01 detected ");
-                usb_hid_keyboard_inputpassword(flash_get_data("PIN", 64));
+                // usb_hid_keyboard_inputpassword(flash_get_data("PIN", 64));
                 //关闭2.4寸屏的显示
                 bflb_gpio_reset(gpio, GPIO_PIN_14);
+                usb_hid_keyboard_setWakeup();
             }
             break;
             case CUSTOM_STATE_RADAR_NDET:
             {
-                usb_hid_keyboard_lock();
+                // usb_hid_keyboard_lock();
                 //开启显示
                 bflb_gpio_set(gpio, GPIO_PIN_14);
+                usb_hid_keyboard_setSleep();
+
             }
             break;
             default:
@@ -342,6 +345,8 @@ static char* compare_wea_output_img_100x100(const char* weather_data)
     if (strncmp(weather, "中雨转雷阵雨", 12)==0) tianqi = &_tianqizhongyu_alpha_100x100;
     if (strncmp(weather, "雷阵雨", 6)==0) tianqi = &_tianqiyeleiyu_alpha_100x100;
     if (strncmp(weather, "阴转多云", 8)==0) tianqi = &_tianqiduoyun_alpha_100x100;
+    if (strncmp(weather, "阴转晴", 6)==0) tianqi = &_tianqiqing_alpha_100x100;
+
     if (strncmp(weather, "多云转雷阵雨", 12)==0) tianqi = &_tianqiduoyun_alpha_100x100;
     if (strncmp(weather, "雷阵雨转中到大雨", 16)==0) tianqi = &_tianqiyeleiyu_alpha_100x100;
     if (strncmp(weather, "雷阵雨转中雨", 12)==0) tianqi = &_tianqiyeleiyu_alpha_100x100;

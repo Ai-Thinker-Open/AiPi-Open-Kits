@@ -7,7 +7,7 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include "gui_guider.h"
-
+#include "wifi_event.h"
 
 void ui_init_style(lv_style_t* style)
 {
@@ -25,6 +25,9 @@ void init_scr_del_flag(lv_ui* ui)
 void setup_ui(lv_ui* ui)
 {
 	init_scr_del_flag(ui);
+	ui->timerout = atoi(flash_get_data("TIMER", 16));
+	strcpy(ui->PIN, flash_get_data("PIN", 64));
+
 	setup_scr_Home(ui);
 	lv_scr_load(ui->Home);
 }

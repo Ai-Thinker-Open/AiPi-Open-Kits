@@ -13,6 +13,7 @@
 #include "log.h"
 #include "custom.h"
 #include "wifi_event.h"
+#include "rd_01_recv.h"
 #define DBG_TAG "LV-EVENT"
 
 
@@ -111,11 +112,17 @@ static void Home_img_btn_3_event_handler(lv_event_t* e)
             }
             else
                 ui->timerout = timerout_sec;
+            char* timerout_str = pvPortMalloc(16);
+            memset(timerout_str, 0, 16);
+            sprintf(timerout_str, "%d", ui->timerout);
+            flash_erase_set("TIMER", timerout_str);
+            vPortFree(timerout_str);
 
             LOG_I("Lock PC time=%d s", ui->timerout);
             if (xTimerIsTimerActive(ui->rd_01_nodet_time)!=pdFALSE)
                 xTimerStopFromISR(ui->rd_01_nodet_time, &xHigherPriorityTaskWoken);
             xTimerChangePeriodFromISR(ui->rd_01_nodet_time, pdMS_TO_TICKS(ui->timerout*1000), &xHigherPriorityTaskWoken);//重新设置锁屏的时间
+            rd_01_detected = 1;
         }
         break;
         default:

@@ -25,7 +25,7 @@
 xTimerHandle rd_01_det_time;
 void* rd_01_nodet_time;
 
-int rd_01_detected = 1;
+int rd_01_detected = 0;
 
 struct bflb_device_s* gpio;
 
@@ -63,22 +63,20 @@ static void gpio_isr(int irq, void* arg)
 */
 static void rd_01_detected_time_cb(xTaskHandle xtimer)
 {
-
     uint8_t timer_id = pvTimerGetTimerID(xtimer);
 
     if (timer_id) {
-
         LOG_I("Rd-01  detected by someone set PC Sleep");
+        if (!rd_01_detected)
+            xTaskNotify(custom_status_task, CUSTOM_STATE_RADAR_NDET, eSetValueWithOverwrite);
 
-        xTaskNotify(custom_status_task, CUSTOM_STATE_RADAR_NDET, eSetValueWithOverwrite);
     }
     else {
-
         LOG_I("Rd-01  detected by someone set PC Wake up");
-
         xTaskNotify(custom_status_task, CUSTOM_STATE_RADAR_DET, eSetValueWithOverwrite);
-    }
 
+    }
+    rd_01_detected = 0;
 }
 
 void Rd_01_recv_init(void)
@@ -88,7 +86,7 @@ void Rd_01_recv_init(void)
     bflb_gpio_int_mask(gpio, RD_01_IO, false);
 
     rd_01_det_time = xTimerCreate("rd-01det", pdMS_TO_TICKS(RD01_DET_TIME*100), pdFALSE, 0, rd_01_detected_time_cb);
-    rd_01_nodet_time = xTimerCreate("rd-01 no det", pdMS_TO_TICKS(RD01_NDET_TIME*100), pdFALSE, 1, rd_01_detected_time_cb);
+    rd_01_nodet_time = xTimerCreate("rd-01 no det", pdMS_TO_TICKS(guider_ui.timerout*1000), pdFALSE, 1, rd_01_detected_time_cb);
 
     bflb_irq_attach(gpio->irq_num, gpio_isr, gpio);
     bflb_irq_enable(gpio->irq_num);

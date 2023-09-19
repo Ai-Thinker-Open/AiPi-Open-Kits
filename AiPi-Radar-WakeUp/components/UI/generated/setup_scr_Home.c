@@ -10,7 +10,7 @@
 #include "events_init.h"
 #include "custom.h"
 #include "https_client.h"
-
+#include "FreeRTOS.h"
 int Home_digital_clock_1_hour_value = 11;
 int Home_digital_clock_1_min_value = 25;
 int Home_digital_clock_1_sec_value = 50;
@@ -1130,7 +1130,7 @@ void setup_scr_Home(lv_ui* ui) {
 	lv_obj_set_style_pad_right(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(ui->Home_label_pin, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
-
+	lv_obj_add_flag(ui->Home_label_pin, LV_OBJ_FLAG_HIDDEN);
 	//Write codes Home_ta_PIN
 	ui->Home_ta_PIN = lv_textarea_create(ui->tile_lock);
 	lv_obj_set_pos(ui->Home_ta_PIN, 49, 68);
@@ -1171,7 +1171,7 @@ void setup_scr_Home(lv_ui* ui) {
 	//use keyboard on Home_ta_PIN
 
 	lv_obj_add_event_cb(ui->Home_ta_PIN, ta_Home_event_cb, LV_EVENT_ALL, g_kb_numble);
-
+	lv_obj_add_flag(ui->Home_ta_PIN, LV_OBJ_FLAG_HIDDEN);
 	//Write codes Home_label_timer
 	ui->Home_label_timer = lv_label_create(ui->tile_lock);
 	lv_obj_set_pos(ui->Home_label_timer, 40, 102);
@@ -1204,8 +1204,8 @@ void setup_scr_Home(lv_ui* ui) {
 
 	//Write codes Home_ta_min
 	ui->Home_ta_min = lv_textarea_create(ui->tile_lock);
-	lv_obj_set_pos(ui->Home_ta_min, 55, 123);
-	lv_obj_set_size(ui->Home_ta_min, 38, 25);
+	lv_obj_set_pos(ui->Home_ta_min, 49, 123);
+	lv_obj_set_size(ui->Home_ta_min, 44, 25);
 	lv_obj_set_scrollbar_mode(ui->Home_ta_min, LV_SCROLLBAR_MODE_OFF);
 
 	//Set style for Home_ta_min. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -1236,7 +1236,10 @@ void setup_scr_Home(lv_ui* ui) {
 	lv_obj_set_style_radius(ui->Home_ta_min, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_color(ui->Home_ta_min, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui->Home_ta_min, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
-	lv_textarea_set_text(ui->Home_ta_min, "00");
+	char* timer_str = pvPortMalloc(3);
+	memset(timer_str, 0, 3);
+	sprintf(timer_str, "%d", ui->timerout>60?ui->timerout/60:0);
+	lv_textarea_set_text(ui->Home_ta_min, timer_str);
 
 	//use keyboard on Home_ta_min
 	lv_obj_add_event_cb(ui->Home_ta_min, ta_Home_event_cb, LV_EVENT_ALL, g_kb_numble);
@@ -1275,8 +1278,11 @@ void setup_scr_Home(lv_ui* ui) {
 	lv_obj_set_style_radius(ui->Home_ta_sec, 0, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_color(ui->Home_ta_sec, lv_color_make(0x21, 0x95, 0xf6), LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui->Home_ta_sec, 255, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
-	lv_textarea_set_text(ui->Home_ta_sec, "20");
+	memset(timer_str, 0, 3);
+	sprintf(timer_str, "%d", ui->timerout>60?ui->timerout%60:ui->timerout);
 
+	lv_textarea_set_text(ui->Home_ta_sec, timer_str);
+	vPortFree(timer_str);
 	//use keyboard on Home_ta_sec
 	lv_obj_add_event_cb(ui->Home_ta_sec, ta_Home_event_cb, LV_EVENT_ALL, g_kb_numble);
 

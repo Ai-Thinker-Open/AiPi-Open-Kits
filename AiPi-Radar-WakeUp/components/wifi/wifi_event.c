@@ -256,6 +256,36 @@ char* flash_get_data(char* key, uint32_t len)
 
     return flash_data;
 }
+
+/**
+ * @brief 存储数字
+ *
+ * @param key
+ * @param numble
+*/
+void flash_erase_set_numble(char* key, uint32_t numble)
+{
+    size_t len = 0;
+    ef_set_and_save_env(key, numble);
+    // bflb_flash_read(key, flash_data, strlen(value));
+    // printf("writer data:%s\r\n", flash_data);
+    ef_get_env_blob(key, numble, 1, &len);
+}
+/**
+ * @brief
+ *
+ * @param key
+ * @return uint32_t
+*/
+uint32_t flash_get_data_numble(char* key)
+{
+    uint32_t flash_data;
+    size_t len = 0;
+    ef_get_env_blob(key, &flash_data, 1, (size_t)&len);
+    return flash_data;
+}
+
+
 /**
  * @brief system_start_auto_connenct
  *     系统启动自动连接WiFi，
