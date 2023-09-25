@@ -26,6 +26,7 @@
 #include "usbd_core.h"
 #include "usbd_hid.h"
 #include "bflb_gpio.h"
+#include "ble_hid_dev.h"
   /*********************
    *      DEFINES
    *********************/
@@ -63,6 +64,7 @@ void custom_init(lv_ui* ui)
 {
     xTaskCreate(custom_state_task, "state task", 1024, ui, 3, (xTaskHandle*)&custom_status_task);
     weathers_time = xTimerCreate("waather", pdMS_TO_TICKS(1000), pdTRUE, 0, http_weather_timer_cb);
+
 }
 /**
  * @brief custom_state_task
@@ -79,7 +81,7 @@ static void custom_state_task(void* arg)
     bflb_gpio_init(gpio, GPIO_PIN_14, GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_SMT_EN | GPIO_DRV_0);
     //启动时自动连接WiFi
     system_start_auto_connenct(true);
-
+    if (ui->keyboard_con_type) ble_hid_enable(true);
     while (1)
     {
         xTaskNotifyWait(0xffffffff, 0, &state, portMAX_DELAY);
@@ -186,9 +188,18 @@ static void custom_state_task(void* arg)
                 }
             }
             break;
-            case CUSTOM_STATE_USB_KEY:
+            case CUSTOM_STATR_KB_CON_USB:
+            {
+                //断开蓝牙连接
+                ble_hid_enable(false);
+
+            }
+            break;
+            case CUSTOM_STATR_KB_CON_BLE:
             {
 
+                //启动BLE keyboard
+                ble_hid_enable(true);
             }
             break;
             case CUSTOM_STATE_RADAR_DET:
@@ -196,16 +207,43 @@ static void custom_state_task(void* arg)
                 LOG_I("Ra-01 detected ");
                 // usb_hid_keyboard_inputpassword(flash_get_data("PIN", 64));
                 //关闭2.4寸屏的显示
+                if (!desktop_lock) break;
                 bflb_gpio_reset(gpio, GPIO_PIN_14);
-                usb_hid_keyboard_setWakeup();
+
+                if (!ui->keyboard_con_type)
+                    usb_hid_keyboard_setWakeup();
+                else {
+
+                    for (size_t i = 0; i < 20; i++)
+                    {
+
+                        ble_hid_notify_send(HID_KEY_NUMBLE_DISPLAY_Bri_IN);
+                        vTaskDelay(pdMS_TO_TICKS(50));
+                    }
+                    desktop_lock = false;
+                }
             }
             break;
             case CUSTOM_STATE_RADAR_NDET:
             {
                 // usb_hid_keyboard_lock();
+                if (desktop_lock) break;
                 //开启显示
                 bflb_gpio_set(gpio, GPIO_PIN_14);
-                usb_hid_keyboard_setSleep();
+
+                if (!ui->keyboard_con_type)
+                    usb_hid_keyboard_setSleep();
+                else {
+
+                    for (size_t i = 0; i < 20; i++)
+                    {
+
+                        ble_hid_notify_send(HID_KEY_NUMBLE_DISPLAY_Bri_DE);
+                        vTaskDelay(pdMS_TO_TICKS(50));
+                    }
+                    desktop_lock = true;
+                }
+
 
             }
             break;

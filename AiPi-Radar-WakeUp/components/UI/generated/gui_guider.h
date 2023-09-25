@@ -62,11 +62,13 @@ extern "C" {
 		lv_obj_t* Home_btn_3;
 		lv_obj_t* Home_btn_3_label;
 		lv_obj_t* Home_label_Tile;
+		lv_obj_t* Home_ddlist_key;
 		char ssid[32];
 		char pass[64];
 		char PIN[64];
 		uint16_t timerout;
 		void* rd_01_nodet_time;
+		int keyboard_con_type;
 	}lv_ui;
 
 	void ui_init_style(lv_style_t* style);

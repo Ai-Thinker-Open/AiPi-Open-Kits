@@ -18,7 +18,7 @@ file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/components/*.c")
 file(GLOB_RECURSE UI "${CMAKE_CURRENT_SOURCE_DIR}/components/UI/*.c")
 
 # 添加头文件的引用路径（Add .h include directories）
-sdk_add_include_directories(main config components/wifi components/USB_HID components/Radar_recv components/CJSON components/http_client)
+sdk_add_include_directories(main config components/wifi components/USB_HID components/Radar_recv components/CJSON components/http_client components/BLE_HID)
 
 sdk_add_include_directories(components/UI components/UI/custom components/UI/generated components/UI/generated/guider_fonts)
 

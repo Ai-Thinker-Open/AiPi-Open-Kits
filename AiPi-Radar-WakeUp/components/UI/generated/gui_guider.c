@@ -27,7 +27,7 @@ void setup_ui(lv_ui* ui)
 	init_scr_del_flag(ui);
 	ui->timerout = atoi(flash_get_data("TIMER", 16));
 	strcpy(ui->PIN, flash_get_data("PIN", 64));
-
+	ui->keyboard_con_type = atoi(flash_get_data("HID_CON", 8));
 	setup_scr_Home(ui);
 	lv_scr_load(ui->Home);
 }

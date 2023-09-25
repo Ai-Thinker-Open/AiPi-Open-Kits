@@ -130,10 +130,37 @@ static void Home_img_btn_3_event_handler(lv_event_t* e)
     }
 }
 
+static void Home_img_ddlist_key_event_handler(lv_event_t* e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui* ui = lv_event_get_user_data(e);
+
+    switch (code)
+    {
+        case LV_EVENT_VALUE_CHANGED:
+        {
+            LOG_I("keyboard selected is %s", lv_dropdown_get_selected(ui->Home_ddlist_key)?"BLE":"USB");
+            xTaskNotify(custom_status_task, lv_dropdown_get_selected(ui->Home_ddlist_key)?CUSTOM_STATR_KB_CON_BLE:CUSTOM_STATR_KB_CON_USB, eSetValueWithOverwrite);//发送切换连接方式
+
+            ui->keyboard_con_type = lv_dropdown_get_selected(ui->Home_ddlist_key);
+            //保存起来
+            char* con_type = pvPortMalloc(8);
+            memset(con_type, 0, 8);
+            sprintf(con_type, "%d", ui->keyboard_con_type);
+            flash_erase_set("HID_CON", con_type);
+            vPortFree(con_type);
+        }
+        break;
+        default:
+            break;
+    }
+}
+
 void events_init_Home(lv_ui* ui)
 {
     lv_obj_add_event_cb(ui->Home_btn_connect, Home_btn_connect_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->Home_btn_2, Home_btn_2_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->Home_img_loding, Home_img_loding_event_handler, LV_EVENT_ALL, ui);
     lv_obj_add_event_cb(ui->Home_btn_3, Home_img_btn_3_event_handler, LV_EVENT_ALL, ui);
+    lv_obj_add_event_cb(ui->Home_ddlist_key, Home_img_ddlist_key_event_handler, LV_EVENT_ALL, ui);
 }

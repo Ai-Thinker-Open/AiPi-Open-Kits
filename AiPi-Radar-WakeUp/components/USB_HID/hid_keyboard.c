@@ -21,7 +21,7 @@
 #define HID_KEYBOARD_REPORT_DESC_SIZE 89
 // #define HID_KEYBOARD_REPORT_DESC_SIZE 28
 
-static bool desktop_lock = false;
+int desktop_lock = false;
 
 static const uint8_t hid_descriptor[] = {
     USB_DEVICE_DESCRIPTOR_INIT(USB_2_0, 0x00, 0x00, 0x00, USBD_VID, USBD_PID, 0x0002, 0x01),
@@ -222,6 +222,8 @@ void hid_keyboard_init(void)
     usbd_add_endpoint(&hid_in_ep);
     usbd_initialize();
 }
+
+
 /**
  * @brief usb_hid_keyboard_send
  *
@@ -287,6 +289,7 @@ void usb_hid_keyboard_setSleep(void)
 void usb_hid_keyboard_setWakeup(void)
 {
     // uint8_t sendbuffer[] = { 0x01,0x00,0x00,HID_KBD_USAGE_ENTER,0x00,0x00,0x00,0x00,0x00 }; // CRTL+L
+
     if (!desktop_lock) return; //如果屏幕还亮着，就退出
     uint8_t sendbuffer[] = { 0x02, 0x6f };
 

@@ -34,6 +34,8 @@
 #include "hid_keyboard.h"
 //RD-01
 #include "rd_01_recv.h"
+//BLE HID
+#include "ble_hid_dev.h"
 
 
 #define DBG_TAG "MAIN"
@@ -82,9 +84,12 @@ int main(void)
     setup_ui(&guider_ui);
     custom_init(&guider_ui);
     events_init(&guider_ui);
+
+    ble_hid_init();
     xTaskCreate(bl61x_show_heap_size_task, (char*)"lvgl", 512, NULL, 1, NULL);
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 2, NULL);
     hid_keyboard_init();
     Rd_01_recv_init();
+
     vTaskStartScheduler();
 }

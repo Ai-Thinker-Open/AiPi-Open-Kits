@@ -1405,6 +1405,74 @@ void setup_scr_Home(lv_ui* ui) {
 	lv_obj_set_style_pad_top(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(ui->Home_label_Tile, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 
+	//Write codes Home_ddlist_key
+	ui->Home_ddlist_key = lv_dropdown_create(ui->tile_lock);
+	lv_obj_set_pos(ui->Home_ddlist_key, 40, 61);
+	lv_obj_set_size(ui->Home_ddlist_key, 143, 28);
+	lv_obj_set_scrollbar_mode(ui->Home_ddlist_key, LV_SCROLLBAR_MODE_OFF);
+	lv_dropdown_set_options(ui->Home_ddlist_key, "USB\nBLE");
+
+	lv_dropdown_set_selected(ui->Home_ddlist_key, ui->keyboard_con_type);
+
+	//Set style for Home_ddlist_key. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
+	lv_obj_set_style_radius(ui->Home_ddlist_key, 3, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->Home_ddlist_key, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_color(ui->Home_ddlist_key, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_grad_dir(ui->Home_ddlist_key, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui->Home_ddlist_key, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_width(ui->Home_ddlist_key, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_color(ui->Home_ddlist_key, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_opa(ui->Home_ddlist_key, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_spread(ui->Home_ddlist_key, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_x(ui->Home_ddlist_key, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_shadow_ofs_y(ui->Home_ddlist_key, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(ui->Home_ddlist_key, lv_color_make(0x21, 0x95, 0xf6), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_width(ui->Home_ddlist_key, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_border_opa(ui->Home_ddlist_key, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(ui->Home_ddlist_key, lv_color_make(0xf9, 0xf9, 0xf9), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->Home_ddlist_key, &lv_font_montserratMedium_12, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui->Home_ddlist_key, 6, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui->Home_ddlist_key, 6, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui->Home_ddlist_key, 8, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Set style state: LV_STATE_CHECKED for style_home_ddlist_key_extra_list_selected_checked
+	static lv_style_t style_home_ddlist_key_extra_list_selected_checked;
+	ui_init_style(&style_home_ddlist_key_extra_list_selected_checked);
+	lv_style_set_radius(&style_home_ddlist_key_extra_list_selected_checked, 3);
+	lv_style_set_bg_color(&style_home_ddlist_key_extra_list_selected_checked, lv_color_make(0x21, 0x95, 0xf6));
+	lv_style_set_bg_grad_color(&style_home_ddlist_key_extra_list_selected_checked, lv_color_make(0x00, 0xa1, 0xb5));
+	lv_style_set_bg_grad_dir(&style_home_ddlist_key_extra_list_selected_checked, LV_GRAD_DIR_NONE);
+	lv_style_set_bg_opa(&style_home_ddlist_key_extra_list_selected_checked, 255);
+	lv_style_set_border_color(&style_home_ddlist_key_extra_list_selected_checked, lv_color_make(0x00, 0x00, 0x00));
+	lv_style_set_border_width(&style_home_ddlist_key_extra_list_selected_checked, 1);
+	lv_style_set_border_opa(&style_home_ddlist_key_extra_list_selected_checked, 255);
+	lv_style_set_text_color(&style_home_ddlist_key_extra_list_selected_checked, lv_color_make(0xff, 0xff, 0xff));
+	lv_style_set_text_font(&style_home_ddlist_key_extra_list_selected_checked, &lv_font_montserratMedium_12);
+	lv_obj_add_style(lv_dropdown_get_list(ui->Home_ddlist_key), &style_home_ddlist_key_extra_list_selected_checked, LV_PART_SELECTED|LV_STATE_CHECKED);
+
+	//Set style state: LV_STATE_DEFAULT for style_home_ddlist_key_extra_list_main_default
+	static lv_style_t style_home_ddlist_key_extra_list_main_default;
+	ui_init_style(&style_home_ddlist_key_extra_list_main_default);
+	lv_style_set_radius(&style_home_ddlist_key_extra_list_main_default, 3);
+	lv_style_set_bg_color(&style_home_ddlist_key_extra_list_main_default, lv_color_make(0x0a, 0x0a, 0x0a));
+	lv_style_set_bg_grad_color(&style_home_ddlist_key_extra_list_main_default, lv_color_make(0xff, 0xff, 0xff));
+	lv_style_set_bg_grad_dir(&style_home_ddlist_key_extra_list_main_default, LV_GRAD_DIR_NONE);
+	lv_style_set_bg_opa(&style_home_ddlist_key_extra_list_main_default, 255);
+	lv_style_set_border_color(&style_home_ddlist_key_extra_list_main_default, lv_color_make(0x21, 0x95, 0xf6));
+	lv_style_set_border_width(&style_home_ddlist_key_extra_list_main_default, 1);
+	lv_style_set_border_opa(&style_home_ddlist_key_extra_list_main_default, 255);
+	lv_style_set_text_color(&style_home_ddlist_key_extra_list_main_default, lv_color_make(0xf2, 0xf2, 0xf2));
+	lv_style_set_text_font(&style_home_ddlist_key_extra_list_main_default, &lv_font_montserratMedium_12);
+	lv_style_set_max_height(&style_home_ddlist_key_extra_list_main_default, 90);
+	lv_obj_add_style(lv_dropdown_get_list(ui->Home_ddlist_key), &style_home_ddlist_key_extra_list_main_default, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	//Set style state: LV_STATE_DEFAULT for style_home_ddlist_key_extra_list_scrollbar_default
+	static lv_style_t style_home_ddlist_key_extra_list_scrollbar_default;
+	ui_init_style(&style_home_ddlist_key_extra_list_scrollbar_default);
+	lv_style_set_radius(&style_home_ddlist_key_extra_list_scrollbar_default, 3);
+	lv_style_set_bg_color(&style_home_ddlist_key_extra_list_scrollbar_default, lv_color_make(0x00, 0x00, 0x00));
+	lv_style_set_bg_opa(&style_home_ddlist_key_extra_list_scrollbar_default, 255);
+	lv_obj_add_style(lv_dropdown_get_list(ui->Home_ddlist_key), &style_home_ddlist_key_extra_list_scrollbar_default, LV_PART_SCROLLBAR|LV_STATE_DEFAULT);
 	//Write codes Home_cont_loding
 	ui->Home_cont_loding = lv_obj_create(ui->Home);
 	lv_obj_set_pos(ui->Home_cont_loding, 0, 0);
@@ -1433,8 +1501,6 @@ void setup_scr_Home(lv_ui* ui) {
 
 	//Hidden for widget Home_cont_loding
 	lv_obj_add_flag(ui->Home_cont_loding, LV_OBJ_FLAG_HIDDEN);
-
-
 	//Write codes Home_img_loding
 	ui->Home_img_loding = lv_img_create(ui->Home_cont_loding);
 	lv_obj_set_pos(ui->Home_img_loding, 65, 97);
@@ -1452,4 +1518,5 @@ void setup_scr_Home(lv_ui* ui) {
 
 	//Init events for screen
 	events_init_Home(ui);
+
 }

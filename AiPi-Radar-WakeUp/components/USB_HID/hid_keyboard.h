@@ -24,6 +24,8 @@ typedef enum {
     KB_NUMBLE_0,
 }keyboard_numble_t;
 
+extern int desktop_lock;
+
 void hid_keyboard_init(void);
 void usb_hid_keyboard_send(char Keyboard_ctrl, char keybord_key);
 #if 1

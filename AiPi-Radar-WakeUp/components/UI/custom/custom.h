@@ -32,6 +32,8 @@ extern "C" {
         CUSTOM_STATE_USB_KEY,
         CUSTOM_STATE_RADAR_DET,
         CUSTOM_STATE_RADAR_NDET,
+        CUSTOM_STATR_KB_CON_USB,
+        CUSTOM_STATR_KB_CON_BLE,
     }custom_state_t;
 
     typedef struct {
