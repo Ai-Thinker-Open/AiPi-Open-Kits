@@ -59,7 +59,9 @@
 ### 2.4 Rd-01 雷达模组配置
 
 本工程需要对雷达模组做基本配置，需要烧录特定的固件才能有准确的识别，固件在**Rd-01 fw/Rd01_IO5.bin**,
+
 烧录过程请参考：https://aithinker.blog.csdn.net/article/details/125781602
+
 接线请参考：https://blog.csdn.net/Boantong_/article/details/130235376
 
 #### 配置参数如下：
