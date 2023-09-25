@@ -18,6 +18,7 @@
 | AiPi-Remote| 小安派-Remote 源码| [点击查看](AiPi-Remote/README.md) |
 | AiPi-Knob-ClipsTool| 小安派-AiPi-Knob-ClipsTool 剪辑助手源码| [点击查看](AiPi-Knob-ClipsTool/README.md) |
 | AiPi-KVM| 小安派-KVM 三进一出切换器源码| [点击查看](AiPi-KVM/README.md) |
+| AiPi-Radar-WakeUp| 小安派-雷达天气站源码| [点击查看](AiPi-Radar-WakeUp/README_CN.md) |
 
 ## 一、克隆Ai-Thinker仓库
 在linux的终端下输入
@@ -80,4 +81,4 @@ make flash COMX=/dev/ttyUSB0  //烧录命令
 
 #### （4）出现“All Success”表示烧录成功
 
-<img decoding="async" src="IMG/04.png" width="80%">
+<img decoding="async" src="IMG/04.png" width="80%">``
