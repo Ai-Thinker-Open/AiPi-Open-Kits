@@ -10,6 +10,9 @@
 */
 #ifndef DEV_IR_H
 #define DEV_IR_H
+#include "ir_send.h"
+#define IR_RX_IO GPIO_PIN_11
+#define IR_TX_IO GPIO_PIN_13
 
 #define CODE_U64 "CODEU64"
 
@@ -43,6 +46,7 @@ extern dev_ir_t* pIRList;
 void device_ir_init(device_ir_type_t ir_type);
 void device_ir_deinit(void);
 uint64_t deviceIRGetCodeValue(void);
+void device_ir_rea_enable(int enable);
 dev_ir_t* irCreateCodeListNode(ir_code_t code_type, char* name, uint64_t code_numble);
 void irListPushBack(dev_ir_t* listcode);
 void irChangeCode(ir_code_t code_type, uint32_t codeNuble);
