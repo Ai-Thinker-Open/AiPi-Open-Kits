@@ -19,10 +19,11 @@
 #include "hardware/ir_reg.h"
 #include "dev_state.h"
 #include "user_esflash.h"
+
+
 #define DBG_TAG "DEV IR"
 
-#define IR_RX_IO GPIO_PIN_11
-#define IR_TX_IO GPIO_PIN_13
+
 
 struct bflb_device_s* irrx;
 
@@ -75,18 +76,16 @@ static void ir_rx_task(void* arg)
     static uint64_t data = 0;
     while (1) {
         rx_len = __user_ir_receive(irrx, &data);
-        if (rx_len>0&&data!=0) {
+        if (rx_len>0&&data>0xffff) {
             //
             ir_data = data;
-            LOG_I("ir  data len=%d:0x%08X,%llu", rx_len, ir_data, ir_data);
-            char* code_str = pvPortMalloc(16);
-            memset(code_str, 0, 16);
+            LOG_I("ir  data len=%d:0x%llX,%llu", rx_len, ir_data, ir_data);
+            char* code_str = pvPortMalloc(32);
+            memset(code_str, 0, 32);
             sprintf(code_str, "%llu", ir_data);
             flash_erase_set(CODE_U64, code_str);
             vPortFree(code_str);
-
             dev_state_send_notify(DEV_STATE_IR_RX_DONE);
-            // ef_set_u64(CODE_U64, ir_data);
 
         }
         // vTaskDelay(pdMS_TO_TICKS(10));
@@ -95,10 +94,8 @@ static void ir_rx_task(void* arg)
 
 uint64_t deviceIRGetCodeValue(void)
 {
-    uint64_t data = 0;
-    data = atoll(flash_get_data(CODE_U64, 16));
-    LOG_F("flash read code=0x%llX", data);
-    return data;
+
+    return (uint64_t)atoll(flash_get_data(CODE_U64, 16));
 }
 
 void device_ir_init(device_ir_type_t ir_type)
@@ -109,7 +106,7 @@ void device_ir_init(device_ir_type_t ir_type)
     }
 
     gpio = bflb_device_get_by_name("gpio");
-    bflb_gpio_init(gpio, IR_TX_IO, GPIO_OUTPUT | GPIO_FLOAT | GPIO_SMT_EN | GPIO_DRV_0);
+    bflb_gpio_init(gpio, IR_TX_IO, GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
 
     bflb_gpio_init(gpio, IR_RX_IO, GPIO_INPUT | GPIO_SMT_EN | GPIO_DRV_0);
     GLB_IR_RX_GPIO_Sel(IR_RX_IO);
@@ -133,9 +130,9 @@ void device_ir_init(device_ir_type_t ir_type)
             break;
     }
     dev_ir_type = ir_type;
-
     rx_cfg.input_inverse = true;
-    rx_cfg.deglitch_enable = false;
+    rx_cfg.deglitch_enable = true;
+    rx_cfg.end_threshold = 32;
 
     bflb_ir_rx_init(irrx, &rx_cfg);
     bflb_ir_rx_enable(irrx, true);
@@ -143,6 +140,7 @@ void device_ir_init(device_ir_type_t ir_type)
     // bflb_irq_attach(irrx->irq_num, irrx_isr, NULL);
     // bflb_irq_enable(irrx->irq_num);
     xTaskCreate(ir_rx_task, "rx task", 1024, NULL, 8, &ir_task);
+
     LOG_I("IR enable susccse");
 }
 
@@ -157,6 +155,12 @@ void device_ir_deinit(void)
     // bflb_ir_rx_init(irrx, &rx_cfg);
     vTaskDelete(ir_task);
 }
+
+void device_ir_rea_enable(int enable)
+{
+    bflb_ir_rx_enable(irrx, enable);
+}
+
 /**
  * @brief 创建一个红外码节点
  *

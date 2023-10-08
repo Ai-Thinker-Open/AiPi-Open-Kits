@@ -12,6 +12,7 @@
 
 IR_SEND_EXT TaskHandle_t ir_send_system_task_xhandle;
 
-IR_SEND_EXT void ir_send_system_task(void *p_arg);
-
+IR_SEND_EXT void ir_send_system_task(void* p_arg);
+void irTxInitConfig(void);
+void irTx_send_code(uint64_t coder);
 #endif

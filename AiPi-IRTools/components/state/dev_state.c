@@ -20,6 +20,7 @@
 #include "gui_guider.h"
 #include "dev_ir.h"
 #include "user_esflash.h"
+#include "dev_ir.h"
 #define DBG_TAG "DEV STATE"
 
 xTaskHandle devTaskHandle;
@@ -30,6 +31,7 @@ static void dev_state_task(void* arg)
 {
     dev_state_t states;
     lv_ui* ui = (lv_ui*)arg;
+    irTxInitConfig();
     while (1) {
         xTaskNotifyWait(0xffffffff, 0, &states, portMAX_DELAY);
 
@@ -65,8 +67,9 @@ static void dev_state_task(void* arg)
             {
                 LOG_I("DEV_STATE_IR_RX_DONE:0x%llX", deviceIRGetCodeValue());
                 if (!ui->Home_del) {
-                    lv_label_set_text_fmt(ui->Home_ta_ircmd, "0x%08X", deviceIRGetCodeValue());
+                    lv_label_set_text_fmt(ui->Home_ta_ircmd, "0x%llX", deviceIRGetCodeValue());
                 }
+
             }
             break;
             case DEV_STATE_IR_TYPE_CHANGE:
@@ -78,7 +81,10 @@ static void dev_state_task(void* arg)
             break;
             case DEV_STATE_LV_EVENT_TETS:
             {
+                // device_ir_rea_enable(0);
                 LOG_I("DEV_STATE_LV_EVENT_TETS");
+                irTx_send_code(0xb27b10);
+                // device_ir_rea_enable(1);
             }
             break;
             case DEV_STATE_IR_SAVE_CODE:

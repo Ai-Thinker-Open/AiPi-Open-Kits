@@ -1,0 +1,59 @@
+From 1fd1d4a4fdaeee193a185fe698f982f8e1c7f136 Mon Sep 17 00:00:00 2001
+From: seahi-Mo <seahi-mo@foxmail.com>
+Date: Tue, 3 Oct 2023 05:34:37 -0700
+Subject: [PATCH] IRtools code type
+
+---
+ components/graphics/lvgl/port/lv_port_indev.c | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/components/graphics/lvgl/port/lv_port_indev.c b/components/graphics/lvgl/port/lv_port_indev.c
+index d37be0a2..d7a96702 100755
+--- a/components/graphics/lvgl/port/lv_port_indev.c
++++ b/components/graphics/lvgl/port/lv_port_indev.c
+@@ -43,6 +43,7 @@ static uint32_t keypad_get_key(void);
+ #endif
+ 
+ #ifdef ENCODER_ENABLE
++#include "encoder.h"
+ static void encoder_init(void);
+ static bool encoder_read(lv_indev_drv_t* indev_drv, lv_indev_data_t* data);
+ // static void encoder_handler(void);
+@@ -168,6 +169,9 @@ void lv_port_indev_init(void)
+      * add objects to the group with `lv_group_add_obj(group, obj)`
+      * and assign this input device to group to navigate in it:
+      * `lv_indev_set_group(indev_encoder, group);` */
++     lv_group_t * group = lv_group_create();
++     lv_group_set_default(group);
++     lv_indev_set_group(indev_encoder, group);
+ #endif
+ 
+      /*------------------
+@@ -484,18 +488,19 @@ int32_t get_encoder_cnt(void)
+ static void encoder_init(void)
+ {
+     /*Your code comes here*/
++     encoderDeviceInit(&encoder_diff, &encoder_state);
+ }
+ 
+ /* Will be called by the library to read the encoder */
+ static bool encoder_read(lv_indev_drv_t* indev_drv, lv_indev_data_t* data)
+ {
+ 
+-    data->enc_diff = get_encoder_cnt();
++    data->enc_diff =  encoder_diff;
+     data->state = encoder_state;
+-    if (encoder_state == LV_INDEV_STATE_PR) {
+-        encoder_state = LV_INDEV_STATE_REL;
+-    }
+-
++    // if (encoder_state == LV_INDEV_STATE_PR) {
++    //     encoder_state = LV_INDEV_STATE_REL;
++    // }
++     encoder_diff=0;
+     /*Return `false` because we are not buffering and no more data to read*/
+     return false;
+ }
+-- 
+2.25.1
+
