@@ -192,7 +192,7 @@ uint64_t irCodeListGetCode(ir_code_t code_type)
         return 0;
     }
     while (pCode!=NULL) {
-
+        if (pCode)
     }
 }
 
