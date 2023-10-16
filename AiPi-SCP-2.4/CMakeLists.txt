@@ -6,19 +6,24 @@ find_package(bouffalo_sdk REQUIRED HINTS $ENV{BL_SDK_BASE})
 file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/demos/*.c")
 
 # User
-sdk_add_compile_definitions(-DCONFIG_CLI_CMD_ENABLE)
-#sdk_add_compile_definitions(-DBL616_DHCP_DEBUG)
+# sdk_add_compile_definitions(-DCONFIG_CLI_CMD_ENABLE)
 
+# sdk_add_compile_definitions(-DBL616_DHCP_DEBUG)
 target_sources(app PRIVATE
-                #    audio.c
-                  #  audio_pcm.c
-                  #  8388_pcm.c
-                   bsp_es8388.c
-                   es8388test.c
-                   )
+
+  # audio.c
+  # audio_pcm.c
+  # 8388_pcm.c
+  bsp_es8388.c
+  es8388test.c
+)
+
+sdk_set_linker_script($ENV{BL_SDK_BASE}/bsp/board/bl616dk/bl616_flash_old.ld)
 
 sdk_add_include_directories(.)
+
 target_sources(app PRIVATE ${sources})
 sdk_set_main_file(main.c)
 
-project(mqtt)
+get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+project(${PROJECT_NAME})

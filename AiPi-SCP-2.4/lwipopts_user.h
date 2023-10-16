@@ -31,7 +31,8 @@
  */
 #ifndef LWIP_HDR_LWIPOPTS_H__
 #define LWIP_HDR_LWIPOPTS_H__
-
+#define CONFIG_MAC_TXQ_DEPTH 16
+#define CONFIG_MAC_RXQ_DEPTH 12
 #define LWIP_NETIF_API     1
 #define LWIP_DEBUG         1
 #define LWIP_STATS_DISPLAY 1
@@ -109,7 +110,7 @@
 
 #define LWIP_TIMEVAL_PRIVATE      0 // use sys/time.h for struct timeval
 
-//#define LWIP_PROVIDE_ERRNO
+ //#define LWIP_PROVIDE_ERRNO
 
 #define LWIP_DHCP                 1
 #define LWIP_DNS                  1
@@ -119,7 +120,7 @@
 #define SO_REUSE                  1
 #define LWIP_TCP_KEEPALIVE        1
 
-extern int *__errno(void);
+extern int* __errno(void);
 #define errno                         (*__errno())
 #define LWIP_NETIF_STATUS_CALLBACK    1
 #define LWIP_NETIF_API                1

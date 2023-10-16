@@ -43,7 +43,7 @@
 #include "rfparam_adapter.h"
 
 #include "board.h"
-#include "shell.h"
+  // #include "shell.h"
 
 #define DBG_TAG "MAIN"
 #include "log.h"
@@ -486,8 +486,8 @@ int main(void)
     // es8388_voice_init();
     es8388test_init();
 
-    uart0 = bflb_device_get_by_name("uart0");
-    shell_init_with_task(uart0);
+    // uart0 = bflb_device_get_by_name("uart0");
+    // shell_init_with_task(uart0);
 
     // printf("HeapSize:%d\r\n",xPortGetFreeHeapSize());
     tcpip_init(NULL, NULL);
