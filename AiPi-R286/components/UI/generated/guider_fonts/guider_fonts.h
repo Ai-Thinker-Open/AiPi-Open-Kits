@@ -19,7 +19,10 @@ LV_FONT_DECLARE(lv_font_MiSans_Demibold_70)
 LV_FONT_DECLARE(lv_font_montserratMedium_16)
 LV_FONT_DECLARE(lv_font_MiSans_Normal_30)
 LV_FONT_DECLARE(lv_font_montserratMedium_12)
+LV_FONT_DECLARE(lv_font_MiSans_Demibold_20)
 LV_FONT_DECLARE(lv_font_MiSans_Demibold_16)
+LV_FONT_DECLARE(lv_font_MiSans_Demibold_18)
+LV_FONT_DECLARE(lv_font_MiSans_Demibold_12)
 LV_FONT_DECLARE(lv_font_simsun_18)
 
 

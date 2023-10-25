@@ -8,3 +8,13 @@
  * @copyright Copyright (c) 2023
  *
 */
+#ifndef RELAYS_DEV_H
+#define RELAYS_DEV_H
+
+#define RELAYS_SW1 20
+#define RELAYS_SW2 17
+#define RELAYS_SW3 15
+
+void relays_device_init(void* device_t);
+
+#endif

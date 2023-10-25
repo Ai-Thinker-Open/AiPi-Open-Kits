@@ -16,6 +16,7 @@ sdk_set_linker_script(config/bl616_flash.ld)
 
 # 搜集所有的C文件( Collect source files)
 file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/components/*.c")
+
 file(GLOB_RECURSE UI "${CMAKE_CURRENT_SOURCE_DIR}/components/UI/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/components/UI/custom/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/components/UI/generated/*.c"
@@ -24,7 +25,7 @@ file(GLOB_RECURSE UI "${CMAKE_CURRENT_SOURCE_DIR}/components/UI/*.c"
 )
 
 # 添加头文件的引用路径（Add .h include directories）
-sdk_add_include_directories(main config components/wifi components/state components/relays)
+sdk_add_include_directories(main config components/wifi components/state components/relays components/device)
 
 sdk_add_include_directories(components/UI components/UI/custom components/UI/generated components/UI/generated/guider_customer_fonts components/UI/generated/guider_fonts components/UI/generated/images)
 
