@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.15)
+
+include(proj.conf)
+
+find_package(bouffalo_sdk REQUIRED HINTS $ENV{BL_SDK_BASE})
+
+sdk_add_include_directories(.)
+sdk_add_include_directories(main)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/driver)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/protocol)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/system)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/utils)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/application)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/3rdparty/http-parser/include)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/3rdparty/aiio/tcp_transport/include)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/3rdparty/aiio/tcp_transport/private_include)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/3rdparty/aiio/aiio_tls)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/3rdparty/aiio/aiio_tls/aiio-tls-crypto)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/3rdparty/aiio)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/3rdparty/aiio/mqtt/aiio_mqtt/lib/include)
+sdk_add_include_directories(../../aiTinkerCloud_SDK/3rdparty/aiio/mqtt/aiio_mqtt/include)
+
+aux_source_directory(./src SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/driver SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/protocol SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/system SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/utils SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/application SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/3rdparty/http-parser/src SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/3rdparty/aiio/tcp_transport SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/3rdparty/aiio/tcp_transport SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/3rdparty/aiio/aiio_tls SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/3rdparty/aiio/aiio_tls/aiio-tls-crypto SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/3rdparty/aiio/mqtt/aiio_mqtt SRC_FILES)
+aux_source_directory(./../../aiTinkerCloud_SDK/3rdparty/aiio/mqtt/aiio_mqtt/lib SRC_FILES)
+list(REMOVE_ITEM SRC_FILES "./main/main.c")
+
+target_sources(app PRIVATE ${SRC_FILES})
+
+sdk_set_main_file(main/main.c)
+
+get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+project(${PROJECT_NAME})
