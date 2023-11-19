@@ -1,9 +1,9 @@
 /**
  * @brief   This file describe the data of product dpid
- * 
+ *
  * @file    config.h
  * @copyright Copyright (C) 2020-2023, Shenzhen Anxinke Technology Co., Ltd
- * @note 
+ * @note
  * @par Change Logs:
  * <table>
  * <tr><th>Date               <th>Version             <th>Author           <th>Notes
@@ -13,16 +13,15 @@
 #define __CONFIG_H_
 
 
-
-/* 开发平台创建产品后生成的产品ID，用户可根据创建不同产品而获得不同的产品ID，可在该处进行修改*/
+#if __has_include("aiio_dev_config.h")
+#include "aiio_dev_config.h" 
+#else
+ /* 开发平台创建产品后生成的产品ID，用户可根据创建不同产品而获得不同的产品ID，可在该处进行修改*/
 #define  PRODUCT_ID                         "PKEVvgUr"
-
 /* 产品标识,该标识是用户在创建不同产品时将自定义的产品标识 */
 #define  PRODUCT_FLAG                       "kxx"
 
-
 //============================ 空净物模型数据定义 ==================================================
-
 
 //开关(可下发可上报 rw)
 //备注:布尔值（Bool）
@@ -99,5 +98,8 @@
 //音乐切换(可下发可上报 rw)
 //备注:枚举值（Enum）
 #define CMD_PLAY_NEXT              26
+#endif
+
+
 
 #endif

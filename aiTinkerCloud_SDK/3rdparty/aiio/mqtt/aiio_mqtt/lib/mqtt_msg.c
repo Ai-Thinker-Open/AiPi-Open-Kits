@@ -45,7 +45,7 @@ enum mqtt_connect_flag {
     MQTT_CONNECT_FLAG_CLEAN_SESSION = 1 << 1
 };
 
-static int append_string(mqtt_connection_t *connection, const char *string, int len)
+static int append_string(mqtt_connection_t* connection, const char* string, int len)
 {
     if (connection->message.length + len + 2 > connection->buffer_length) {
         return -1;
@@ -59,7 +59,7 @@ static int append_string(mqtt_connection_t *connection, const char *string, int 
     return len + 2;
 }
 
-static uint16_t append_message_id(mqtt_connection_t *connection, uint16_t message_id)
+static uint16_t append_message_id(mqtt_connection_t* connection, uint16_t message_id)
 {
     // If message_id is zero then we should assign one, otherwise
     // we'll use the one supplied by the caller
@@ -81,25 +81,25 @@ static uint16_t append_message_id(mqtt_connection_t *connection, uint16_t messag
     return message_id;
 }
 
-static int init_message(mqtt_connection_t *connection)
+static int init_message(mqtt_connection_t* connection)
 {
     connection->message.length = MQTT_MAX_FIXED_HEADER_SIZE;
     return MQTT_MAX_FIXED_HEADER_SIZE;
 }
 
-static mqtt_message_t *fail_message(mqtt_connection_t *connection)
+static mqtt_message_t* fail_message(mqtt_connection_t* connection)
 {
     connection->message.data = connection->buffer;
     connection->message.length = 0;
     return &connection->message;
 }
 
-static mqtt_message_t *fini_message(mqtt_connection_t *connection, int type, int dup, int qos, int retain)
+static mqtt_message_t* fini_message(mqtt_connection_t* connection, int type, int dup, int qos, int retain)
 {
     int message_length = connection->message.length - MQTT_MAX_FIXED_HEADER_SIZE;
     int total_length = message_length;
     int encoded_length = 0;
-    uint8_t encoded_lens[4] = {0};
+    uint8_t encoded_lens[4] = { 0 };
     // Check if we have fragmented message and update total_len
     if (connection->message.fragmented_msg_total_length) {
         total_length = connection->message.fragmented_msg_total_length - MQTT_MAX_FIXED_HEADER_SIZE;
@@ -128,7 +128,7 @@ static mqtt_message_t *fini_message(mqtt_connection_t *connection, int type, int
     connection->message.data = connection->buffer + offs;
     connection->message.fragmented_msg_data_offset -= offs;
     // type byte
-    connection->buffer[offs++] =  ((type & 0x0f) << 4) | ((dup & 1) << 3) | ((qos & 3) << 1) | (retain & 1);
+    connection->buffer[offs++] = ((type & 0x0f) << 4) | ((dup & 1) << 3) | ((qos & 3) << 1) | (retain & 1);
     // length bytes
     for (int j = 0; j < len_bytes; j++) {
         connection->buffer[offs++] = encoded_lens[j];
@@ -137,14 +137,14 @@ static mqtt_message_t *fini_message(mqtt_connection_t *connection, int type, int
     return &connection->message;
 }
 
-void mqtt_msg_init(mqtt_connection_t *connection, uint8_t *buffer, size_t buffer_length)
+void mqtt_msg_init(mqtt_connection_t* connection, uint8_t* buffer, size_t buffer_length)
 {
     memset(connection, 0, sizeof(mqtt_connection_t));
     connection->buffer = buffer;
     connection->buffer_length = buffer_length;
 }
 
-size_t mqtt_get_total_length(const uint8_t *buffer, size_t length, int *fixed_size_len)
+size_t mqtt_get_total_length(const uint8_t* buffer, size_t length, int* fixed_size_len)
 {
     int i;
     size_t totlen = 0;
@@ -164,7 +164,7 @@ size_t mqtt_get_total_length(const uint8_t *buffer, size_t length, int *fixed_si
     return totlen;
 }
 
-bool mqtt_header_complete(uint8_t *buffer, size_t buffer_length)
+bool mqtt_header_complete(uint8_t* buffer, size_t buffer_length)
 {
     uint16_t i;
     uint16_t topiclen;
@@ -195,7 +195,7 @@ bool mqtt_header_complete(uint8_t *buffer, size_t buffer_length)
     return buffer_length >= i;
 }
 
-char *mqtt_get_publish_topic(uint8_t *buffer, size_t *length)
+char* mqtt_get_publish_topic(uint8_t* buffer, size_t* length)
 {
     int i;
     int topiclen;
@@ -218,10 +218,10 @@ char *mqtt_get_publish_topic(uint8_t *buffer, size_t *length)
     }
 
     *length = topiclen;
-    return (char *)(buffer + i);
+    return (char*)(buffer + i);
 }
 
-char *mqtt_get_publish_data(uint8_t *buffer, size_t *length)
+char* mqtt_get_publish_data(uint8_t* buffer, size_t* length)
 {
     int i;
     int totlen = 0;
@@ -263,87 +263,90 @@ char *mqtt_get_publish_data(uint8_t *buffer, size_t *length)
 
     if (totlen <= blength) {
         *length = totlen - i;
-    } else {
+    }
+    else {
         *length = blength - i;
     }
-    return (char *)(buffer + i);
+    return (char*)(buffer + i);
 }
 
-char *mqtt_get_suback_data(uint8_t *buffer, size_t *length)
+char* mqtt_get_suback_data(uint8_t* buffer, size_t* length)
 {
     // SUBACK payload length = total length - (fixed header (2 bytes) + variable header (2 bytes))
     // This requires the remaining length to be encoded in 1 byte.
     if (*length > 4) {
         *length -= 4;
-        return (char *)(buffer + 4);
+        return (char*)(buffer + 4);
     }
     *length = 0;
     return NULL;
 }
 
-uint16_t mqtt_get_id(uint8_t *buffer, size_t length)
+uint16_t mqtt_get_id(uint8_t* buffer, size_t length)
 {
     if (length < 1) {
         return 0;
     }
 
     switch (mqtt_get_type(buffer)) {
-    case MQTT_MSG_TYPE_PUBLISH: {
-        int i;
-        int topiclen;
+        case MQTT_MSG_TYPE_PUBLISH: {
+            int i;
+            int topiclen;
 
-        for (i = 1; i < length; ++i) {
-            if ((buffer[i] & 0x80) == 0) {
-                ++i;
-                break;
+            for (i = 1; i < length; ++i) {
+                if ((buffer[i] & 0x80) == 0) {
+                    ++i;
+                    break;
+                }
             }
-        }
 
-        if (i + 2 >= length) {
-            return 0;
-        }
-        topiclen = buffer[i++] << 8;
-        topiclen |= buffer[i++];
-
-        if (i + topiclen > length) {
-            return 0;
-        }
-        i += topiclen;
-
-        if (mqtt_get_qos(buffer) > 0) {
-            if (i + 2 > length) {
+            if (i + 2 >= length) {
                 return 0;
             }
-            //i += 2;
-        } else {
-            return 0;
+            topiclen = buffer[i++] << 8;
+            topiclen |= buffer[i++];
+
+            if (i + topiclen > length) {
+                return 0;
+            }
+            i += topiclen;
+
+            if (mqtt_get_qos(buffer) > 0) {
+                if (i + 2 > length) {
+                    return 0;
+                }
+                //i += 2;
+            }
+            else {
+                return 0;
+            }
+
+            return (buffer[i] << 8) | buffer[i + 1];
+        }
+        case MQTT_MSG_TYPE_PUBACK:
+        case MQTT_MSG_TYPE_PUBREC:
+        case MQTT_MSG_TYPE_PUBREL:
+        case MQTT_MSG_TYPE_PUBCOMP:
+        case MQTT_MSG_TYPE_SUBACK:
+        case MQTT_MSG_TYPE_UNSUBACK:
+        case MQTT_MSG_TYPE_SUBSCRIBE:
+        case MQTT_MSG_TYPE_UNSUBSCRIBE: {
+            // This requires the remaining length to be encoded in 1 byte,
+            // which it should be.
+            if (length >= 4 && (buffer[1] & 0x80) == 0) {
+                return (buffer[2] << 8) | buffer[3];
+            }
+            else {
+                return 0;
+            }
         }
 
-        return (buffer[i] << 8) | buffer[i + 1];
-    }
-    case MQTT_MSG_TYPE_PUBACK:
-    case MQTT_MSG_TYPE_PUBREC:
-    case MQTT_MSG_TYPE_PUBREL:
-    case MQTT_MSG_TYPE_PUBCOMP:
-    case MQTT_MSG_TYPE_SUBACK:
-    case MQTT_MSG_TYPE_UNSUBACK:
-    case MQTT_MSG_TYPE_SUBSCRIBE:
-    case MQTT_MSG_TYPE_UNSUBSCRIBE: {
-        // This requires the remaining length to be encoded in 1 byte,
-        // which it should be.
-        if (length >= 4 && (buffer[1] & 0x80) == 0) {
-            return (buffer[2] << 8) | buffer[3];
-        } else {
+        default:
             return 0;
-        }
-    }
-
-    default:
-        return 0;
     }
 }
 
-mqtt_message_t *mqtt_msg_connect(mqtt_connection_t *connection, mqtt_connect_info_t *info)
+mqtt_message_t* mqtt_msg_connect(mqtt_connection_t* connection, mqtt_connect_info_t* info)
 {
 
     init_message(connection);
@@ -351,14 +354,15 @@ mqtt_message_t *mqtt_msg_connect(mqtt_connection_t *connection, mqtt_connect_inf
     int header_len;
     if (info->protocol_ver == MQTT_PROTOCOL_V_3_1) {
         header_len = MQTT_3_1_VARIABLE_HEADER_SIZE;
-    } else {
+    }
+    else {
         header_len = MQTT_3_1_1_VARIABLE_HEADER_SIZE;
     }
 
     if (connection->message.length + header_len > connection->buffer_length) {
         return fail_message(connection);
     }
-    char *variable_header = (char *)(connection->buffer + connection->message.length);
+    char* variable_header = (char*)(connection->buffer + connection->message.length);
     connection->message.length += header_len;
 
     int header_idx = 0;
@@ -369,7 +373,8 @@ mqtt_message_t *mqtt_msg_connect(mqtt_connection_t *connection, mqtt_connect_inf
         memcpy(&variable_header[header_idx], "MQIsdp", 6);          // Protocol name
         header_idx = header_idx + 6;
         variable_header[header_idx++] = 3;                          // Protocol version
-    } else {
+    }
+    else {
         /* Defaults to protocol version 3.1.1 values */
         variable_header[header_idx++] = 4;                          // Variable header length LSB
         memcpy(&variable_header[header_idx], "MQTT", 4);            // Protocol name
@@ -390,7 +395,8 @@ mqtt_message_t *mqtt_msg_connect(mqtt_connection_t *connection, mqtt_connect_inf
         if (append_string(connection, info->client_id, strlen(info->client_id)) < 0) {
             return fail_message(connection);
         }
-    } else {
+    }
+    else {
         if (append_string(connection, "", 0) < 0) {
             return fail_message(connection);
         }
@@ -442,7 +448,7 @@ mqtt_message_t *mqtt_msg_connect(mqtt_connection_t *connection, mqtt_connect_inf
     return fini_message(connection, MQTT_MSG_TYPE_CONNECT, 0, 0, 0);
 }
 
-mqtt_message_t *mqtt_msg_publish(mqtt_connection_t *connection, const char *topic, const char *data, int data_length, int qos, int retain, uint16_t *message_id)
+mqtt_message_t* mqtt_msg_publish(mqtt_connection_t* connection, const char* topic, const char* data, int data_length, int qos, int retain, uint16_t* message_id)
 {
     init_message(connection);
 
@@ -462,7 +468,8 @@ mqtt_message_t *mqtt_msg_publish(mqtt_connection_t *connection, const char *topi
         if ((*message_id = append_message_id(connection, 0)) == 0) {
             return fail_message(connection);
         }
-    } else {
+    }
+    else {
         *message_id = 0;
     }
 
@@ -472,7 +479,8 @@ mqtt_message_t *mqtt_msg_publish(mqtt_connection_t *connection, const char *topi
         memcpy(connection->buffer + connection->message.length, data, connection->buffer_length - connection->message.length);
         connection->message.length = connection->buffer_length;
         connection->message.fragmented_msg_total_length = data_length + connection->message.fragmented_msg_data_offset;
-    } else {
+    }
+    else {
         if (data != NULL) {
             memcpy(connection->buffer + connection->message.length, data, data_length);
             connection->message.length += data_length;
@@ -482,7 +490,7 @@ mqtt_message_t *mqtt_msg_publish(mqtt_connection_t *connection, const char *topi
     return fini_message(connection, MQTT_MSG_TYPE_PUBLISH, 0, qos, retain);
 }
 
-mqtt_message_t *mqtt_msg_puback(mqtt_connection_t *connection, uint16_t message_id)
+mqtt_message_t* mqtt_msg_puback(mqtt_connection_t* connection, uint16_t message_id)
 {
     init_message(connection);
     if (append_message_id(connection, message_id) == 0) {
@@ -491,7 +499,7 @@ mqtt_message_t *mqtt_msg_puback(mqtt_connection_t *connection, uint16_t message_
     return fini_message(connection, MQTT_MSG_TYPE_PUBACK, 0, 0, 0);
 }
 
-mqtt_message_t *mqtt_msg_pubrec(mqtt_connection_t *connection, uint16_t message_id)
+mqtt_message_t* mqtt_msg_pubrec(mqtt_connection_t* connection, uint16_t message_id)
 {
     init_message(connection);
     if (append_message_id(connection, message_id) == 0) {
@@ -500,7 +508,7 @@ mqtt_message_t *mqtt_msg_pubrec(mqtt_connection_t *connection, uint16_t message_
     return fini_message(connection, MQTT_MSG_TYPE_PUBREC, 0, 0, 0);
 }
 
-mqtt_message_t *mqtt_msg_pubrel(mqtt_connection_t *connection, uint16_t message_id)
+mqtt_message_t* mqtt_msg_pubrel(mqtt_connection_t* connection, uint16_t message_id)
 {
     init_message(connection);
     if (append_message_id(connection, message_id) == 0) {
@@ -509,7 +517,7 @@ mqtt_message_t *mqtt_msg_pubrel(mqtt_connection_t *connection, uint16_t message_
     return fini_message(connection, MQTT_MSG_TYPE_PUBREL, 0, 1, 0);
 }
 
-mqtt_message_t *mqtt_msg_pubcomp(mqtt_connection_t *connection, uint16_t message_id)
+mqtt_message_t* mqtt_msg_pubcomp(mqtt_connection_t* connection, uint16_t message_id)
 {
     init_message(connection);
     if (append_message_id(connection, message_id) == 0) {
@@ -518,7 +526,7 @@ mqtt_message_t *mqtt_msg_pubcomp(mqtt_connection_t *connection, uint16_t message
     return fini_message(connection, MQTT_MSG_TYPE_PUBCOMP, 0, 0, 0);
 }
 
-mqtt_message_t *mqtt_msg_subscribe(mqtt_connection_t *connection, const char *topic, int qos, uint16_t *message_id)
+mqtt_message_t* mqtt_msg_subscribe(mqtt_connection_t* connection, const char* topic, int qos, uint16_t* message_id)
 {
     init_message(connection);
 
@@ -542,7 +550,7 @@ mqtt_message_t *mqtt_msg_subscribe(mqtt_connection_t *connection, const char *to
     return fini_message(connection, MQTT_MSG_TYPE_SUBSCRIBE, 0, 1, 0);
 }
 
-mqtt_message_t *mqtt_msg_unsubscribe(mqtt_connection_t *connection, const char *topic, uint16_t *message_id)
+mqtt_message_t* mqtt_msg_unsubscribe(mqtt_connection_t* connection, const char* topic, uint16_t* message_id)
 {
     init_message(connection);
 
@@ -561,19 +569,19 @@ mqtt_message_t *mqtt_msg_unsubscribe(mqtt_connection_t *connection, const char *
     return fini_message(connection, MQTT_MSG_TYPE_UNSUBSCRIBE, 0, 1, 0);
 }
 
-mqtt_message_t *mqtt_msg_pingreq(mqtt_connection_t *connection)
+mqtt_message_t* mqtt_msg_pingreq(mqtt_connection_t* connection)
 {
     init_message(connection);
     return fini_message(connection, MQTT_MSG_TYPE_PINGREQ, 0, 0, 0);
 }
 
-mqtt_message_t *mqtt_msg_pingresp(mqtt_connection_t *connection)
+mqtt_message_t* mqtt_msg_pingresp(mqtt_connection_t* connection)
 {
     init_message(connection);
     return fini_message(connection, MQTT_MSG_TYPE_PINGRESP, 0, 0, 0);
 }
 
-mqtt_message_t *mqtt_msg_disconnect(mqtt_connection_t *connection)
+mqtt_message_t* mqtt_msg_disconnect(mqtt_connection_t* connection)
 {
     init_message(connection);
     return fini_message(connection, MQTT_MSG_TYPE_DISCONNECT, 0, 0, 0);
@@ -583,7 +591,7 @@ mqtt_message_t *mqtt_msg_disconnect(mqtt_connection_t *connection)
  * check flags: [MQTT-2.2.2-1], [MQTT-2.2.2-2]
  * returns 0 if flags are invalid, otherwise returns 1
  */
-int mqtt_has_valid_msg_hdr(uint8_t *buffer, size_t length)
+int mqtt_has_valid_msg_hdr(uint8_t* buffer, size_t length)
 {
     int qos, dup;
 
@@ -591,30 +599,30 @@ int mqtt_has_valid_msg_hdr(uint8_t *buffer, size_t length)
         return 0;
     }
     switch (mqtt_get_type(buffer)) {
-    case MQTT_MSG_TYPE_CONNECT:
-    case MQTT_MSG_TYPE_CONNACK:
-    case MQTT_MSG_TYPE_PUBACK:
-    case MQTT_MSG_TYPE_PUBREC:
-    case MQTT_MSG_TYPE_PUBCOMP:
-    case MQTT_MSG_TYPE_SUBACK:
-    case MQTT_MSG_TYPE_UNSUBACK:
-    case MQTT_MSG_TYPE_PINGREQ:
-    case MQTT_MSG_TYPE_PINGRESP:
-    case MQTT_MSG_TYPE_DISCONNECT:
-        return (buffer[0] & 0x0f) == 0;  /* all flag bits are 0 */
-    case MQTT_MSG_TYPE_PUBREL:
-    case MQTT_MSG_TYPE_SUBSCRIBE:
-    case MQTT_MSG_TYPE_UNSUBSCRIBE:
-        return (buffer[0] & 0x0f) == 0x02;  /* only bit 1 is set */
-    case MQTT_MSG_TYPE_PUBLISH:
-        qos = mqtt_get_qos(buffer);
-        dup = mqtt_get_dup(buffer);
-        /*
-         * there is no qos=3  [MQTT-3.3.1-4]
-         * dup flag must be set to 0 for all qos=0 messages [MQTT-3.3.1-2]
-         */
-        return (qos < 3) && ((qos > 0) || (dup == 0));
-    default:
-        return 0;
+        case MQTT_MSG_TYPE_CONNECT:
+        case MQTT_MSG_TYPE_CONNACK:
+        case MQTT_MSG_TYPE_PUBACK:
+        case MQTT_MSG_TYPE_PUBREC:
+        case MQTT_MSG_TYPE_PUBCOMP:
+        case MQTT_MSG_TYPE_SUBACK:
+        case MQTT_MSG_TYPE_UNSUBACK:
+        case MQTT_MSG_TYPE_PINGREQ:
+        case MQTT_MSG_TYPE_PINGRESP:
+        case MQTT_MSG_TYPE_DISCONNECT:
+            return (buffer[0] & 0x0f) == 0;  /* all flag bits are 0 */
+        case MQTT_MSG_TYPE_PUBREL:
+        case MQTT_MSG_TYPE_SUBSCRIBE:
+        case MQTT_MSG_TYPE_UNSUBSCRIBE:
+            return (buffer[0] & 0x0f) == 0x02;  /* only bit 1 is set */
+        case MQTT_MSG_TYPE_PUBLISH:
+            qos = mqtt_get_qos(buffer);
+            dup = mqtt_get_dup(buffer);
+            /*
+             * there is no qos=3  [MQTT-3.3.1-4]
+             * dup flag must be set to 0 for all qos=0 messages [MQTT-3.3.1-2]
+             */
+            return (qos < 3) && ((qos > 0) || (dup == 0));
+        default:
+            return 0;
     }
 }

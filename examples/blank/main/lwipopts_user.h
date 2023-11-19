@@ -32,8 +32,8 @@
 #ifndef LWIP_HDR_LWIPOPTS_H__
 #define LWIP_HDR_LWIPOPTS_H__
 
-// #define LWIP_NUM_NETIF_CLIENT_DATA              1
-// #define LWIP_MDNS_RESPONDER                     1
+ // #define LWIP_NUM_NETIF_CLIENT_DATA              1
+ // #define LWIP_MDNS_RESPONDER                     1
 #define LWIP_NETIF_API     1
 #define LWIP_DEBUG         1
 #define LWIP_STATS_DISPLAY 1
@@ -123,7 +123,7 @@
 #define SO_REUSE                  1
 #define LWIP_TCP_KEEPALIVE        1
 
-extern int *__errno(void);
+extern int* __errno(void);
 #define errno                         (*__errno())
 #define LWIP_NETIF_STATUS_CALLBACK    1
 #define LWIP_NETIF_API                1

@@ -34,16 +34,16 @@ _Static_assert(MQTT_EVENT_ANY == AIIO_EVENT_ANY_ID, "mqtt-client event enum does
 #endif
 
 
-static const char *TAG = "MQTT_CLIENT";
+static const char* TAG = "MQTT_CLIENT";
 
 typedef struct mqtt_state {
-    uint8_t *in_buffer;
-    uint8_t *out_buffer;
+    uint8_t* in_buffer;
+    uint8_t* out_buffer;
     int in_buffer_length;
     int out_buffer_length;
     size_t message_length;
     size_t in_buffer_read_len;
-    mqtt_message_t *outbound_message;
+    mqtt_message_t* outbound_message;
     mqtt_connection_t mqtt_connection;
     uint16_t pending_msg_id;
     int pending_msg_type;
@@ -56,32 +56,32 @@ typedef struct {
     aiio_event_loop_handle_t event_loop_handle;
     int task_stack;
     int task_prio;
-    char *uri;
-    char *host;
-    char *path;
-    char *scheme;
+    char* uri;
+    char* host;
+    char* path;
+    char* scheme;
     int port;
     bool auto_reconnect;
-    void *user_context;
+    void* user_context;
     int network_timeout_ms;
     int refresh_connection_after_ms;
     int reconnect_timeout_ms;
-    char **alpn_protos;
+    char** alpn_protos;
     int num_alpn_protos;
-    char *clientkey_password;
+    char* clientkey_password;
     int clientkey_password_len;
     bool use_global_ca_store;
-    aiio_err_t ((*crt_bundle_attach)(void *conf));
-    const char *cacert_buf;
+    aiio_err_t((*crt_bundle_attach)(void* conf));
+    const char* cacert_buf;
     size_t cacert_bytes;
-    const char *clientcert_buf;
+    const char* clientcert_buf;
     size_t clientcert_bytes;
-    const char *clientkey_buf;
+    const char* clientkey_buf;
     size_t clientkey_bytes;
-    const struct psk_key_hint *psk_hint_key;
+    const struct psk_key_hint* psk_hint_key;
     bool skip_cert_common_name_check;
     bool use_secure_element;
-    void *ds_data;
+    void* ds_data;
     int message_retransmit_timeout;
 } mqtt_config_storage_t;
 
@@ -95,7 +95,7 @@ typedef enum {
 struct aiio_mqtt_client {
     aiio_transport_list_handle_t transport_list;
     aiio_transport_handle_t transport;
-    mqtt_config_storage_t *config;
+    mqtt_config_storage_t* config;
     mqtt_state_t  mqtt_state;
     mqtt_connect_info_t connect_info;
     mqtt_client_state_t state;
@@ -123,7 +123,7 @@ static void aiio_mqtt_destroy_config(aiio_mqtt_client_handle_t client);
 static aiio_err_t aiio_mqtt_connect(aiio_mqtt_client_handle_t client, int timeout_ms);
 static void aiio_mqtt_abort_connection(aiio_mqtt_client_handle_t client);
 static aiio_err_t aiio_mqtt_client_ping(aiio_mqtt_client_handle_t client);
-static char *create_string(const char *ptr, int len);
+static char* create_string(const char* ptr, int len);
 static int mqtt_message_receive(aiio_mqtt_client_handle_t client, int read_poll_timeout_ms);
 static void aiio_mqtt_client_dispatch_transport_error(aiio_mqtt_client_handle_t client);
 static aiio_err_t send_disconnect_msg(aiio_mqtt_client_handle_t client);
@@ -136,9 +136,9 @@ enum aiio_mqtt_ssl_cert_key_api {
     MQTT_SSL_DATA_API_MAX,
 };
 
-static aiio_err_t aiio_mqtt_set_cert_key_data(aiio_transport_handle_t ssl, enum aiio_mqtt_ssl_cert_key_api what, const char *cert_key_data, int cert_key_len)
+static aiio_err_t aiio_mqtt_set_cert_key_data(aiio_transport_handle_t ssl, enum aiio_mqtt_ssl_cert_key_api what, const char* cert_key_data, int cert_key_len)
 {
-    char *data = (char *)cert_key_data;
+    char* data = (char*)cert_key_data;
     int ssl_transport_api_id = what;
     int len = cert_key_len;
 
@@ -154,7 +154,7 @@ static aiio_err_t aiio_mqtt_set_cert_key_data(aiio_transport_handle_t ssl, enum 
     }
 #ifndef MQTT_SUPPORTED_FEATURE_DER_CERTIFICATES
     else {
-        aiio_log_e( "Explicit cert-/key-len is not available ");
+        aiio_log_e("Explicit cert-/key-len is not available ");
         return AIIO_ERR_NOT_SUPPORTED;
     }
 #endif
@@ -167,50 +167,52 @@ static aiio_err_t aiio_mqtt_set_cert_key_data(aiio_transport_handle_t ssl, enum 
 
     switch (ssl_transport_api_id) {
 #ifdef MQTT_SUPPORTED_FEATURE_DER_CERTIFICATES
-    case MQTT_SSL_DATA_API_CA_CERT:
-        aiio_transport_ssl_set_cert_data_der(ssl, data, len);
-        break;
-    case MQTT_SSL_DATA_API_CLIENT_CERT:
-        aiio_transport_ssl_set_client_cert_data_der(ssl, data, len);
-        break;
-    case MQTT_SSL_DATA_API_CLIENT_KEY:
-        aiio_transport_ssl_set_client_key_data_der(ssl, data, len);
-        break;
+        case MQTT_SSL_DATA_API_CA_CERT:
+            aiio_transport_ssl_set_cert_data_der(ssl, data, len);
+            break;
+        case MQTT_SSL_DATA_API_CLIENT_CERT:
+            aiio_transport_ssl_set_client_cert_data_der(ssl, data, len);
+            break;
+        case MQTT_SSL_DATA_API_CLIENT_KEY:
+            aiio_transport_ssl_set_client_key_data_der(ssl, data, len);
+            break;
 #endif
-    case MQTT_SSL_DATA_API_CA_CERT + MQTT_SSL_DATA_API_MAX:
-        aiio_transport_ssl_set_cert_data(ssl, data, len);
-        break;
-    case MQTT_SSL_DATA_API_CLIENT_CERT + MQTT_SSL_DATA_API_MAX:
-        aiio_transport_ssl_set_client_cert_data(ssl, data, len);
-        break;
-    case MQTT_SSL_DATA_API_CLIENT_KEY + MQTT_SSL_DATA_API_MAX:
-        aiio_transport_ssl_set_client_key_data(ssl, data, len);
-        break;
-    default:
-        return AIIO_ERR_INVALID_ARG;
+        case MQTT_SSL_DATA_API_CA_CERT + MQTT_SSL_DATA_API_MAX:
+            aiio_transport_ssl_set_cert_data(ssl, data, len);
+            break;
+        case MQTT_SSL_DATA_API_CLIENT_CERT + MQTT_SSL_DATA_API_MAX:
+            aiio_transport_ssl_set_client_cert_data(ssl, data, len);
+            break;
+        case MQTT_SSL_DATA_API_CLIENT_KEY + MQTT_SSL_DATA_API_MAX:
+            aiio_transport_ssl_set_client_key_data(ssl, data, len);
+            break;
+        default:
+            return AIIO_ERR_INVALID_ARG;
     }
     return AIIO_OK;
 }
 
-static aiio_err_t aiio_mqtt_set_ssl_transport_properties(aiio_transport_list_handle_t transport_list, mqtt_config_storage_t *cfg)
+static aiio_err_t aiio_mqtt_set_ssl_transport_properties(aiio_transport_list_handle_t transport_list, mqtt_config_storage_t* cfg)
 {
     aiio_transport_handle_t ssl = aiio_transport_list_get_transport(transport_list, "mqtts");
 
     if (cfg->use_global_ca_store == true) {
         aiio_transport_ssl_enable_global_ca_store(ssl);
-    } else if (cfg->crt_bundle_attach != NULL) {
+    }
+    else if (cfg->crt_bundle_attach != NULL) {
 #ifdef MQTT_SUPPORTED_FEATURE_CERTIFICATE_BUNDLE
 #ifdef CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
         aiio_transport_ssl_crt_bundle_attach(ssl, cfg->crt_bundle_attach);
 #else
-        aiio_log_e( "Certificate bundle is not enabled for mbedTLS in menuconfig");
+        aiio_log_e("Certificate bundle is not enabled for mbedTLS in menuconfig");
         goto aiio_mqtt_set_transport_failed;
 #endif /* CONFIG_MBEDTLS_CERTIFICATE_BUNDLE */
 #else
-        aiio_log_e( "Certificate bundle feature is not available ");
+        aiio_log_e("Certificate bundle feature is not available ");
         goto aiio_mqtt_set_transport_failed;
 #endif /* MQTT_SUPPORTED_FEATURE_CERTIFICATE_BUNDLE */
-    } else {
+    }
+    else {
         AIIO_OK_CHECK(aiio_mqtt_set_cert_key_data(ssl, MQTT_SSL_DATA_API_CA_CERT, cfg->cacert_buf, cfg->cacert_bytes),
                      goto aiio_mqtt_set_transport_failed);
 
@@ -223,11 +225,11 @@ static aiio_err_t aiio_mqtt_set_ssl_transport_properties(aiio_transport_list_han
 #ifdef CONFIG_TLS_USE_SECURE_ELEMENT
         aiio_transport_ssl_use_secure_element(ssl);
 #else
-        aiio_log_e( "Secure element not enabled for aiio-tls in menuconfig");
+        aiio_log_e("Secure element not enabled for aiio-tls in menuconfig");
         goto aiio_mqtt_set_transport_failed;
 #endif /* CONFIG_TLS_USE_SECURE_ELEMENT */
 #else
-        aiio_log_e( "Secure element feature is not available");
+        aiio_log_e("Secure element feature is not available");
         goto aiio_mqtt_set_transport_failed;
 #endif /* MQTT_SUPPORTED_FEATURE_SECURE_ELEMENT */
     }
@@ -237,11 +239,11 @@ static aiio_err_t aiio_mqtt_set_ssl_transport_properties(aiio_transport_list_han
 #ifdef CONFIG_TLS_USE_DS_PERIPHERAL
         aiio_transport_ssl_set_ds_data(ssl, cfg->ds_data);
 #else
-        aiio_log_e( "Digital Signature not enabled for aiio-tls in menuconfig");
+        aiio_log_e("Digital Signature not enabled for aiio-tls in menuconfig");
         goto aiio_mqtt_set_transport_failed;
 #endif /* CONFIG_TLS_USE_DS_PERIPHERAL */
 #else
-        aiio_log_e( "Digital Signature feature is not available ");
+        aiio_log_e("Digital Signature feature is not available ");
         goto aiio_mqtt_set_transport_failed;
 #endif
     }
@@ -256,7 +258,7 @@ static aiio_err_t aiio_mqtt_set_ssl_transport_properties(aiio_transport_list_han
                 cfg->clientkey_password,
                 cfg->clientkey_password_len);
 #else
-        aiio_log_e( "Password protected keys are not available");
+        aiio_log_e("Password protected keys are not available");
         goto aiio_mqtt_set_transport_failed;
 #endif
     }
@@ -266,11 +268,11 @@ static aiio_err_t aiio_mqtt_set_ssl_transport_properties(aiio_transport_list_han
 #ifdef CONFIG_TLS_PSK_VERIFICATION
         aiio_transport_ssl_set_psk_key_hint(ssl, cfg->psk_hint_key);
 #else
-        aiio_log_e( "PSK authentication configured but not enabled in menuconfig: Please enable TLS_PSK_VERIFICATION option");
+        aiio_log_e("PSK authentication configured but not enabled in menuconfig: Please enable TLS_PSK_VERIFICATION option");
         goto aiio_mqtt_set_transport_failed;
 #endif
 #else
-        aiio_log_e( "PSK authentication is not available");
+        aiio_log_e("PSK authentication is not available");
         goto aiio_mqtt_set_transport_failed;
 #endif
     }
@@ -278,13 +280,13 @@ static aiio_err_t aiio_mqtt_set_ssl_transport_properties(aiio_transport_list_han
     if (cfg->alpn_protos) {
 #if defined(MQTT_SUPPORTED_FEATURE_ALPN) && MQTT_ENABLE_SSL
 #if defined(CONFIG_MBEDTLS_SSL_ALPN) || defined(CONFIG_WOLFSSL_HAVE_ALPN)
-        aiio_transport_ssl_set_alpn_protocol(ssl, (const char **)cfg->alpn_protos);
+        aiio_transport_ssl_set_alpn_protocol(ssl, (const char**)cfg->alpn_protos);
 #else
-        aiio_log_e( "APLN configured but not enabled in menuconfig: Please enable MBEDTLS_SSL_ALPN or WOLFSSL_HAVE_ALPN option");
+        aiio_log_e("APLN configured but not enabled in menuconfig: Please enable MBEDTLS_SSL_ALPN or WOLFSSL_HAVE_ALPN option");
         goto aiio_mqtt_set_transport_failed;
 #endif
 #else
-        aiio_log_e( "APLN is not available");
+        aiio_log_e("APLN is not available");
         goto aiio_mqtt_set_transport_failed;
 #endif
     }
@@ -294,7 +296,7 @@ static aiio_err_t aiio_mqtt_set_ssl_transport_properties(aiio_transport_list_han
 #if defined(MQTT_SUPPORTED_FEATURE_SKIP_CRT_CMN_NAME_CHECK) && MQTT_ENABLE_SSL
         aiio_transport_ssl_skip_common_name_check(ssl);
 #else
-        aiio_log_e( "Skip certificate common name check is not available ");
+        aiio_log_e("Skip certificate common name check is not available ");
         goto aiio_mqtt_set_transport_failed;
 #endif
     }
@@ -307,7 +309,7 @@ aiio_mqtt_set_transport_failed:
 #endif // MQTT_ENABLE_SSL
 
 /* Checks if the user supplied config values are internally consistent */
-static aiio_err_t aiio_mqtt_check_cfg_conflict(const mqtt_config_storage_t *cfg, const aiio_mqtt_client_config_t *user_cfg)
+static aiio_err_t aiio_mqtt_check_cfg_conflict(const mqtt_config_storage_t* cfg, const aiio_mqtt_client_config_t* user_cfg)
 {
     aiio_err_t ret = AIIO_OK;
 
@@ -319,22 +321,23 @@ static aiio_err_t aiio_mqtt_check_cfg_conflict(const mqtt_config_storage_t *cfg,
 
     if (!is_ssl_scheme && ssl_cfg_enabled) {
         if (cfg->uri) {
-            aiio_log_w( "SSL related configs set, but the URI scheme specifies a non-SSL scheme, scheme = %s", cfg->scheme);
-        } else {
-            aiio_log_w( "SSL related configs set, but the transport protocol is a non-SSL scheme, transport = %d", user_cfg->transport);
+            aiio_log_w("SSL related configs set, but the URI scheme specifies a non-SSL scheme, scheme = %s", cfg->scheme);
+        }
+        else {
+            aiio_log_w("SSL related configs set, but the transport protocol is a non-SSL scheme, transport = %d", user_cfg->transport);
         }
         ret = AIIO_ERR_INVALID_ARG;
     }
 
     if (cfg->uri && user_cfg->transport) {
-        aiio_log_w( "Transport config set, but overridden by scheme from URI: transport = %d, uri scheme = %s", user_cfg->transport, cfg->scheme);
+        aiio_log_w("Transport config set, but overridden by scheme from URI: transport = %d, uri scheme = %s", user_cfg->transport, cfg->scheme);
         ret = AIIO_ERR_INVALID_ARG;
     }
 
     return ret;
 }
 
-static bool set_if_config(char const *const new_config, char **old_config)
+static bool set_if_config(char const* const new_config, char** old_config)
 {
     if (new_config) {
         free(*old_config);
@@ -346,10 +349,10 @@ static bool set_if_config(char const *const new_config, char **old_config)
     return true;
 }
 
-aiio_err_t aiio_mqtt_set_config(aiio_mqtt_client_handle_t client, const aiio_mqtt_client_config_t *config)
+aiio_err_t aiio_mqtt_set_config(aiio_mqtt_client_handle_t client, const aiio_mqtt_client_config_t* config)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return AIIO_ERR_INVALID_ARG;
     }
     MQTT_API_LOCK(client);
@@ -391,11 +394,12 @@ aiio_err_t aiio_mqtt_set_config(aiio_mqtt_client_handle_t client, const aiio_mqt
     if (!config->set_null_client_id) {
         if (config->client_id) {
             AIIO_MEM_CHECK(set_if_config(config->client_id, &client->connect_info.client_id), goto _mqtt_set_config_failed);
-        } else if (client->connect_info.client_id == NULL) {
+        }
+        else if (client->connect_info.client_id == NULL) {
             client->connect_info.client_id = platform_create_id_string();
         }
         AIIO_MEM_CHECK(client->connect_info.client_id, goto _mqtt_set_config_failed);
-        aiio_log_d( "MQTT client_id=%s", client->connect_info.client_id);
+        aiio_log_d("MQTT client_id=%s", client->connect_info.client_id);
     }
 
     AIIO_MEM_CHECK(set_if_config(config->uri, &client->config->uri), goto _mqtt_set_config_failed);
@@ -407,7 +411,8 @@ aiio_err_t aiio_mqtt_set_config(aiio_mqtt_client_handle_t client, const aiio_mqt
         AIIO_MEM_CHECK(client->connect_info.will_message, goto _mqtt_set_config_failed);
         memcpy(client->connect_info.will_message, config->lwt_msg, config->lwt_msg_len);
         client->connect_info.will_length = config->lwt_msg_len;
-    } else if (config->lwt_msg) {
+    }
+    else if (config->lwt_msg) {
         free(client->connect_info.will_message);
         client->connect_info.will_message = strdup(config->lwt_msg);
         AIIO_MEM_CHECK(client->connect_info.will_message, goto _mqtt_set_config_failed);
@@ -423,7 +428,7 @@ aiio_err_t aiio_mqtt_set_config(aiio_mqtt_client_handle_t client, const aiio_mqt
     if (config->disable_clean_session == client->connect_info.clean_session) {
         client->connect_info.clean_session = !config->disable_clean_session;
         if (!client->connect_info.clean_session && config->set_null_client_id) {
-            aiio_log_e( "Clean Session flag must be true if client has a null id");
+            aiio_log_e("Clean Session flag must be true if client has a null id");
         }
     }
     if (config->keepalive) {
@@ -474,7 +479,8 @@ aiio_err_t aiio_mqtt_set_config(aiio_mqtt_client_handle_t client, const aiio_mqt
 
     if (config->reconnect_timeout_ms) {
         client->config->reconnect_timeout_ms = config->reconnect_timeout_ms;
-    } else {
+    }
+    else {
         client->config->reconnect_timeout_ms = MQTT_RECON_DEFAULT_MS;
     }
 
@@ -485,9 +491,9 @@ aiio_err_t aiio_mqtt_set_config(aiio_mqtt_client_handle_t client, const aiio_mqt
         free(client->config->alpn_protos);
         client->config->num_alpn_protos = 0;
 
-        const char **p;
+        const char** p;
 
-        for (p = config->alpn_protos; *p != NULL; p++ ) {
+        for (p = config->alpn_protos; *p != NULL; p++) {
             client->config->num_alpn_protos++;
         }
         // mbedTLS expects the list to be null-terminated
@@ -600,14 +606,15 @@ static inline aiio_err_t aiio_mqtt_write(aiio_mqtt_client_handle_t client)
     int wlen = 0, widx = 0, len = client->mqtt_state.outbound_message->length;
     while (len > 0) {
         wlen = aiio_transport_write(client->transport,
-                                   (char *)client->mqtt_state.outbound_message->data + widx,
+                                   (char*)client->mqtt_state.outbound_message->data + widx,
                                    len,
                                    client->config->network_timeout_ms);
         if (wlen < 0) {
-            aiio_log_e( "Writing failed: errno=%d", errno);
+            aiio_log_e("Writing failed: errno=%d", errno);
             return AIIO_FAIL;
-        } else if (wlen == 0) {
-            aiio_log_e( "Writing didn't complete in specified timeout: errno=%d", errno);
+        }
+        else if (wlen == 0) {
+            aiio_log_e("Writing didn't complete in specified timeout: errno=%d", errno);
             return AIIO_ERR_TIMEOUT;
         }
         widx += wlen;
@@ -623,14 +630,14 @@ static aiio_err_t aiio_mqtt_connect(aiio_mqtt_client_handle_t client, int timeou
     client->mqtt_state.outbound_message = mqtt_msg_connect(&client->mqtt_state.mqtt_connection,
                                           &client->connect_info);
     if (client->mqtt_state.outbound_message->length == 0) {
-        aiio_log_e( "Connect message cannot be created");
+        aiio_log_e("Connect message cannot be created");
         return AIIO_FAIL;
     }
 
     client->mqtt_state.pending_msg_type = mqtt_get_type(client->mqtt_state.outbound_message->data);
     client->mqtt_state.pending_msg_id = mqtt_get_id(client->mqtt_state.outbound_message->data,
                                         client->mqtt_state.outbound_message->length);
-    aiio_log_d( "Sending MQTT CONNECT message, type: %d, id: %04X",
+    aiio_log_d("Sending MQTT CONNECT message, type: %d, id: %04X",
              client->mqtt_state.pending_msg_type,
              client->mqtt_state.pending_msg_id);
 
@@ -648,36 +655,36 @@ static aiio_err_t aiio_mqtt_connect(aiio_mqtt_client_handle_t client, int timeou
     } while (read_len == 0 && platform_tick_get_ms() - connack_recv_started < client->config->network_timeout_ms);
 
     if (read_len <= 0) {
-        aiio_log_e( "%s: mqtt_message_receive() returned %d", __func__, read_len);
+        aiio_log_e("%s: mqtt_message_receive() returned %d", __func__, read_len);
         return AIIO_FAIL;
     }
 
     if (mqtt_get_type(client->mqtt_state.in_buffer) != MQTT_MSG_TYPE_CONNACK) {
-        aiio_log_e( "Invalid MSG_TYPE response: %d, read_len: %d", mqtt_get_type(client->mqtt_state.in_buffer), read_len);
+        aiio_log_e("Invalid MSG_TYPE response: %d, read_len: %d", mqtt_get_type(client->mqtt_state.in_buffer), read_len);
         return AIIO_FAIL;
     }
     client->mqtt_state.in_buffer_read_len = 0;
     connect_rsp_code = mqtt_get_connect_return_code(client->mqtt_state.in_buffer);
     if (connect_rsp_code == MQTT_CONNECTION_ACCEPTED) {
-        aiio_log_d( "Connected");
+        aiio_log_d("Connected");
         return AIIO_OK;
     }
     switch (connect_rsp_code) {
-    case MQTT_CONNECTION_REFUSE_PROTOCOL:
-        aiio_log_w( "Connection refused, bad protocol");
-        break;
-    case MQTT_CONNECTION_REFUSE_SERVER_UNAVAILABLE:
-        aiio_log_w( "Connection refused, server unavailable");
-        break;
-    case MQTT_CONNECTION_REFUSE_BAD_USERNAME:
-        aiio_log_w( "Connection refused, bad username or password");
-        break;
-    case MQTT_CONNECTION_REFUSE_NOT_AUTHORIZED:
-        aiio_log_w( "Connection refused, not authorized");
-        break;
-    default:
-        aiio_log_w( "Connection refused, Unknow reason");
-        break;
+        case MQTT_CONNECTION_REFUSE_PROTOCOL:
+            aiio_log_w("Connection refused, bad protocol");
+            break;
+        case MQTT_CONNECTION_REFUSE_SERVER_UNAVAILABLE:
+            aiio_log_w("Connection refused, server unavailable");
+            break;
+        case MQTT_CONNECTION_REFUSE_BAD_USERNAME:
+            aiio_log_w("Connection refused, bad username or password");
+            break;
+        case MQTT_CONNECTION_REFUSE_NOT_AUTHORIZED:
+            aiio_log_w("Connection refused, not authorized");
+            break;
+        default:
+            aiio_log_w("Connection refused, Unknow reason");
+            break;
     }
     /* propagate event with connection refused error */
     client->event.event_id = MQTT_EVENT_ERROR;
@@ -698,7 +705,7 @@ static void aiio_mqtt_abort_connection(aiio_mqtt_client_handle_t client)
     client->wait_timeout_ms = client->config->reconnect_timeout_ms;
     client->reconnect_tick = platform_tick_get_ms();
     client->state = MQTT_STATE_WAIT_RECONNECT;
-    aiio_log_d( "Reconnect after %d ms", client->wait_timeout_ms);
+    aiio_log_d("Reconnect after %d ms", client->wait_timeout_ms);
     client->event.event_id = MQTT_EVENT_DISCONNECTED;
     client->wait_for_ping_resp = false;
     aiio_mqtt_dispatch_event_with_msgid(client);
@@ -710,7 +717,7 @@ static bool create_client_data(aiio_mqtt_client_handle_t client)
     client->event.error_handle = calloc(1, sizeof(aiio_mqtt_error_codes_t));
     AIIO_MEM_CHECK(client->event.error_handle, return false)
 
-    client->api_lock = xSemaphoreCreateRecursiveMutex();
+        client->api_lock = xSemaphoreCreateRecursiveMutex();
     AIIO_MEM_CHECK(client->api_lock, return false);
 
     client->transport_list = aiio_transport_list_init();
@@ -752,7 +759,7 @@ static bool create_client_data(aiio_mqtt_client_handle_t client)
     return true;
 }
 
-aiio_mqtt_client_handle_t aiio_mqtt_client_init(const aiio_mqtt_client_config_t *config)
+aiio_mqtt_client_handle_t aiio_mqtt_client_init(const aiio_mqtt_client_config_t* config)
 {
     aiio_mqtt_client_handle_t client = calloc(1, sizeof(struct aiio_mqtt_client));
     AIIO_MEM_CHECK(client, return NULL);
@@ -782,10 +789,10 @@ aiio_mqtt_client_handle_t aiio_mqtt_client_init(const aiio_mqtt_client_config_t 
     // use separate value for output buffer size if configured
     int out_buffer_size = config->out_buffer_size > 0 ? config->out_buffer_size : buffer_size;
 
-    client->mqtt_state.in_buffer = (uint8_t *)malloc(buffer_size);
+    client->mqtt_state.in_buffer = (uint8_t*)malloc(buffer_size);
     AIIO_MEM_CHECK(client->mqtt_state.in_buffer, goto _mqtt_init_failed);
     client->mqtt_state.in_buffer_length = buffer_size;
-    client->mqtt_state.out_buffer = (uint8_t *)malloc(out_buffer_size);
+    client->mqtt_state.out_buffer = (uint8_t*)malloc(out_buffer_size);
     AIIO_MEM_CHECK(client->mqtt_state.out_buffer, goto _mqtt_init_failed);
 
     client->mqtt_state.out_buffer_length = out_buffer_size;
@@ -831,9 +838,9 @@ aiio_err_t aiio_mqtt_client_destroy(aiio_mqtt_client_handle_t client)
     return AIIO_OK;
 }
 
-static char *create_string(const char *ptr, int len)
+static char* create_string(const char* ptr, int len)
 {
-    char *ret;
+    char* ret;
     if (len <= 0) {
         return NULL;
     }
@@ -843,13 +850,13 @@ static char *create_string(const char *ptr, int len)
     return ret;
 }
 
-aiio_err_t aiio_mqtt_client_set_uri(aiio_mqtt_client_handle_t client, const char *uri)
+aiio_err_t aiio_mqtt_client_set_uri(aiio_mqtt_client_handle_t client, const char* uri)
 {
     struct http_parser_url puri;
     http_parser_url_init(&puri);
     int parser_status = http_parser_parse_url(uri, strlen(uri), 0, &puri);
     if (parser_status != 0) {
-        aiio_log_e( "Error parse uri = %s", uri);
+        aiio_log_e("Error parse uri = %s", uri);
         return AIIO_FAIL;
     }
 
@@ -867,9 +874,11 @@ aiio_err_t aiio_mqtt_client_set_uri(aiio_mqtt_client_handle_t client, const char
     if (puri.field_data[UF_PATH].len || puri.field_data[UF_QUERY].len) {
         if (puri.field_data[UF_QUERY].len == 0) {
             asprintf(&client->config->path, "%.*s", puri.field_data[UF_PATH].len, uri + puri.field_data[UF_PATH].off);
-        } else if (puri.field_data[UF_PATH].len == 0)  {
+        }
+        else if (puri.field_data[UF_PATH].len == 0) {
             asprintf(&client->config->path, "/?%.*s", puri.field_data[UF_QUERY].len, uri + puri.field_data[UF_QUERY].off);
-        } else {
+        }
+        else {
             asprintf(&client->config->path, "%.*s?%.*s", puri.field_data[UF_PATH].len, uri + puri.field_data[UF_PATH].off,
                      puri.field_data[UF_QUERY].len, uri + puri.field_data[UF_QUERY].off);
         }
@@ -895,15 +904,15 @@ aiio_err_t aiio_mqtt_client_set_uri(aiio_mqtt_client_handle_t client, const char
     }
 
     if (puri.field_data[UF_PORT].len) {
-        client->config->port = strtol((const char *)(uri + puri.field_data[UF_PORT].off), NULL, 10);
+        client->config->port = strtol((const char*)(uri + puri.field_data[UF_PORT].off), NULL, 10);
     }
 
-    char *user_info = create_string(uri + puri.field_data[UF_USERINFO].off, puri.field_data[UF_USERINFO].len);
+    char* user_info = create_string(uri + puri.field_data[UF_USERINFO].off, puri.field_data[UF_USERINFO].len);
     if (user_info) {
-        char *pass = strchr(user_info, ':');
+        char* pass = strchr(user_info, ':');
         if (pass) {
             pass[0] = 0; //terminal username
-            pass ++;
+            pass++;
             client->connect_info.password = strdup(pass);
         }
         client->connect_info.username = strdup(user_info);
@@ -941,7 +950,8 @@ static aiio_err_t aiio_mqtt_dispatch_event(aiio_mqtt_client_handle_t client)
 
     if (client->config->event_handle) {
         return client->config->event_handle(&client->event);
-    } else {
+    }
+    else {
 #ifdef MQTT_SUPPORTED_FEATURE_EVENT_LOOP
         aiio_event_post_to(client->config->event_loop_handle, MQTT_EVENTS, client->event.event_id, &client->event, sizeof(client->event), portMAX_DELAY);
         return aiio_event_loop_run(client->config->event_loop_handle, 0);
@@ -953,25 +963,25 @@ static aiio_err_t aiio_mqtt_dispatch_event(aiio_mqtt_client_handle_t client)
 
 static aiio_err_t deliver_publish(aiio_mqtt_client_handle_t client)
 {
-    uint8_t *msg_buf = client->mqtt_state.in_buffer;
+    uint8_t* msg_buf = client->mqtt_state.in_buffer;
     size_t msg_read_len = client->mqtt_state.in_buffer_read_len;
     size_t msg_total_len = client->mqtt_state.message_length;
     size_t msg_topic_len = msg_read_len, msg_data_len = msg_read_len;
     size_t msg_data_offset = 0;
-    char *msg_topic = NULL, *msg_data = NULL;
+    char* msg_topic = NULL, * msg_data = NULL;
 
     // get topic
     msg_topic = mqtt_get_publish_topic(msg_buf, &msg_topic_len);
     if (msg_topic == NULL) {
-        aiio_log_e( "%s: mqtt_get_publish_topic() failed", __func__);
+        aiio_log_e("%s: mqtt_get_publish_topic() failed", __func__);
         return AIIO_FAIL;
     }
-    aiio_log_d( "%s: msg_topic_len=%zu", __func__, msg_topic_len);
+    aiio_log_d("%s: msg_topic_len=%zu", __func__, msg_topic_len);
 
     // get payload
     msg_data = mqtt_get_publish_data(msg_buf, &msg_data_len);
     if (msg_data_len > 0 && msg_data == NULL) {
-        aiio_log_e( "%s: mqtt_get_publish_data() failed", __func__);
+        aiio_log_e("%s: mqtt_get_publish_data() failed", __func__);
         return AIIO_FAIL;
     }
 
@@ -983,7 +993,7 @@ static aiio_err_t deliver_publish(aiio_mqtt_client_handle_t client)
     client->event.total_data_len = msg_data_len + msg_total_len - msg_read_len;
 
 post_data_event:
-    aiio_log_d( "Get data len= %zu, topic len=%zu, total_data: %d offset: %zu", msg_data_len, msg_topic_len,
+    aiio_log_d("Get data len= %zu, topic len=%zu, total_data: %d offset: %zu", msg_data_len, msg_topic_len,
              client->event.total_data_len, msg_data_offset);
     client->event.event_id = MQTT_EVENT_DATA;
     client->event.data = msg_data_len > 0 ? msg_data : NULL;
@@ -996,15 +1006,15 @@ post_data_event:
     if (msg_read_len < msg_total_len) {
         size_t buf_len = client->mqtt_state.in_buffer_length;
 
-        msg_data = (char *)client->mqtt_state.in_buffer;
+        msg_data = (char*)client->mqtt_state.in_buffer;
         msg_topic = NULL;
         msg_topic_len = 0;
         msg_data_offset += msg_data_len;
-        msg_data_len = aiio_transport_read(client-> transport, (char *)client->mqtt_state.in_buffer,
+        msg_data_len = aiio_transport_read(client->transport, (char*)client->mqtt_state.in_buffer,
                                           msg_total_len - msg_read_len > buf_len ? buf_len : msg_total_len - msg_read_len,
                                           client->config->network_timeout_ms);
         if (msg_data_len <= 0) {
-            aiio_log_e( "Read error or timeout: len_read=%zu, errno=%d", msg_data_len, errno);
+            aiio_log_e("Read error or timeout: len_read=%zu, errno=%d", msg_data_len, errno);
             return AIIO_FAIL;
         }
         msg_read_len += msg_data_len;
@@ -1015,13 +1025,13 @@ post_data_event:
 
 static aiio_err_t deliver_suback(aiio_mqtt_client_handle_t client)
 {
-    uint8_t *msg_buf = client->mqtt_state.in_buffer;
+    uint8_t* msg_buf = client->mqtt_state.in_buffer;
     size_t msg_data_len = client->mqtt_state.in_buffer_read_len;
-    char *msg_data = NULL;
+    char* msg_data = NULL;
 
     msg_data = mqtt_get_suback_data(msg_buf, &msg_data_len);
     if (msg_data_len <= 0) {
-        aiio_log_e( "Failed to acquire suback data");
+        aiio_log_e("Failed to acquire suback data");
         return AIIO_FAIL;
     }
     // post data event
@@ -1037,26 +1047,26 @@ static aiio_err_t deliver_suback(aiio_mqtt_client_handle_t client)
 
 static bool is_valid_mqtt_msg(aiio_mqtt_client_handle_t client, int msg_type, int msg_id)
 {
-    aiio_log_d( "pending_id=%d, pending_msg_count = %d", client->mqtt_state.pending_msg_id, client->mqtt_state.pending_msg_count);
+    aiio_log_d("pending_id=%d, pending_msg_count = %d", client->mqtt_state.pending_msg_id, client->mqtt_state.pending_msg_count);
     if (client->mqtt_state.pending_msg_count == 0) {
         return false;
     }
     if (outbox_delete(client->outbox, msg_id, msg_type) == AIIO_OK) {
-        client->mqtt_state.pending_msg_count --;
+        client->mqtt_state.pending_msg_count--;
         return true;
     }
 
     return false;
 }
 
-static outbox_item_handle_t mqtt_enqueue_oversized(aiio_mqtt_client_handle_t client, uint8_t *remaining_data, int remaining_len)
+static outbox_item_handle_t mqtt_enqueue_oversized(aiio_mqtt_client_handle_t client, uint8_t* remaining_data, int remaining_len)
 {
-    aiio_log_d( "mqtt_enqueue_oversized id: %d, type=%d successful",
+    aiio_log_d("mqtt_enqueue_oversized id: %d, type=%d successful",
              client->mqtt_state.pending_msg_id, client->mqtt_state.pending_msg_type);
     //lock mutex
     outbox_message_t msg = { 0 };
     msg.data = client->mqtt_state.outbound_message->data;
-    msg.len =  client->mqtt_state.outbound_message->length;
+    msg.len = client->mqtt_state.outbound_message->length;
     msg.msg_id = client->mqtt_state.pending_msg_id;
     msg.msg_type = client->mqtt_state.pending_msg_type;
     msg.msg_qos = client->mqtt_state.pending_publish_qos;
@@ -1069,12 +1079,12 @@ static outbox_item_handle_t mqtt_enqueue_oversized(aiio_mqtt_client_handle_t cli
 
 static outbox_item_handle_t mqtt_enqueue(aiio_mqtt_client_handle_t client)
 {
-    aiio_log_d( "mqtt_enqueue id: %d, type=%d successful",
+    aiio_log_d("mqtt_enqueue id: %d, type=%d successful",
              client->mqtt_state.pending_msg_id, client->mqtt_state.pending_msg_type);
     if (client->mqtt_state.pending_msg_count > 0) {
         outbox_message_t msg = { 0 };
         msg.data = client->mqtt_state.outbound_message->data;
-        msg.len =  client->mqtt_state.outbound_message->length;
+        msg.len = client->mqtt_state.outbound_message->length;
         msg.msg_id = client->mqtt_state.pending_msg_id;
         msg.msg_type = client->mqtt_state.pending_msg_type;
         msg.msg_qos = client->mqtt_state.pending_publish_qos;
@@ -1096,7 +1106,7 @@ static outbox_item_handle_t mqtt_enqueue(aiio_mqtt_client_handle_t client)
 static int mqtt_message_receive(aiio_mqtt_client_handle_t client, int read_poll_timeout_ms)
 {
     int read_len, total_len, fixed_header_len;
-    uint8_t *buf = client->mqtt_state.in_buffer + client->mqtt_state.in_buffer_read_len;
+    uint8_t* buf = client->mqtt_state.in_buffer + client->mqtt_state.in_buffer_read_len;
     aiio_transport_handle_t t = client->transport;
 
     client->mqtt_state.message_length = 0;
@@ -1105,22 +1115,22 @@ static int mqtt_message_receive(aiio_mqtt_client_handle_t client, int read_poll_
          * Read first byte of the mqtt packet fixed header, it contains packet
          * type and flags.
          */
-        read_len = aiio_transport_read(t, (char *)buf, 1, read_poll_timeout_ms);
+        read_len = aiio_transport_read(t, (char*)buf, 1, read_poll_timeout_ms);
         if (read_len < 0) {
-            aiio_log_e( "%s: transport_read() error: errno=%d", __func__, errno);
+            aiio_log_e("%s: transport_read() error: errno=%d", __func__, errno);
             goto err;
         }
         if (read_len == 0) {
-            aiio_log_v( "%s: transport_read(): no data or EOF", __func__);
+            aiio_log_v("%s: transport_read(): no data or EOF", __func__);
             return 0;
         }
-        aiio_log_d( "%s: first byte: 0x%x", __func__, *buf);
+        aiio_log_d("%s: first byte: 0x%x", __func__, *buf);
         /*
          * Verify the flags and act according to MQTT protocol: close connection
          * if the flags are set incorrectly.
          */
         if (!mqtt_has_valid_msg_hdr(buf, read_len)) {
-            aiio_log_e( "%s: received a message with an invalid header=0x%x", __func__, *buf);
+            aiio_log_e("%s: received a message with an invalid header=0x%x", __func__, *buf);
             goto err;
         }
         buf++;
@@ -1136,22 +1146,22 @@ static int mqtt_message_receive(aiio_mqtt_client_handle_t client, int read_poll_
              * maximal remaining length value = 16383 (maximal total message
              * size of 16386 bytes).
              */
-            read_len = aiio_transport_read(t, (char *)buf, 1, read_poll_timeout_ms);
+            read_len = aiio_transport_read(t, (char*)buf, 1, read_poll_timeout_ms);
             if (read_len < 0) {
-                aiio_log_e( "%s: transport_read() error: errno=%d", __func__, errno);
+                aiio_log_e("%s: transport_read() error: errno=%d", __func__, errno);
                 goto err;
             }
             if (read_len == 0) {
-                aiio_log_d( "%s: transport_read(): no data or EOF", __func__);
+                aiio_log_d("%s: transport_read(): no data or EOF", __func__);
                 return 0;
             }
-            aiio_log_d( "%s: read \"remaining length\" byte: 0x%x", __func__, *buf);
+            aiio_log_d("%s: read \"remaining length\" byte: 0x%x", __func__, *buf);
             buf++;
             client->mqtt_state.in_buffer_read_len++;
         } while ((client->mqtt_state.in_buffer_read_len < 6) && (*(buf - 1) & 0x80));
     }
     total_len = mqtt_get_total_length(client->mqtt_state.in_buffer, client->mqtt_state.in_buffer_read_len, &fixed_header_len);
-    aiio_log_d( "%s: total message length: %d (already read: %zu)", __func__, total_len, client->mqtt_state.in_buffer_read_len);
+    aiio_log_d("%s: total message length: %d (already read: %zu)", __func__, total_len, client->mqtt_state.in_buffer_read_len);
     client->mqtt_state.message_length = total_len;
     if (client->mqtt_state.in_buffer_length < total_len) {
         if (mqtt_get_type(client->mqtt_state.in_buffer) == MQTT_MSG_TYPE_PUBLISH) {
@@ -1161,19 +1171,20 @@ static int mqtt_message_receive(aiio_mqtt_client_handle_t client, int read_poll_
              */
             if (client->mqtt_state.in_buffer_read_len < fixed_header_len + 2) {
                 /* read next 2 bytes - topic length to get minimum portion of publish packet */
-                read_len = aiio_transport_read(t, (char *)buf, client->mqtt_state.in_buffer_read_len - fixed_header_len + 2, read_poll_timeout_ms);
-                aiio_log_d( "%s: read_len=%d", __func__, read_len);
+                read_len = aiio_transport_read(t, (char*)buf, client->mqtt_state.in_buffer_read_len - fixed_header_len + 2, read_poll_timeout_ms);
+                aiio_log_d("%s: read_len=%d", __func__, read_len);
                 if (read_len < 0) {
-                    aiio_log_e( "%s: transport_read() error: errno=%d", __func__, errno);
+                    aiio_log_e("%s: transport_read() error: errno=%d", __func__, errno);
                     goto err;
-                } else if (read_len == 0) {
-                    aiio_log_d( "%s: transport_read(): no data or EOF", __func__);
+                }
+                else if (read_len == 0) {
+                    aiio_log_d("%s: transport_read(): no data or EOF", __func__);
                     return 0;
                 }
                 client->mqtt_state.in_buffer_read_len += read_len;
                 buf += read_len;
                 if (client->mqtt_state.in_buffer_read_len < fixed_header_len + 2) {
-                    aiio_log_d( "%s: transport_read(): message reading left in progress :: total message length: %d (already read: %zu)",
+                    aiio_log_d("%s: transport_read(): message reading left in progress :: total message length: %d (already read: %zu)",
                              __func__, total_len, client->mqtt_state.in_buffer_read_len);
                     return 0;
                 }
@@ -1181,39 +1192,41 @@ static int mqtt_message_receive(aiio_mqtt_client_handle_t client, int read_poll_
             int topic_len = client->mqtt_state.in_buffer[fixed_header_len] << 8;
             topic_len |= client->mqtt_state.in_buffer[fixed_header_len + 1];
             total_len = fixed_header_len + topic_len + (mqtt_get_qos(client->mqtt_state.in_buffer) > 0 ? 2 : 0);
-            aiio_log_d( "%s: total len modified to %d as message longer than input buffer", __func__, total_len);
+            aiio_log_d("%s: total len modified to %d as message longer than input buffer", __func__, total_len);
             if (client->mqtt_state.in_buffer_length < total_len) {
-                aiio_log_e( "%s: message is too big, insufficient buffer size", __func__);
+                aiio_log_e("%s: message is too big, insufficient buffer size", __func__);
                 goto err;
-            } else {
+            }
+            else {
                 total_len = client->mqtt_state.in_buffer_length;
             }
             /* free to continue with reading */
-        } else {
-            aiio_log_e( "%s: message is too big, insufficient buffer size", __func__);
+        }
+        else {
+            aiio_log_e("%s: message is too big, insufficient buffer size", __func__);
             goto err;
         }
     }
     if (client->mqtt_state.in_buffer_read_len < total_len) {
         /* read the rest of the mqtt message */
-        read_len = aiio_transport_read(t, (char *)buf, total_len - client->mqtt_state.in_buffer_read_len, read_poll_timeout_ms);
-        aiio_log_d( "%s: read_len=%d", __func__, read_len);
+        read_len = aiio_transport_read(t, (char*)buf, total_len - client->mqtt_state.in_buffer_read_len, read_poll_timeout_ms);
+        aiio_log_d("%s: read_len=%d", __func__, read_len);
         if (read_len < 0) {
-            aiio_log_e( "%s: transport_read() error: errno=%d", __func__, errno);
+            aiio_log_e("%s: transport_read() error: errno=%d", __func__, errno);
             goto err;
         }
         if (read_len == 0) {
-            aiio_log_d( "%s: transport_read(): no data or EOF", __func__);
+            aiio_log_d("%s: transport_read(): no data or EOF", __func__);
             return 0;
         }
         client->mqtt_state.in_buffer_read_len += read_len;
         if (client->mqtt_state.in_buffer_read_len < total_len) {
-            aiio_log_d( "%s: transport_read(): message reading left in progress :: total message length: %d (already read: %zu)",
+            aiio_log_d("%s: transport_read(): message reading left in progress :: total message length: %d (already read: %zu)",
                      __func__, total_len, client->mqtt_state.in_buffer_read_len);
             return 0;
         }
     }
-    aiio_log_d( "%s: transport_read():%zu %zu", __func__, client->mqtt_state.in_buffer_read_len, client->mqtt_state.message_length);
+    aiio_log_d("%s: transport_read():%zu %zu", __func__, client->mqtt_state.in_buffer_read_len, client->mqtt_state.message_length);
     return 1;
 err:
     aiio_mqtt_client_dispatch_transport_error(client);
@@ -1229,7 +1242,7 @@ static aiio_err_t mqtt_process_receive(aiio_mqtt_client_handle_t client)
     /* non-blocking receive in order not to block other tasks */
     int recv = mqtt_message_receive(client, 0);
     if (recv < 0) {
-        aiio_log_e( "%s: mqtt_message_receive() returned %d", __func__, recv);
+        aiio_log_e("%s: mqtt_message_receive() returned %d", __func__, recv);
         return AIIO_FAIL;
     }
     if (recv == 0) {
@@ -1242,90 +1255,91 @@ static aiio_err_t mqtt_process_receive(aiio_mqtt_client_handle_t client)
     msg_qos = mqtt_get_qos(client->mqtt_state.in_buffer);
     msg_id = mqtt_get_id(client->mqtt_state.in_buffer, read_len);
 
-    aiio_log_d( "msg_type=%d, msg_id=%d", msg_type, msg_id);
+    aiio_log_d("msg_type=%d, msg_id=%d", msg_type, msg_id);
 
     switch (msg_type) {
-    case MQTT_MSG_TYPE_SUBACK:
-        if (is_valid_mqtt_msg(client, MQTT_MSG_TYPE_SUBSCRIBE, msg_id)) {
-            aiio_log_d( "deliver_suback, message_length_read=%zu, message_length=%zu", client->mqtt_state.in_buffer_read_len, client->mqtt_state.message_length);
-            if (deliver_suback(client) != AIIO_OK) {
-                aiio_log_e( "Failed to deliver suback message id=%d", msg_id);
+        case MQTT_MSG_TYPE_SUBACK:
+            if (is_valid_mqtt_msg(client, MQTT_MSG_TYPE_SUBSCRIBE, msg_id)) {
+                aiio_log_d("deliver_suback, message_length_read=%zu, message_length=%zu", client->mqtt_state.in_buffer_read_len, client->mqtt_state.message_length);
+                if (deliver_suback(client) != AIIO_OK) {
+                    aiio_log_e("Failed to deliver suback message id=%d", msg_id);
+                    return AIIO_FAIL;
+                }
+            }
+            break;
+        case MQTT_MSG_TYPE_UNSUBACK:
+            if (is_valid_mqtt_msg(client, MQTT_MSG_TYPE_UNSUBSCRIBE, msg_id)) {
+                aiio_log_d("UnSubscribe successful");
+                client->event.event_id = MQTT_EVENT_UNSUBSCRIBED;
+                aiio_mqtt_dispatch_event_with_msgid(client);
+            }
+            break;
+        case MQTT_MSG_TYPE_PUBLISH:
+            aiio_log_d("deliver_publish, message_length_read=%zu, message_length=%zu", client->mqtt_state.in_buffer_read_len, client->mqtt_state.message_length);
+            if (deliver_publish(client) != AIIO_OK) {
+                aiio_log_e("Failed to deliver publish message id=%d", msg_id);
                 return AIIO_FAIL;
             }
-        }
-        break;
-    case MQTT_MSG_TYPE_UNSUBACK:
-        if (is_valid_mqtt_msg(client, MQTT_MSG_TYPE_UNSUBSCRIBE, msg_id)) {
-            aiio_log_d( "UnSubscribe successful");
-            client->event.event_id = MQTT_EVENT_UNSUBSCRIBED;
-            aiio_mqtt_dispatch_event_with_msgid(client);
-        }
-        break;
-    case MQTT_MSG_TYPE_PUBLISH:
-        aiio_log_d( "deliver_publish, message_length_read=%zu, message_length=%zu", client->mqtt_state.in_buffer_read_len, client->mqtt_state.message_length);
-        if (deliver_publish(client) != AIIO_OK) {
-            aiio_log_e( "Failed to deliver publish message id=%d", msg_id);
-            return AIIO_FAIL;
-        }
-        if (msg_qos == 1) {
-            client->mqtt_state.outbound_message = mqtt_msg_puback(&client->mqtt_state.mqtt_connection, msg_id);
-        } else if (msg_qos == 2) {
-            client->mqtt_state.outbound_message = mqtt_msg_pubrec(&client->mqtt_state.mqtt_connection, msg_id);
-        }
-        if (client->mqtt_state.outbound_message->length == 0) {
-            aiio_log_e( "Publish response message PUBACK or PUBREC cannot be created");
-            return AIIO_FAIL;
-        }
-
-        if (msg_qos == 1 || msg_qos == 2) {
-            aiio_log_d( "Queue response QoS: %d", msg_qos);
-
-            if (mqtt_write_data(client) != AIIO_OK) {
-                aiio_log_e( "Error write qos msg repsonse, qos = %d", msg_qos);
+            if (msg_qos == 1) {
+                client->mqtt_state.outbound_message = mqtt_msg_puback(&client->mqtt_state.mqtt_connection, msg_id);
+            }
+            else if (msg_qos == 2) {
+                client->mqtt_state.outbound_message = mqtt_msg_pubrec(&client->mqtt_state.mqtt_connection, msg_id);
+            }
+            if (client->mqtt_state.outbound_message->length == 0) {
+                aiio_log_e("Publish response message PUBACK or PUBREC cannot be created");
                 return AIIO_FAIL;
             }
-        }
-        break;
-    case MQTT_MSG_TYPE_PUBACK:
-        if (is_valid_mqtt_msg(client, MQTT_MSG_TYPE_PUBLISH, msg_id)) {
-            aiio_log_d( "received MQTT_MSG_TYPE_PUBACK, finish QoS1 publish");
-            client->event.event_id = MQTT_EVENT_PUBLISHED;
-            aiio_mqtt_dispatch_event_with_msgid(client);
-        }
-        break;
-    case MQTT_MSG_TYPE_PUBREC:
-        aiio_log_d( "received MQTT_MSG_TYPE_PUBREC");
-        client->mqtt_state.outbound_message = mqtt_msg_pubrel(&client->mqtt_state.mqtt_connection, msg_id);
-        if (client->mqtt_state.outbound_message->length == 0) {
-            aiio_log_e( "Publish response message PUBREL cannot be created");
-            return AIIO_FAIL;
-        }
 
-        outbox_set_pending(client->outbox, msg_id, ACKNOWLEDGED);
-        mqtt_write_data(client);
-        break;
-    case MQTT_MSG_TYPE_PUBREL:
-        aiio_log_d( "received MQTT_MSG_TYPE_PUBREL");
-        client->mqtt_state.outbound_message = mqtt_msg_pubcomp(&client->mqtt_state.mqtt_connection, msg_id);
-        if (client->mqtt_state.outbound_message->length == 0) {
-            aiio_log_e( "Publish response message PUBCOMP cannot be created");
-            return AIIO_FAIL;
-        }
+            if (msg_qos == 1 || msg_qos == 2) {
+                aiio_log_d("Queue response QoS: %d", msg_qos);
 
-        mqtt_write_data(client);
-        break;
-    case MQTT_MSG_TYPE_PUBCOMP:
-        aiio_log_d( "received MQTT_MSG_TYPE_PUBCOMP");
-        if (is_valid_mqtt_msg(client, MQTT_MSG_TYPE_PUBLISH, msg_id)) {
-            aiio_log_d( "Receive MQTT_MSG_TYPE_PUBCOMP, finish QoS2 publish");
-            client->event.event_id = MQTT_EVENT_PUBLISHED;
-            aiio_mqtt_dispatch_event_with_msgid(client);
-        }
-        break;
-    case MQTT_MSG_TYPE_PINGRESP:
-        aiio_log_d( "MQTT_MSG_TYPE_PINGRESP");
-        client->wait_for_ping_resp = false;
-        break;
+                if (mqtt_write_data(client) != AIIO_OK) {
+                    aiio_log_e("Error write qos msg repsonse, qos = %d", msg_qos);
+                    return AIIO_FAIL;
+                }
+            }
+            break;
+        case MQTT_MSG_TYPE_PUBACK:
+            if (is_valid_mqtt_msg(client, MQTT_MSG_TYPE_PUBLISH, msg_id)) {
+                aiio_log_d("received MQTT_MSG_TYPE_PUBACK, finish QoS1 publish");
+                client->event.event_id = MQTT_EVENT_PUBLISHED;
+                aiio_mqtt_dispatch_event_with_msgid(client);
+            }
+            break;
+        case MQTT_MSG_TYPE_PUBREC:
+            aiio_log_d("received MQTT_MSG_TYPE_PUBREC");
+            client->mqtt_state.outbound_message = mqtt_msg_pubrel(&client->mqtt_state.mqtt_connection, msg_id);
+            if (client->mqtt_state.outbound_message->length == 0) {
+                aiio_log_e("Publish response message PUBREL cannot be created");
+                return AIIO_FAIL;
+            }
+
+            outbox_set_pending(client->outbox, msg_id, ACKNOWLEDGED);
+            mqtt_write_data(client);
+            break;
+        case MQTT_MSG_TYPE_PUBREL:
+            aiio_log_d("received MQTT_MSG_TYPE_PUBREL");
+            client->mqtt_state.outbound_message = mqtt_msg_pubcomp(&client->mqtt_state.mqtt_connection, msg_id);
+            if (client->mqtt_state.outbound_message->length == 0) {
+                aiio_log_e("Publish response message PUBCOMP cannot be created");
+                return AIIO_FAIL;
+            }
+
+            mqtt_write_data(client);
+            break;
+        case MQTT_MSG_TYPE_PUBCOMP:
+            aiio_log_d("received MQTT_MSG_TYPE_PUBCOMP");
+            if (is_valid_mqtt_msg(client, MQTT_MSG_TYPE_PUBLISH, msg_id)) {
+                aiio_log_d("Receive MQTT_MSG_TYPE_PUBCOMP, finish QoS2 publish");
+                client->event.event_id = MQTT_EVENT_PUBLISHED;
+                aiio_mqtt_dispatch_event_with_msgid(client);
+            }
+            break;
+        case MQTT_MSG_TYPE_PINGRESP:
+            aiio_log_d("MQTT_MSG_TYPE_PINGRESP");
+            client->wait_for_ping_resp = false;
+            break;
     }
 
     client->mqtt_state.in_buffer_read_len = 0;
@@ -1344,7 +1358,7 @@ static aiio_err_t mqtt_resend_queued(aiio_mqtt_client_handle_t client, outbox_it
 
     // try to resend the data
     if (mqtt_write_data(client) != AIIO_OK) {
-        aiio_log_e( "Error to resend data ");
+        aiio_log_e("Error to resend data ");
         aiio_mqtt_abort_connection(client);
         return AIIO_FAIL;
     }
@@ -1353,7 +1367,7 @@ static aiio_err_t mqtt_resend_queued(aiio_mqtt_client_handle_t client, outbox_it
     if (client->mqtt_state.pending_msg_type == MQTT_MSG_TYPE_PUBLISH && client->mqtt_state.pending_publish_qos == 0) {
         // delete all qos0 publish messages once we process them
         if (outbox_delete_item(client->outbox, item) != AIIO_OK) {
-            aiio_log_e( "Failed to remove queued qos0 message from the outbox");
+            aiio_log_e("Failed to remove queued qos0 message from the outbox");
         }
     }
     return AIIO_OK;
@@ -1370,9 +1384,9 @@ static void mqtt_delete_expired_messages(aiio_mqtt_client_handle_t client)
         client->event.event_id = MQTT_EVENT_DELETED;
         client->event.msg_id = msg_id;
         if (aiio_mqtt_dispatch_event(client) != AIIO_OK) {
-            aiio_log_e( "Failed to post event on deleting message id=%d", msg_id);
+            aiio_log_e("Failed to post event on deleting message id=%d", msg_id);
         }
-        deleted_items ++;
+        deleted_items++;
     }
 #else
     int deleted_items = outbox_delete_expired(client->outbox, platform_tick_get_ms(), OUTBOX_EXPIRED_TIMEOUT_MS);
@@ -1384,9 +1398,9 @@ static void mqtt_delete_expired_messages(aiio_mqtt_client_handle_t client)
     }
 }
 
-static void aiio_mqtt_task(void *pv)
+static void aiio_mqtt_task(void* pv)
 {
-    aiio_mqtt_client_handle_t client = (aiio_mqtt_client_handle_t) pv;
+    aiio_mqtt_client_handle_t client = (aiio_mqtt_client_handle_t)pv;
     uint64_t last_retransmit = 0;
     outbox_tick_t msg_tick = 0;
     client->run = true;
@@ -1395,7 +1409,7 @@ static void aiio_mqtt_task(void *pv)
     client->transport = aiio_transport_list_get_transport(client->transport_list, client->config->scheme);
 
     if (client->transport == NULL) {
-        aiio_log_e( "There are no transports valid, stop mqtt client, config scheme = %s", client->config->scheme);
+        aiio_log_e("There are no transports valid, stop mqtt client, config scheme = %s", client->config->scheme);
         client->run = false;
     }
     //default port
@@ -1408,129 +1422,132 @@ static void aiio_mqtt_task(void *pv)
     while (client->run) {
         MQTT_API_LOCK(client);
         switch (client->state) {
-        case MQTT_STATE_DISCONNECTED:
-            break;
-        case MQTT_STATE_INIT:
-            xEventGroupClearBits(client->status_bits, RECONNECT_BIT | DISCONNECT_BIT);
-            client->event.event_id = MQTT_EVENT_BEFORE_CONNECT;
-            aiio_mqtt_dispatch_event_with_msgid(client);
+            case MQTT_STATE_DISCONNECTED:
+                break;
+            case MQTT_STATE_INIT:
+                xEventGroupClearBits(client->status_bits, RECONNECT_BIT | DISCONNECT_BIT);
+                client->event.event_id = MQTT_EVENT_BEFORE_CONNECT;
+                aiio_mqtt_dispatch_event_with_msgid(client);
 
-            if (client->transport == NULL) {
-                aiio_log_e( "There is no transport");
-                client->run = false;
-            }
+                if (client->transport == NULL) {
+                    aiio_log_e("There is no transport");
+                    client->run = false;
+                }
 #if MQTT_ENABLE_SSL
-            aiio_mqtt_set_ssl_transport_properties(client->transport_list, client->config);
+                aiio_mqtt_set_ssl_transport_properties(client->transport_list, client->config);
 #endif
 
-            if (aiio_transport_connect(client->transport,
-                                      client->config->host,
-                                      client->config->port,
-                                      client->config->network_timeout_ms) < 0) {
-                aiio_log_e( "Error transport connect");
-                aiio_mqtt_client_dispatch_transport_error(client);
-                aiio_mqtt_abort_connection(client);
-                break;
-            }
-            aiio_log_d( "Transport connected to %s://%s:%d", client->config->scheme, client->config->host, client->config->port);
-            if (aiio_mqtt_connect(client, client->config->network_timeout_ms) != AIIO_OK) {
-                aiio_log_e( "MQTT connect failed");
-                aiio_mqtt_abort_connection(client);
-                break;
-            }
-            client->event.event_id = MQTT_EVENT_CONNECTED;
-            client->event.session_present = mqtt_get_connect_session_present(client->mqtt_state.in_buffer);
-            client->state = MQTT_STATE_CONNECTED;
-            aiio_mqtt_dispatch_event_with_msgid(client);
-            client->refresh_connection_tick = platform_tick_get_ms();
-
-            break;
-        case MQTT_STATE_CONNECTED:
-            // check for disconnection request
-            if (xEventGroupWaitBits(client->status_bits, DISCONNECT_BIT, true, true, 0) & DISCONNECT_BIT) {
-                send_disconnect_msg(client);    // ignore error, if clean disconnect fails, just abort the connection
-                aiio_mqtt_abort_connection(client);
-                break;
-            }
-            // receive and process data
-            if (mqtt_process_receive(client) == AIIO_FAIL) {
-                aiio_mqtt_abort_connection(client);
-                break;
-            }
-
-            // delete long pending messages
-            mqtt_delete_expired_messages(client);
-
-            // resend all non-transmitted messages first
-            outbox_item_handle_t item = outbox_dequeue(client->outbox, QUEUED, NULL);
-            if (item) {
-                if (mqtt_resend_queued(client, item) == AIIO_OK) {
-                    outbox_set_pending(client->outbox, client->mqtt_state.pending_msg_id, TRANSMITTED);
-                }
-                // resend other "transmitted" messages after 1s
-            } else if (platform_tick_get_ms() - last_retransmit > client->config->message_retransmit_timeout) {
-                last_retransmit = platform_tick_get_ms();
-                item = outbox_dequeue(client->outbox, TRANSMITTED, &msg_tick);
-                if (item && (last_retransmit - msg_tick > client->config->message_retransmit_timeout))  {
-                    mqtt_resend_queued(client, item);
-                }
-            }
-
-            if (client->connect_info.keepalive &&       // connect_info.keepalive=0 means that the keepslive is disabled
-                    platform_tick_get_ms() - client->keepalive_tick > client->connect_info.keepalive * 1000 / 2) {
-                //No ping resp from last ping => Disconnected
-                if (client->wait_for_ping_resp) {
-                    aiio_log_e( "No PING_RESP, disconnected");
-                    aiio_mqtt_abort_connection(client);
-                    client->wait_for_ping_resp = false;
-                    break;
-                }
-                if (aiio_mqtt_client_ping(client) == AIIO_FAIL) {
-                    aiio_log_e( "Can't send ping, disconnected");
+                if (aiio_transport_connect(client->transport,
+                    client->config->host,
+                    client->config->port,
+                    client->config->network_timeout_ms) < 0) {
+                    aiio_log_e("Error transport connect");
+                    aiio_mqtt_client_dispatch_transport_error(client);
                     aiio_mqtt_abort_connection(client);
                     break;
-                } else {
-                    client->wait_for_ping_resp = true;
                 }
-                aiio_log_d( "PING sent");
-            }
+                aiio_log_d("Transport connected to %s://%s:%d", client->config->scheme, client->config->host, client->config->port);
+                if (aiio_mqtt_connect(client, client->config->network_timeout_ms) != AIIO_OK) {
+                    aiio_log_e("MQTT connect failed");
+                    aiio_mqtt_abort_connection(client);
+                    break;
+                }
+                client->event.event_id = MQTT_EVENT_CONNECTED;
+                client->event.session_present = mqtt_get_connect_session_present(client->mqtt_state.in_buffer);
+                client->state = MQTT_STATE_CONNECTED;
+                aiio_mqtt_dispatch_event_with_msgid(client);
+                client->refresh_connection_tick = platform_tick_get_ms();
 
-            if (client->config->refresh_connection_after_ms &&
-                    platform_tick_get_ms() - client->refresh_connection_tick > client->config->refresh_connection_after_ms) {
-                aiio_log_d( "Refreshing the connection...");
-                aiio_mqtt_abort_connection(client);
-                client->state = MQTT_STATE_INIT;
-            }
-
-            break;
-        case MQTT_STATE_WAIT_RECONNECT:
-
-            if (!client->config->auto_reconnect && xEventGroupGetBits(client->status_bits)&RECONNECT_BIT) {
-                xEventGroupClearBits(client->status_bits, RECONNECT_BIT);
-                client->state = MQTT_STATE_INIT;
-                client->wait_timeout_ms = MQTT_RECON_DEFAULT_MS;
-                aiio_log_d( "Reconnecting per user request...");
                 break;
-            } else if (client->config->auto_reconnect &&
-                       platform_tick_get_ms() - client->reconnect_tick > client->wait_timeout_ms) {
-                client->state = MQTT_STATE_INIT;
-                client->reconnect_tick = platform_tick_get_ms();
-                aiio_log_d( "Reconnecting...");
+            case MQTT_STATE_CONNECTED:
+                // check for disconnection request
+                if (xEventGroupWaitBits(client->status_bits, DISCONNECT_BIT, true, true, 0) & DISCONNECT_BIT) {
+                    send_disconnect_msg(client);    // ignore error, if clean disconnect fails, just abort the connection
+                    aiio_mqtt_abort_connection(client);
+                    break;
+                }
+                // receive and process data
+                if (mqtt_process_receive(client) == AIIO_FAIL) {
+                    aiio_mqtt_abort_connection(client);
+                    break;
+                }
+
+                // delete long pending messages
+                mqtt_delete_expired_messages(client);
+
+                // resend all non-transmitted messages first
+                outbox_item_handle_t item = outbox_dequeue(client->outbox, QUEUED, NULL);
+                if (item) {
+                    if (mqtt_resend_queued(client, item) == AIIO_OK) {
+                        outbox_set_pending(client->outbox, client->mqtt_state.pending_msg_id, TRANSMITTED);
+                    }
+                    // resend other "transmitted" messages after 1s
+                }
+                else if (platform_tick_get_ms() - last_retransmit > client->config->message_retransmit_timeout) {
+                    last_retransmit = platform_tick_get_ms();
+                    item = outbox_dequeue(client->outbox, TRANSMITTED, &msg_tick);
+                    if (item && (last_retransmit - msg_tick > client->config->message_retransmit_timeout)) {
+                        mqtt_resend_queued(client, item);
+                    }
+                }
+
+                if (client->connect_info.keepalive &&       // connect_info.keepalive=0 means that the keepslive is disabled
+                        platform_tick_get_ms() - client->keepalive_tick > client->connect_info.keepalive * 1000 / 2) {
+                    //No ping resp from last ping => Disconnected
+                    if (client->wait_for_ping_resp) {
+                        aiio_log_e("No PING_RESP, disconnected");
+                        aiio_mqtt_abort_connection(client);
+                        client->wait_for_ping_resp = false;
+                        break;
+                    }
+                    if (aiio_mqtt_client_ping(client) == AIIO_FAIL) {
+                        aiio_log_e("Can't send ping, disconnected");
+                        aiio_mqtt_abort_connection(client);
+                        break;
+                    }
+                    else {
+                        client->wait_for_ping_resp = true;
+                    }
+                    aiio_log_d("PING sent");
+                }
+
+                if (client->config->refresh_connection_after_ms &&
+                        platform_tick_get_ms() - client->refresh_connection_tick > client->config->refresh_connection_after_ms) {
+                    aiio_log_d("Refreshing the connection...");
+                    aiio_mqtt_abort_connection(client);
+                    client->state = MQTT_STATE_INIT;
+                }
+
                 break;
-            }
-            MQTT_API_UNLOCK(client);
-            xEventGroupWaitBits(client->status_bits, RECONNECT_BIT, false, true,
-                                client->wait_timeout_ms / 2 / portTICK_PERIOD_MS);
-            // continue the while loop instead of break, as the mutex is unlocked
-            continue;
-        default:
-            aiio_log_e( "MQTT client error, client is in an unrecoverable state.");
-            break;
+            case MQTT_STATE_WAIT_RECONNECT:
+
+                if (!client->config->auto_reconnect && xEventGroupGetBits(client->status_bits)&RECONNECT_BIT) {
+                    xEventGroupClearBits(client->status_bits, RECONNECT_BIT);
+                    client->state = MQTT_STATE_INIT;
+                    client->wait_timeout_ms = MQTT_RECON_DEFAULT_MS;
+                    aiio_log_d("Reconnecting per user request...");
+                    break;
+                }
+                else if (client->config->auto_reconnect &&
+                        platform_tick_get_ms() - client->reconnect_tick > client->wait_timeout_ms) {
+                    client->state = MQTT_STATE_INIT;
+                    client->reconnect_tick = platform_tick_get_ms();
+                    aiio_log_d("Reconnecting...");
+                    break;
+                }
+                MQTT_API_UNLOCK(client);
+                xEventGroupWaitBits(client->status_bits, RECONNECT_BIT, false, true,
+                                    client->wait_timeout_ms / 2 / portTICK_PERIOD_MS);
+                // continue the while loop instead of break, as the mutex is unlocked
+                continue;
+            default:
+                aiio_log_e("MQTT client error, client is in an unrecoverable state.");
+                break;
         }
         MQTT_API_UNLOCK(client);
         if (MQTT_STATE_CONNECTED == client->state) {
             if (aiio_transport_poll_read(client->transport, MQTT_POLL_READ_TIMEOUT_MS) < 0) {
-                aiio_log_e( "Poll read error: %d, aborting connection", errno);
+                aiio_log_e("Poll read error: %d, aborting connection", errno);
                 aiio_mqtt_abort_connection(client);
             }
         }
@@ -1546,26 +1563,26 @@ static void aiio_mqtt_task(void *pv)
 aiio_err_t aiio_mqtt_client_start(aiio_mqtt_client_handle_t client)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return AIIO_ERR_INVALID_ARG;
     }
     MQTT_API_LOCK(client);
     if (client->state != MQTT_STATE_INIT && client->state != MQTT_STATE_DISCONNECTED) {
-        aiio_log_e( "Client has started");
+        aiio_log_e("Client has started");
         MQTT_API_UNLOCK(client);
         return AIIO_FAIL;
     }
     aiio_err_t err = AIIO_OK;
 #if MQTT_CORE_SELECTION_ENABLED
-    aiio_log_d( "Core selection enabled on %u", MQTT_TASK_CORE);
+    aiio_log_d("Core selection enabled on %u", MQTT_TASK_CORE);
     if (xTaskCreatePinnedToCore(aiio_mqtt_task, "mqtt_task", client->config->task_stack, client, client->config->task_prio, &client->task_handle, MQTT_TASK_CORE) != pdTRUE) {
-        aiio_log_e( "Error create mqtt task");
+        aiio_log_e("Error create mqtt task");
         err = AIIO_FAIL;
     }
 #else
-    aiio_log_d( "Core selection disabled");
+    aiio_log_d("Core selection disabled");
     if (xTaskCreate(aiio_mqtt_task, "mqtt_task", client->config->task_stack, client, client->config->task_prio, &client->task_handle) != pdTRUE) {
-        aiio_log_e( "Error create mqtt task");
+        aiio_log_e("Error create mqtt task");
         err = AIIO_FAIL;
     }
 #endif
@@ -1576,7 +1593,7 @@ aiio_err_t aiio_mqtt_client_start(aiio_mqtt_client_handle_t client)
 aiio_err_t aiio_mqtt_client_disconnect(aiio_mqtt_client_handle_t client)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return AIIO_ERR_INVALID_ARG;
     }
     aiio_log_i("Client asked to disconnect");
@@ -1587,12 +1604,12 @@ aiio_err_t aiio_mqtt_client_disconnect(aiio_mqtt_client_handle_t client)
 aiio_err_t aiio_mqtt_client_reconnect(aiio_mqtt_client_handle_t client)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return AIIO_ERR_INVALID_ARG;
     }
     aiio_log_i("Client force reconnect requested");
     if (client->state != MQTT_STATE_WAIT_RECONNECT) {
-        aiio_log_d( "The client is not waiting for reconnection. Ignore the request");
+        aiio_log_d("The client is not waiting for reconnection. Ignore the request");
         return AIIO_FAIL;
     }
     client->wait_timeout_ms = 0;
@@ -1605,11 +1622,11 @@ static aiio_err_t send_disconnect_msg(aiio_mqtt_client_handle_t client)
     // Notify the broker we are disconnecting
     client->mqtt_state.outbound_message = mqtt_msg_disconnect(&client->mqtt_state.mqtt_connection);
     if (client->mqtt_state.outbound_message->length == 0) {
-        aiio_log_e( "Disconnect message cannot be created");
+        aiio_log_e("Disconnect message cannot be created");
         return AIIO_FAIL;
     }
     if (mqtt_write_data(client) != AIIO_OK) {
-        aiio_log_e( "Error sending disconnect message");
+        aiio_log_e("Error sending disconnect message");
     }
     return AIIO_OK;
 }
@@ -1617,7 +1634,7 @@ static aiio_err_t send_disconnect_msg(aiio_mqtt_client_handle_t client)
 aiio_err_t aiio_mqtt_client_stop(aiio_mqtt_client_handle_t client)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return AIIO_ERR_INVALID_ARG;
     }
     MQTT_API_LOCK(client);
@@ -1626,7 +1643,7 @@ aiio_err_t aiio_mqtt_client_stop(aiio_mqtt_client_handle_t client)
         TaskHandle_t running_task = xTaskGetCurrentTaskHandle();
         if (running_task == client->task_handle) {
             MQTT_API_UNLOCK(client);
-            aiio_log_e( "Client cannot be stopped from MQTT task");
+            aiio_log_e("Client cannot be stopped from MQTT task");
             return AIIO_FAIL;
         }
 
@@ -1643,8 +1660,9 @@ aiio_err_t aiio_mqtt_client_stop(aiio_mqtt_client_handle_t client)
         MQTT_API_UNLOCK(client);
         xEventGroupWaitBits(client->status_bits, STOPPED_BIT, false, true, portMAX_DELAY);
         return AIIO_OK;
-    } else {
-        aiio_log_w( "Client asked to stop, but was not started");
+    }
+    else {
+        aiio_log_w("Client asked to stop, but was not started");
         MQTT_API_UNLOCK(client);
         return AIIO_FAIL;
     }
@@ -1654,27 +1672,27 @@ static aiio_err_t aiio_mqtt_client_ping(aiio_mqtt_client_handle_t client)
 {
     client->mqtt_state.outbound_message = mqtt_msg_pingreq(&client->mqtt_state.mqtt_connection);
     if (client->mqtt_state.outbound_message->length == 0) {
-        aiio_log_e( "Ping message cannot be created");
+        aiio_log_e("Ping message cannot be created");
         return AIIO_FAIL;
     }
 
     if (mqtt_write_data(client) != AIIO_OK) {
-        aiio_log_e( "Error sending ping");
+        aiio_log_e("Error sending ping");
         return AIIO_FAIL;
     }
-    aiio_log_d( "Sent PING successful");
+    aiio_log_d("Sent PING successful");
     return AIIO_OK;
 }
 
-int aiio_mqtt_client_subscribe(aiio_mqtt_client_handle_t client, const char *topic, int qos)
+int aiio_mqtt_client_subscribe(aiio_mqtt_client_handle_t client, const char* topic, int qos)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return -1;
     }
     MQTT_API_LOCK(client);
     if (client->state != MQTT_STATE_CONNECTED) {
-        aiio_log_e( "Client has not connected");
+        aiio_log_e("Client has not connected");
         MQTT_API_UNLOCK(client);
         return -1;
     }
@@ -1682,13 +1700,13 @@ int aiio_mqtt_client_subscribe(aiio_mqtt_client_handle_t client, const char *top
                                           topic, qos,
                                           &client->mqtt_state.pending_msg_id);
     if (client->mqtt_state.outbound_message->length == 0) {
-        aiio_log_e( "Subscribe message cannot be created");
+        aiio_log_e("Subscribe message cannot be created");
         MQTT_API_UNLOCK(client);
         return -1;
     }
 
     client->mqtt_state.pending_msg_type = mqtt_get_type(client->mqtt_state.outbound_message->data);
-    client->mqtt_state.pending_msg_count ++;
+    client->mqtt_state.pending_msg_count++;
     //move pending msg to outbox (if have)
     if (!mqtt_enqueue(client)) {
         MQTT_API_UNLOCK(client);
@@ -1697,26 +1715,26 @@ int aiio_mqtt_client_subscribe(aiio_mqtt_client_handle_t client, const char *top
     outbox_set_pending(client->outbox, client->mqtt_state.pending_msg_id, TRANSMITTED);// handle error
 
     if (mqtt_write_data(client) != AIIO_OK) {
-        aiio_log_e( "Error to subscribe topic=%s, qos=%d", topic, qos);
+        aiio_log_e("Error to subscribe topic=%s, qos=%d", topic, qos);
         MQTT_API_UNLOCK(client);
         return -1;
     }
 
-    aiio_log_d( "Sent subscribe topic=%s, id: %d, type=%d successful", topic, client->mqtt_state.pending_msg_id, client->mqtt_state.pending_msg_type);
+    aiio_log_d("Sent subscribe topic=%s, id: %d, type=%d successful", topic, client->mqtt_state.pending_msg_id, client->mqtt_state.pending_msg_type);
     MQTT_API_UNLOCK(client);
     return client->mqtt_state.pending_msg_id;
 }
 
-int aiio_mqtt_client_unsubscribe(aiio_mqtt_client_handle_t client, const char *topic)
+int aiio_mqtt_client_unsubscribe(aiio_mqtt_client_handle_t client, const char* topic)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return -1;
     }
     MQTT_API_LOCK(client);
     if (client->state != MQTT_STATE_CONNECTED) {
         MQTT_API_UNLOCK(client);
-        aiio_log_e( "Client has not connected");
+        aiio_log_e("Client has not connected");
         return -1;
     }
     client->mqtt_state.outbound_message = mqtt_msg_unsubscribe(&client->mqtt_state.mqtt_connection,
@@ -1724,13 +1742,13 @@ int aiio_mqtt_client_unsubscribe(aiio_mqtt_client_handle_t client, const char *t
                                           &client->mqtt_state.pending_msg_id);
     if (client->mqtt_state.outbound_message->length == 0) {
         MQTT_API_UNLOCK(client);
-        aiio_log_e( "Unubscribe message cannot be created");
+        aiio_log_e("Unubscribe message cannot be created");
         return -1;
     }
-    aiio_log_d( "unsubscribe, topic\"%s\", id: %d", topic, client->mqtt_state.pending_msg_id);
+    aiio_log_d("unsubscribe, topic\"%s\", id: %d", topic, client->mqtt_state.pending_msg_id);
 
     client->mqtt_state.pending_msg_type = mqtt_get_type(client->mqtt_state.outbound_message->data);
-    client->mqtt_state.pending_msg_count ++;
+    client->mqtt_state.pending_msg_count++;
     if (!mqtt_enqueue(client)) {
         MQTT_API_UNLOCK(client);
         return -1;
@@ -1738,27 +1756,27 @@ int aiio_mqtt_client_unsubscribe(aiio_mqtt_client_handle_t client, const char *t
     outbox_set_pending(client->outbox, client->mqtt_state.pending_msg_id, TRANSMITTED); //handle error
 
     if (mqtt_write_data(client) != AIIO_OK) {
-        aiio_log_e( "Error to unsubscribe topic=%s", topic);
+        aiio_log_e("Error to unsubscribe topic=%s", topic);
         MQTT_API_UNLOCK(client);
         return -1;
     }
 
-    aiio_log_d( "Sent Unsubscribe topic=%s, id: %d, successful", topic, client->mqtt_state.pending_msg_id);
+    aiio_log_d("Sent Unsubscribe topic=%s, id: %d, successful", topic, client->mqtt_state.pending_msg_id);
     MQTT_API_UNLOCK(client);
     return client->mqtt_state.pending_msg_id;
 }
 
-static inline int mqtt_client_enqueue_priv(aiio_mqtt_client_handle_t client, const char *topic, const char *data,
+static inline int mqtt_client_enqueue_priv(aiio_mqtt_client_handle_t client, const char* topic, const char* data,
         int len, int qos, int retain, bool store)
 {
     uint16_t pending_msg_id = 0;
-    mqtt_message_t *publish_msg = mqtt_msg_publish(&client->mqtt_state.mqtt_connection,
+    mqtt_message_t* publish_msg = mqtt_msg_publish(&client->mqtt_state.mqtt_connection,
                                   topic, data, len,
                                   qos, retain,
                                   &pending_msg_id);
 
     if (publish_msg->length == 0) {
-        aiio_log_e( "Publish message cannot be created");
+        aiio_log_e("Publish message cannot be created");
         return -1;
     }
     /* We have to set as pending all the qos>0 messages */
@@ -1767,15 +1785,16 @@ static inline int mqtt_client_enqueue_priv(aiio_mqtt_client_handle_t client, con
         client->mqtt_state.pending_msg_type = mqtt_get_type(client->mqtt_state.outbound_message->data);
         client->mqtt_state.pending_msg_id = pending_msg_id;
         client->mqtt_state.pending_publish_qos = qos;
-        client->mqtt_state.pending_msg_count ++;
+        client->mqtt_state.pending_msg_count++;
         // by default store as QUEUED (not transmitted yet) only for messages which would fit outbound buffer
         if (client->mqtt_state.mqtt_connection.message.fragmented_msg_total_length == 0) {
             if (!mqtt_enqueue(client)) {
                 return -1;
             }
-        } else {
+        }
+        else {
             int first_fragment = client->mqtt_state.outbound_message->length - client->mqtt_state.outbound_message->fragmented_msg_data_offset;
-            if (!mqtt_enqueue_oversized(client, ((uint8_t *)data) + first_fragment, len - first_fragment)) {
+            if (!mqtt_enqueue_oversized(client, ((uint8_t*)data) + first_fragment, len - first_fragment)) {
                 return -1;
             }
             client->mqtt_state.outbound_message->fragmented_msg_total_length = 0;
@@ -1784,10 +1803,10 @@ static inline int mqtt_client_enqueue_priv(aiio_mqtt_client_handle_t client, con
     return pending_msg_id;
 }
 
-int aiio_mqtt_client_publish(aiio_mqtt_client_handle_t client, const char *topic, const char *data, int len, int qos, int retain)
+int aiio_mqtt_client_publish(aiio_mqtt_client_handle_t client, const char* topic, const char* data, int len, int qos, int retain)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return -1;
     }
     MQTT_API_LOCK(client);
@@ -1817,7 +1836,7 @@ int aiio_mqtt_client_publish(aiio_mqtt_client_handle_t client, const char *topic
 
     /* Skip sending if not connected (rely on resending) */
     if (client->state != MQTT_STATE_CONNECTED) {
-        aiio_log_d( "Publish: client is not connected");
+        aiio_log_d("Publish: client is not connected");
         if (qos > 0) {
             ret = pending_msg_id;
         }
@@ -1830,10 +1849,10 @@ int aiio_mqtt_client_publish(aiio_mqtt_client_handle_t client, const char *topic
 
     /* Provide support for sending fragmented message if it doesn't fit buffer */
     int remaining_len = len;
-    const char *current_data = data;
+    const char* current_data = data;
     bool sending = true;
 
-    while (sending)  {
+    while (sending) {
 
         if (mqtt_write_data(client) != AIIO_OK) {
             aiio_mqtt_abort_connection(client);
@@ -1845,24 +1864,26 @@ int aiio_mqtt_client_publish(aiio_mqtt_client_handle_t client, const char *topic
         client->mqtt_state.outbound_message->fragmented_msg_data_offset = 0;
         client->mqtt_state.outbound_message->fragmented_msg_total_length = 0;
         remaining_len -= data_sent;
-        current_data +=  data_sent;
+        current_data += data_sent;
 
         if (remaining_len > 0) {
-            mqtt_connection_t *connection = &client->mqtt_state.mqtt_connection;
-            aiio_log_d( "Sending fragmented message, remains to send %d bytes of %d", remaining_len, len);
+            mqtt_connection_t* connection = &client->mqtt_state.mqtt_connection;
+            aiio_log_d("Sending fragmented message, remains to send %d bytes of %d", remaining_len, len);
             if (remaining_len > connection->buffer_length) {
                 // Continue with sending
                 memcpy(connection->buffer, current_data, connection->buffer_length);
                 connection->message.length = connection->buffer_length;
                 sending = true;
-            } else {
+            }
+            else {
                 memcpy(connection->buffer, current_data, remaining_len);
                 connection->message.length = remaining_len;
                 sending = true;
             }
             connection->message.data = connection->buffer;
             client->mqtt_state.outbound_message = &connection->message;
-        } else {
+        }
+        else {
             // Message was sent correctly
             sending = false;
         }
@@ -1880,17 +1901,17 @@ cannot_publish:
     // clear out possible fragmented publish if failed or skipped
     client->mqtt_state.outbound_message->fragmented_msg_total_length = 0;
     if (qos == 0) {
-        aiio_log_w( "Publish: Losing qos0 data when client not connected");
+        aiio_log_w("Publish: Losing qos0 data when client not connected");
     }
     MQTT_API_UNLOCK(client);
 
     return ret;
 }
 
-int aiio_mqtt_client_enqueue(aiio_mqtt_client_handle_t client, const char *topic, const char *data, int len, int qos, int retain, bool store)
+int aiio_mqtt_client_enqueue(aiio_mqtt_client_handle_t client, const char* topic, const char* data, int len, int qos, int retain, bool store)
 {
     if (!client) {
-        aiio_log_e( "Client was not initialized");
+        aiio_log_e("Client was not initialized");
         return -1;
     }
     MQTT_API_LOCK(client);
@@ -1903,20 +1924,20 @@ int aiio_mqtt_client_enqueue(aiio_mqtt_client_handle_t client, const char *topic
     return ret;
 }
 
-aiio_err_t aiio_mqtt_client_register_event(aiio_mqtt_client_handle_t client, aiio_mqtt_event_id_t event, aiio_event_handler_t event_handler, void *event_handler_arg)
+aiio_err_t aiio_mqtt_client_register_event(aiio_mqtt_client_handle_t client, aiio_mqtt_event_id_t event, aiio_event_handler_t event_handler, void* event_handler_arg)
 {
     if (client == NULL) {
         return AIIO_ERR_INVALID_ARG;
     }
 #ifdef MQTT_SUPPORTED_FEATURE_EVENT_LOOP
     if (client->config->event_handle) {
-        aiio_log_w( "Registering event loop while event callback is not null, clearing callback");
+        aiio_log_w("Registering event loop while event callback is not null, clearing callback");
         client->config->event_handle = NULL;
     }
 
     return aiio_event_handler_register_with(client->config->event_loop_handle, MQTT_EVENTS, event, event_handler, event_handler_arg);
 #else
-    aiio_log_e( "Registering event handler while event loop not available ");
+    aiio_log_e("Registering event handler while event loop not available ");
 
     return AIIO_FAIL;
 #endif

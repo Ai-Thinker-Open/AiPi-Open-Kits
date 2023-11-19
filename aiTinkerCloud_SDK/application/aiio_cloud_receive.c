@@ -1,6 +1,6 @@
 /**
  * @brief   Define some interface about cloud, such as Lauch function of cloud or some callback function
- * 
+ *
  * @file    aiio_cloud_receive.c
  * @copyright Copyright (C) 2020-2023, Shenzhen Anxinke Technology Co., Ltd
  * @note        This file is mainly desctrbing cloud interface
@@ -17,14 +17,15 @@
 #include "aiio_cloud_control.h"
 #include "config.h"
 #include "aiio_stdio.h"
-// #include "aiio_ota_transmit.h"
+#include "device.h"
+ // #include "aiio_ota_transmit.h"
 
 
 
 
 #define         DEVICE_TYPE                 "bl618"                   /*!< 设置该固件运行于哪个芯片平台上 */
 
- 
+
 
 
 static bool service_init_state = false;
@@ -33,17 +34,17 @@ static bool cloud_connect = false;
 
 
 /* The callback function of receive mqtt data*/
-static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
+static void aiio_service_receive_data(aiio_service_rev_event_t* rev_event)
 {
-    aiio_rev_queue_t rev_queue = {0};
+    aiio_rev_queue_t rev_queue = { 0 };
 
-    if(rev_event == NULL)
+    if (rev_event == NULL)
     {
         aiio_log_i("receive event is NULL \r\n");
-        return ;
+        return;
     }
 
-    if(rev_event->data)
+    if (rev_event->data)
     {
         aiio_log_i("receive data: %s \r\n", rev_event->data);
     }
@@ -54,10 +55,10 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         {
             aiio_log_i("AIIO_SERVICE_LANCH_FAIL_EVNET \r\n");
 
-            if(wifi_config_start)
+            if (wifi_config_start)
             {
-                if(ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
-                
+                if (ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
+
                 rev_queue.common_event = REV_CONFIG_FAIL_EVENT;
                 if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
                 {
@@ -71,9 +72,9 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         case AIIO_SERVICE_SUBSCRIBE_TIMEOUT:                                            /* The mqtt subscription is timeout*/
         {
             aiio_log_i("AIIO_SERVICE_SUBSCRIBE_TIMEOUT \r\n");
-            if(wifi_config_start)
+            if (wifi_config_start)
             {
-                if(ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
+                if (ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
 
                 rev_queue.common_event = REV_CONFIG_FAIL_EVENT;
                 if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
@@ -85,12 +86,12 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         }
         break;
 
-        case AIIO_SERVICE_MQTT_DISCONNECT:                                                            
+        case AIIO_SERVICE_MQTT_DISCONNECT:
         {
             aiio_log_i("AIIO_SERVICE_MQTT_DISCONNECT \r\n");
-            if(wifi_config_start && !cloud_connect)
+            if (wifi_config_start && !cloud_connect)
             {
-                if(ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_MQTT_CONN_ERR);
+                if (ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_MQTT_CONN_ERR);
 
                 rev_queue.common_event = REV_CONFIG_FAIL_EVENT;
                 if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
@@ -113,17 +114,17 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         }
         break;
 
-        case AIIO_SERVICE_MQTT_CONNECTING:                                                     
+        case AIIO_SERVICE_MQTT_CONNECTING:
         {
             aiio_log_i("AIIO_SERVICE_MQTT_CONNECTING \r\n");
-            if(ble_config_start)
+            if (ble_config_start)
             {
                 aiio_ble_config_response_status(AIIO_BLE_CODE_MQTT_CONNING);
             }
         }
         break;
 
-        case AIIO_SERVICE_MQTT_CONNECTED:                                                
+        case AIIO_SERVICE_MQTT_CONNECTED:
         {
             aiio_log_i("AIIO_SERVICE_MQTT_CONNECTED \r\n");
 
@@ -136,7 +137,7 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         {
             aiio_log_i("AIIO_SERVICE_ACTIVITY_EVENT \r\n");
 
-            if(ble_config_start)
+            if (ble_config_start)
             {
                 aiio_ble_config_response_status(AIIO_BLE_CODE_ACTIVITY_REQ);
             }
@@ -144,7 +145,7 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         }
         break;
 
-        case AIIO_SERVICE_RESTORE_EVENT:                                                    
+        case AIIO_SERVICE_RESTORE_EVENT:
         {
             aiio_log_i("AIIO_SERVICE_RESTORE_EVENT \r\n");
 
@@ -159,7 +160,7 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         }
         break;
 
-        case AIIO_SERVICE_REBOOT_EVENT:                                                             
+        case AIIO_SERVICE_REBOOT_EVENT:
         {
             aiio_log_i("AIIO_SERVICE_REBOOT_EVENT \r\n");
             aiio_restart();
@@ -192,21 +193,31 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         }
         break;
 
-        case AIIO_SERVICE_CONTROL_EVENT:                                                            
+        case AIIO_SERVICE_CONTROL_EVENT:
         {
             aiio_log_i("AIIO_SERVICE_CONTROL_EVENT \r\n");
 
-            if(rev_event->data)
+            if (rev_event->data)
             {
-                aiio_parse_control_data(rev_event->msgMid, rev_event->from, rev_event->data);
+                // aiio_parse_control_data(rev_event->msgMid, rev_event->from, rev_event->data);
+                rev_queue.common_event = REV_CLOUD_CONTRL_DATA_EVENT;
+
+                memset(r2_device->mq_data, 0, 512);
+                memcpy(r2_device->mq_data, rev_event->data, rev_event->data_len);
+                if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
+                {
+                    aiio_log_e("queue send failed\r\n");
+                }
+                memset(&rev_queue, 0, sizeof(aiio_rev_queue_t));
             }
+
         }
         break;
 
-        case AIIO_SERVICE_UTC_EVENT:                                                                
+        case AIIO_SERVICE_UTC_EVENT:
         {
             aiio_log_i("AIIO_SERVICE_UTC_EVENT \r\n");
-            if(rev_event->data)
+            if (rev_event->data)
             {
                 aiio_log_i("receive data: %s \r\n", rev_event->data);
                 aiio_online_update_local_time(rev_event->data, aiio_strlen(rev_event->data));
@@ -217,11 +228,11 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
         }
         break;
 
-        case AIIO_SERVICE_ONLINE_EVENT:                                                        
+        case AIIO_SERVICE_ONLINE_EVENT:
         {
             aiio_log_i("AIIO_SERVICE_ONLINE_EVENT \r\n");
 
-            if(ble_config_start)
+            if (ble_config_start)
             {
                 aiio_ble_config_response_status(AIIO_BLE_CODE_ONLINE_REQ);
             }
@@ -235,7 +246,7 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
             cloud_connect = true;
         }
         break;
-        
+
         default:
             aiio_log_i("event id err \r\n");
             break;
@@ -244,21 +255,21 @@ static void aiio_service_receive_data(aiio_service_rev_event_t *rev_event)
 
 
 
-void aiio_user_service_init(bool activity, aiio_cloud_receive_t *cloud_data)
+void aiio_user_service_init(bool activity, aiio_cloud_receive_t* cloud_data)
 {
     uint8_t mac[6];
-    char mac_str[20] = {0};
-    aiio_service_config_t  service_config = {0};
+    char mac_str[20] = { 0 };
+    aiio_service_config_t  service_config = { 0 };
 
-    if(service_init_state)
+    if (service_init_state)
     {
         aiio_log_e("service already init \r\n");
-        return ;
+        return;
     }
 
-    aiio_wifi_sta_mac_get((uint8_t *)mac);
-    aiio_log_i("wifi mac = %02x%02x%02x%02x%02x%02x!!",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
-    snprintf(mac_str, 20, "%02x%02x%02x%02x%02x%02x", mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+    aiio_wifi_sta_mac_get((uint8_t*)mac);
+    aiio_log_i("wifi mac = %02x%02x%02x%02x%02x%02x!!", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    snprintf(mac_str, 20, "%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     aiio_log_i("mac_str: %s\r\n", mac_str);
 
     service_config.service_data.deviceid = DEVICE_CLIENT_ID;
@@ -287,10 +298,10 @@ void aiio_user_service_init(bool activity, aiio_cloud_receive_t *cloud_data)
 
 void aiio_user_service_deinit(void)
 {
-    if(!service_init_state)
+    if (!service_init_state)
     {
         aiio_log_e("service already deinit \r\n");
-        return ;
+        return;
     }
     aiio_service_deinit();
     service_init_state = false;

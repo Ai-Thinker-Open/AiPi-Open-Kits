@@ -1,10 +1,10 @@
 /**
  * @brief   声明一些公共的变量、结构体
- * 
+ *
  * @file    aiio_common.h
  * @copyright Copyright (C) 2020-2023, Shenzhen Anxinke Technology Co., Ltd
- * 
- * 
+ *
+ *
  * @par Change Logs:
  * <table>
  * <tr><th>Date               <th>Version             <th>Authorhor           <th>Notes
@@ -43,9 +43,13 @@
 #define FLASH_RW_OTA_INFO_ADDR              (0x3F3000 + 0x1000 * 2)
 
 
+#if __has_include("aiio_dev_config.h")
+#include "aiio_dev_config.h" 
+#else
 #define         DEVICE_CLIENT_ID            "XIYWg4Kuuaa1mz"
 #define         DEVICE_USER_NAME            "1nljlu"
-#define         DEVICE_PASSWD               "UyqoxMou0w0Zxq"   
+#define         DEVICE_PASSWD               "UyqoxMou0w0Zxq"     
+#endif
 
 typedef enum
 {
@@ -63,6 +67,7 @@ typedef enum
     REV_CLOUD_OTA_INFO_EVENT,                           /*!< recevice ota information, ota information need to be stored in flash, the ota version needs to be used to determine whether the firmware upgrade is successful*/
     REV_CLOUD_OTA_FAIL_EVENT,                                 /*!< ota data download fail*/
     REV_CLOUD_OTA_SUCCESS_EVENT,                              /*!< ota data download success*/
+
 }aiio_common_event_t;
 
 
@@ -79,7 +84,7 @@ typedef struct
 }wifi_config_data_t;
 
 
-typedef struct 
+typedef struct
 {
     uint8_t channel;                        /*!< ota upgrade channel, 1: cloud, 2: APP*/
     char    otaVer[10];                        /*!< The ota firmware version*/
@@ -90,22 +95,22 @@ typedef struct
 }aiio_ota_msg_t;
 
 
-typedef struct 
+typedef struct
 {
     char userName[65];
     char userPasswd[65];
     char deviceId[65];
 }aiio_device_info;
 
-typedef struct 
+typedef struct
 {
-    char *queue_data;                      
-    uint16_t queue_data_len;                
-    aiio_common_event_t common_event;      
+    char* queue_data;
+    uint16_t queue_data_len;
+    aiio_common_event_t common_event;
 }aiio_rev_queue_t;
 
 
-extern QueueHandle_t    cloud_rev_queue_handle;        /*!< The receive queue data handle*/                           
+extern QueueHandle_t    cloud_rev_queue_handle;        /*!< The receive queue data handle*/
 extern bool ble_config_start;                       /*!< The launch status in ble distribution network*/
 extern bool wifi_config_start;
 extern bool wifi_connect;
@@ -116,16 +121,16 @@ extern bool device_init;
 
 
 
-int aiio_flash_get_device_info(aiio_device_info *device_info);
-int aiio_flash_clear_device_info(aiio_device_info *device_info);
-int aiio_flash_save_device_info(aiio_device_info *device_info);
+int aiio_flash_get_device_info(aiio_device_info* device_info);
+int aiio_flash_clear_device_info(aiio_device_info* device_info);
+int aiio_flash_save_device_info(aiio_device_info* device_info);
 
-int aiio_flash_get_wifi_config_data(wifi_config_data_t *config_data);
-void aiio_flash_save_wifi_config_data(wifi_config_data_t *config_data);
+int aiio_flash_get_wifi_config_data(wifi_config_data_t* config_data);
+void aiio_flash_save_wifi_config_data(wifi_config_data_t* config_data);
 void aiio_flash_clear_config_data(void);
 
-int aiio_flash_get_ota_info(aiio_ota_msg_t *ota_info);
-int aiio_flash_clear_ota_info(aiio_ota_msg_t *ota_info);
-int aiio_flash_save_ota_info(aiio_ota_msg_t *ota_info);
+int aiio_flash_get_ota_info(aiio_ota_msg_t* ota_info);
+int aiio_flash_clear_ota_info(aiio_ota_msg_t* ota_info);
+int aiio_flash_save_ota_info(aiio_ota_msg_t* ota_info);
 
 #endif

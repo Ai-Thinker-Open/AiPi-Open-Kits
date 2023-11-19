@@ -35,38 +35,38 @@
 #define WIFI_MAX_DISCONNECT_NUMBER          (10)
 
 
-static aiio_os_thread_handle_t *aiio_test_sta_wifi_thread = NULL;           /*!< handle of task thread*/
-static aiio_os_thread_handle_t *aiio_start_thread = NULL;           /*!< handle of task thread*/
+static aiio_os_thread_handle_t* aiio_test_sta_wifi_thread = NULL;           /*!< handle of task thread*/
+static aiio_os_thread_handle_t* aiio_start_thread = NULL;           /*!< handle of task thread*/
 bool wifi_connect = false;                                           /*!< status of wifi connection*/
 
 bool ble_config_start = false;                                       /*!< Launch state of ble distribution network*/
 bool wifi_config_start = false;
-bool device_init = false;
+
 static bool wifi_start_connected = false;
 static uint8_t wifi_disconnect_count = 0;                                   /*!< The number  of wifi disconnection*/
-static aiio_wifi_info_t wifi_info = {0};                                    /*!< Information of wifi*/
-static wifi_config_data_t wifi_config_data = {0};                             /*!< The data of ble distribution network */
-static struct bflb_device_s *uart0;
+static aiio_wifi_info_t wifi_info = { 0 };                                    /*!< Information of wifi*/
+static wifi_config_data_t wifi_config_data = { 0 };                             /*!< The data of ble distribution network */
+
 
 /* Define global variable */
 QueueHandle_t    cloud_rev_queue_handle = NULL;                             /*!< handle of queue*/
-aiio_device_info DeviceInfo = {0};
+aiio_device_info DeviceInfo = { 0 };
 
 
-static void iot_connect_wifi(char *ssid, char *passwd)
+static void iot_connect_wifi(char* ssid, char* passwd)
 {
-    if(ssid == NULL)
+    if (ssid == NULL)
     {
         aiio_log_e("ssid is NULL \r\n");
-        return ;
+        return;
     }
-    
+
     aiio_wifi_set_mode(AIIO_WIFI_MODE_STA);
 
-    aiio_wifi_config_t wifi_sta_config = {0};
+    aiio_wifi_config_t wifi_sta_config = { 0 };
 
     memcpy(wifi_sta_config.sta.ssid, ssid, strlen(ssid));
-    if(passwd)
+    if (passwd)
     {
         memcpy(wifi_sta_config.sta.password, passwd, strlen(passwd));
     }
@@ -76,7 +76,7 @@ static void iot_connect_wifi(char *ssid, char *passwd)
 
     aiio_log_d("ssid = %s \r\n", wifi_sta_config.sta.ssid);
     aiio_log_d("password = %s \r\n", wifi_sta_config.sta.password);
-    aiio_wifi_set_config(AIIO_WIFI_IF_STA,&wifi_sta_config);
+    aiio_wifi_set_config(AIIO_WIFI_IF_STA, &wifi_sta_config);
 
     aiio_wifi_start();
     wifi_disconnect_count = 0;
@@ -85,12 +85,12 @@ static void iot_connect_wifi(char *ssid, char *passwd)
 
 
 
-static void cb_wifi_event(aiio_input_event_t *event, void* data)
+static void cb_wifi_event(aiio_input_event_t* event, void* data)
 {
-    int32_t ret=0;
-    aiio_rev_queue_t  rev_queue = {0};
+    int32_t ret = 0;
+    aiio_rev_queue_t  rev_queue = { 0 };
 
-    switch (event->code) 
+    switch (event->code)
     {
         case AIIO_WIFI_EVENT_WIFI_READY:
         {
@@ -98,7 +98,7 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             // iot_connect_wifi("ZLM_24G", "12345678");
         }
         break;
-        
+
         case AIIO_WIFI_EVENT_SCAN_DONE:
         {
             aiio_log_i("<<<<<<<<<  SCAN DONE OK <<<<<<<<<<");
@@ -126,7 +126,7 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             {
                 //connect timeout
                 aiio_log_i("connect timeout");
-                if(ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
+                if (ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
                 {
                     aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
                 }
@@ -137,7 +137,7 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             {
                 //password error
                 aiio_log_i("password error");
-                if(ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
+                if (ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
                 {
                     aiio_ble_config_response_status(AIIO_BLE_CODE_WIFI_PAWD_ERR);
                 }
@@ -146,7 +146,7 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             {
                 //not found AP
                 aiio_log_i("not found AP");
-                if(ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
+                if (ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
                 {
                     aiio_ble_config_response_status(AIIO_BLE_CODE_WIFI_NO_SSID);
                 }
@@ -155,7 +155,7 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             {
                 //wifi disconnect
                 aiio_log_i("wifi disconnect");
-                if(ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
+                if (ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
                 {
                     aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
                 }
@@ -164,13 +164,13 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             {
                 //connect error
                 aiio_log_i("connect error");
-                if(ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
+                if (ble_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
                 {
                     aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
                 }
             }
 
-            if(wifi_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
+            if (wifi_config_start && wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
             {
                 rev_queue.common_event = REV_CONFIG_FAIL_EVENT;
                 if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
@@ -182,7 +182,7 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             }
             else
             {
-                if(wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
+                if (wifi_disconnect_count > WIFI_MAX_DISCONNECT_NUMBER)
                 {
                     wifi_disconnect_count = 0;
                     rev_queue.common_event = REV_WIFI_CONNECTED_EVENT;
@@ -204,24 +204,24 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             aiio_ble_config_response_status(AIIO_BLE_CODE_WIFI_CONN_OK);
             wifi_connect = true;
 
-            aiio_wifi_sta_connect_ind_stat_info_t wifi_ind_stat={0};
-            aiio_wifi_ip_params_t wifi_sta_ip_praram = {0};
+            aiio_wifi_sta_connect_ind_stat_info_t wifi_ind_stat = { 0 };
+            aiio_wifi_ip_params_t wifi_sta_ip_praram = { 0 };
             uint8_t mac[MAC_LEN];
-            int32_t rssi=0;
+            int32_t rssi = 0;
 
             aiio_wifi_rssi_get(&rssi);
-            aiio_log_d("wifi cur_rssi = %d!!",rssi);
+            aiio_log_d("wifi cur_rssi = %d!!", rssi);
 
             wifi_info.rssi = rssi;
 
             aiio_wifi_sta_mac_get(mac);
-            aiio_log_d("wifi mac = %02x%02x%02x%02x%02x%02x!!",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+            aiio_log_d("wifi mac = %02x%02x%02x%02x%02x%02x!!", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
             aiio_wifi_sta_connect_ind_stat_get(&wifi_ind_stat);
             aiio_log_d("wifi ssid = %s \r\n", wifi_ind_stat.ssid);
             aiio_log_d("wifi passphr = %s \r\n", wifi_ind_stat.passphr);
-            aiio_log_d("wifi sta_bssid = %02x%02x%02x%02x%02x%02x!!",wifi_ind_stat.bssid[0],wifi_ind_stat.bssid[1],wifi_ind_stat.bssid[2],wifi_ind_stat.bssid[3],wifi_ind_stat.bssid[4],wifi_ind_stat.bssid[5]);
+            aiio_log_d("wifi sta_bssid = %02x%02x%02x%02x%02x%02x!!", wifi_ind_stat.bssid[0], wifi_ind_stat.bssid[1], wifi_ind_stat.bssid[2], wifi_ind_stat.bssid[3], wifi_ind_stat.bssid[4], wifi_ind_stat.bssid[5]);
 
-            
+
             aiio_wifi_sta_ip_get(&wifi_sta_ip_praram.ip, &wifi_sta_ip_praram.gateway, &wifi_sta_ip_praram.netmask);
             aiio_log_d("wifi ip = 0x%08x \r\n", wifi_sta_ip_praram.ip);
             aiio_log_d("wifi gateway = 0x%08x \r\n", wifi_sta_ip_praram.gateway);
@@ -231,43 +231,43 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             aiio_log_d("wifi netmask = %s \r\n", ip4addr_ntoa(&wifi_sta_ip_praram.netmask));
 
             wifi_info.ssid = malloc(strlen(wifi_ind_stat.ssid) + 1);
-            if(wifi_info.ssid)
+            if (wifi_info.ssid)
             {
-                memset(wifi_info.ssid , 0, strlen(wifi_ind_stat.ssid) + 1);
+                memset(wifi_info.ssid, 0, strlen(wifi_ind_stat.ssid) + 1);
                 memcpy(wifi_info.ssid, wifi_ind_stat.ssid, strlen(wifi_ind_stat.ssid));
             }
 
             wifi_info.bssid = malloc(sizeof(wifi_ind_stat.bssid) * 2 + 1);
-            if(wifi_info.bssid)
+            if (wifi_info.bssid)
             {
-                memset(wifi_info.bssid , 0, sizeof(wifi_ind_stat.bssid) * 2 + 1);
-                snprintf(wifi_info.bssid, sizeof(wifi_ind_stat.bssid) * 2 + 1, "%02x%02x%02x%02x%02x%02x", 
-                        wifi_ind_stat.bssid[0],wifi_ind_stat.bssid[1],wifi_ind_stat.bssid[2],wifi_ind_stat.bssid[3],wifi_ind_stat.bssid[4],wifi_ind_stat.bssid[5]);
+                memset(wifi_info.bssid, 0, sizeof(wifi_ind_stat.bssid) * 2 + 1);
+                snprintf(wifi_info.bssid, sizeof(wifi_ind_stat.bssid) * 2 + 1, "%02x%02x%02x%02x%02x%02x",
+                        wifi_ind_stat.bssid[0], wifi_ind_stat.bssid[1], wifi_ind_stat.bssid[2], wifi_ind_stat.bssid[3], wifi_ind_stat.bssid[4], wifi_ind_stat.bssid[5]);
             }
 
             wifi_info.ip = malloc(strlen(ip4addr_ntoa(&wifi_sta_ip_praram.ip)) + 1);
-            if(wifi_info.ip)
+            if (wifi_info.ip)
             {
-                memset(wifi_info.ip , 0, strlen(ip4addr_ntoa(&wifi_sta_ip_praram.ip)) + 1);
+                memset(wifi_info.ip, 0, strlen(ip4addr_ntoa(&wifi_sta_ip_praram.ip)) + 1);
                 memcpy(wifi_info.ip, ip4addr_ntoa(&wifi_sta_ip_praram.ip), strlen(ip4addr_ntoa(&wifi_sta_ip_praram.ip)));
             }
 
             wifi_info.mask = malloc(strlen(ip4addr_ntoa(&wifi_sta_ip_praram.netmask)) + 1);
-            if(wifi_info.mask)
+            if (wifi_info.mask)
             {
-                memset(wifi_info.mask , 0, strlen(ip4addr_ntoa(&wifi_sta_ip_praram.netmask)) + 1);
+                memset(wifi_info.mask, 0, strlen(ip4addr_ntoa(&wifi_sta_ip_praram.netmask)) + 1);
                 memcpy(wifi_info.mask, ip4addr_ntoa(&wifi_sta_ip_praram.netmask), strlen(ip4addr_ntoa(&wifi_sta_ip_praram.netmask)));
             }
 
 
             wifi_info.gw = malloc(strlen(ip4addr_ntoa(&wifi_sta_ip_praram.gateway)) + 1);
-            if(wifi_info.gw)
+            if (wifi_info.gw)
             {
-                memset(wifi_info.gw , 0, strlen(ip4addr_ntoa(&wifi_sta_ip_praram.gateway)) + 1);
+                memset(wifi_info.gw, 0, strlen(ip4addr_ntoa(&wifi_sta_ip_praram.gateway)) + 1);
                 memcpy(wifi_info.gw, ip4addr_ntoa(&wifi_sta_ip_praram.gateway), strlen(ip4addr_ntoa(&wifi_sta_ip_praram.gateway)));
             }
 
-            
+
             rev_queue.common_event = REV_CLOUD_CONNECTED_EVENT;
             if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
             {
@@ -298,7 +298,7 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
             aiio_log_i("<<<<<<<<< station connent ap <<<<<<<<<<<");
         }
         break;
-            
+
         case AIIO_WIFI_EVENT_AP_STADISCONNECTED:
         {
             aiio_log_i("<<<<<<<<< station disconnet ap <<<<<<<<<<<");
@@ -310,17 +310,15 @@ static void cb_wifi_event(aiio_input_event_t *event, void* data)
     }
 }
 
-
-
-static void test_sta_wifi_entry(void *pvParameters)
+static void test_sta_wifi_entry(void* pvParameters)
 {
     int msg_id;
-    aiio_rev_queue_t  rev_queue = {0};
+    aiio_rev_queue_t  rev_queue = { 0 };
 
     while (1)
     {
 
-        if(xQueueReceive(cloud_rev_queue_handle, &rev_queue, 0) == pdPASS)
+        if (xQueueReceive(cloud_rev_queue_handle, &rev_queue, 0) == pdPASS)
         {
             switch (rev_queue.common_event)
             {
@@ -349,12 +347,12 @@ static void test_sta_wifi_entry(void *pvParameters)
                 case REV_CONFIG_START_EVENT:
                 {
                     aiio_log_d("REV_CONFIG_START_EVENT \r\n");
-                    if(wifi_connect)
+                    if (wifi_connect)
                     {
                         aiio_user_service_deinit();
                         aiio_wifi_stop();
                     }
-                    else if(wifi_start_connected)
+                    else if (wifi_start_connected)
                     {
                         aiio_wifi_stop();
                     }
@@ -363,22 +361,22 @@ static void test_sta_wifi_entry(void *pvParameters)
                     aiio_ble_config_start();
                     ble_config_start = true;
                     // aiio_TimerStop(cloud_wait_connect_handle);
-                    
+
                     wifi_config_start = true;
                 }
                 break;
 
                 case REV_CONFIG_STOP_EVENT:
                 {
-                    if(wifi_config_start)
+                    if (wifi_config_start)
                     {
                         aiio_log_d("REV_CONFIG_STOP_EVENT \r\n");
-                        
+
                         aiio_ble_config_stop();
                         ble_config_start = false;
                         wifi_config_start = false;
 
-                        if(aiio_flash_get_wifi_config_data(&wifi_config_data) > 0)
+                        if (aiio_flash_get_wifi_config_data(&wifi_config_data) > 0)
                         {
                             aiio_log_d("ssid = %s \r\n", wifi_config_data.ssid);
                             aiio_log_d("passwd = %s \r\n", wifi_config_data.passwd);
@@ -396,7 +394,7 @@ static void test_sta_wifi_entry(void *pvParameters)
                     aiio_os_tick_dealy(aiio_os_ms2tick(2000));
                     aiio_ble_config_stop();
                     ble_config_start = false;
-                    
+
                     wifi_config_start = false;
                 }
                 break;
@@ -404,7 +402,7 @@ static void test_sta_wifi_entry(void *pvParameters)
                 case REV_BLE_DISCONNECTED_EVENT:
                 {
                     aiio_log_d("REV_BLE_DISCONNECTED_EVENT \r\n");
-                    if(ble_config_start)
+                    if (ble_config_start)
                     {
                         aiio_ble_config_stop();
                         aiio_flash_clear_config_data();
@@ -441,7 +439,7 @@ static void test_sta_wifi_entry(void *pvParameters)
                 case REV_WIFI_CONNECTED_EVENT:
                 {
                     aiio_log_d("REV_WIFI_CONNECTED_EVENT \r\n");
-                    if(wifi_connect || wifi_start_connected)
+                    if (wifi_connect || wifi_start_connected)
                     {
                         aiio_wifi_disconnect();
                     }
@@ -452,13 +450,13 @@ static void test_sta_wifi_entry(void *pvParameters)
                 case REV_CLOUD_CONNECTED_EVENT:
                 {
                     aiio_log_d("REV_CLOUD_CONNECTED_EVENT \r\n");
-                    aiio_cloud_receive_t cloud_data = {0};
+                    aiio_cloud_receive_t cloud_data = { 0 };
                     cloud_data.mqtt_host = wifi_config_data.mqttip;
                     cloud_data.device_token = wifi_config_data.token;
                     cloud_data.mqtt_port = wifi_config_data.port;
                     cloud_data.wifi_info = &wifi_info;
 
-                    if(!wifi_config_start)
+                    if (!wifi_config_start)
                     {
                         aiio_user_service_init(true, &cloud_data);
                     }
@@ -474,7 +472,7 @@ static void test_sta_wifi_entry(void *pvParameters)
                 {
                     aiio_log_d("REV_CLOUD_ONLINE_EVENT \r\n");
 
-                    if(wifi_config_start)
+                    if (wifi_config_start)
                     {
                         rev_queue.common_event = REV_CONFIG_OK_EVENT;
                         if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
@@ -513,7 +511,7 @@ static void test_sta_wifi_entry(void *pvParameters)
                     aiio_log_i("REV_CLOUD_OTA_SUCCESS_EVENT \r\n");
                 }
                 break;
-                
+
                 default:
                     aiio_log_e("can't find event[%d] \r\n", rev_queue.common_event);
                     break;
@@ -522,20 +520,18 @@ static void test_sta_wifi_entry(void *pvParameters)
 
         aiio_os_tick_dealy(aiio_os_ms2tick(20));
     }
-    
-
 
     aiio_os_thread_delete(aiio_test_sta_wifi_thread);
 }
 
-static void test_start_entry(void *pvParameters)
+static void test_start_entry(void* pvParameters)
 {
-    aiio_rev_queue_t  rev_queue = {0};
-    int32_t ret=0;
+    aiio_rev_queue_t  rev_queue = { 0 };
+    int32_t ret = 0;
 
     aiio_wifi_register_event_cb(cb_wifi_event);
-    ret=aiio_wifi_init();
-    if(ret!=0){
+    ret = aiio_wifi_init();
+    if (ret!=0) {
         printf("wifi init error!!");
         return 0;
     }
@@ -559,20 +555,18 @@ static void test_start_entry(void *pvParameters)
     aiio_log_i("Hello EasyLogger!");
     aiio_log_d("Hello EasyLogger!");
     aiio_log_v("Hello EasyLogger!");
-    
+
 
     while (1)
     {
         aiio_log_i("rtos free heap size:%dk", aiio_os_get_free_heap_size() / 1024);
         aiio_os_tick_dealy(aiio_os_ms2tick(1000));
     }
-    
-
 }
 
 int main(void)
 {
-    int32_t ret=0;
+    int32_t ret = 0;
 
     board_init();
 
@@ -594,13 +588,13 @@ int main(void)
     aiio_rtc_time_init();
     printf("Hello EasyLogger!");
     cloud_rev_queue_handle = xQueueCreate(QUEUE_MAX_SIZE, sizeof(aiio_rev_queue_t));
-    if(cloud_rev_queue_handle == NULL)
+    if (cloud_rev_queue_handle == NULL)
     {
         return 0;
     }
     printf("Hello EasyLogger!");
     ret = xTaskCreate(test_start_entry, "aiio_start_thread", 4096, NULL, 15, &aiio_start_thread);
-    if(ret != pdPASS)
+    if (ret != pdPASS)
     {
         printf("create thread fail \r\n");
         return 0;
