@@ -1,4 +1,3 @@
-mv bl61x_SDK/os/bsp bl61x_SDK/os/bsp_old 
-cp -r bl61x_SDK/AiPi_bsp  bl61x_SDK/os
-mv bl61x_SDK/os/AiPi_bsp bl61x_SDK/os/bsp
-mv bl61x_SDK/dclocl bl61x_SDK/os/components/graphics/lvgl/extra/widgets
+mv bl61x_SDK/os/bsp/common bl61x_SDK/os/bsp/common_old
+cp -r bl61x_SDK/AiPi_bsp/common  bl61x_SDK/os/bsp/common
+mv bl61x_SDK/dclock bl61x_SDK/os/components/graphics/lvgl/extra/widgets
