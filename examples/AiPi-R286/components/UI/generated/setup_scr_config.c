@@ -235,7 +235,7 @@ void setup_scr_config(lv_ui* ui) {
 	lv_obj_set_scrollbar_mode(ui->config_label_ip, LV_SCROLLBAR_MODE_OFF);
 	lv_label_set_text(ui->config_label_ip, "192.168.222.254");
 	if (r2_device->wifi_sta.ip_addrs)
-		lv_label_set_text(r2_device->ui->config_label_ip, r2_device->wifi_sta.ip_addrs);
+		lv_label_set_text(ui->config_label_ip, r2_device->wifi_sta.ip_addrs);
 	lv_label_set_long_mode(ui->config_label_ip, LV_LABEL_LONG_WRAP);
 
 	//Set style for config_label_ip. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -297,10 +297,12 @@ void setup_scr_config(lv_ui* ui) {
 	lv_obj_set_style_border_width(ui->config_btn_wificonfig, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui->config_btn_wificonfig, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(ui->config_btn_wificonfig, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
-	lv_obj_set_style_text_font(ui->config_btn_wificonfig, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	lv_obj_set_style_text_font(ui->config_btn_wificonfig, r2_device->language? &lv_font_montserrat_16 :&lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(ui->config_btn_wificonfig, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
 	ui->config_btn_wificonfig_label = lv_label_create(ui->config_btn_wificonfig);
-	lv_label_set_text(ui->config_btn_wificonfig_label, "启动配网");
+
+	lv_label_set_text(ui->config_btn_wificonfig_label, r2_device->language?"StartConfig":"启动配网");
 	lv_obj_set_style_pad_all(ui->config_btn_wificonfig, 0, LV_STATE_DEFAULT);
 	lv_obj_align(ui->config_btn_wificonfig_label, LV_ALIGN_CENTER, 0, 0);
 
@@ -326,15 +328,15 @@ void setup_scr_config(lv_ui* ui) {
 	lv_obj_set_style_border_width(ui->config_btn_disconnect, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui->config_btn_disconnect, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(ui->config_btn_disconnect, lv_color_make(0xff, 0xff, 0xff), LV_PART_MAIN|LV_STATE_DEFAULT);
-	lv_obj_set_style_text_font(ui->config_btn_disconnect, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(ui->config_btn_disconnect, r2_device->language? &lv_font_montserrat_16 : &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(ui->config_btn_disconnect, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN|LV_STATE_DEFAULT);
 	ui->config_btn_disconnect_label = lv_label_create(ui->config_btn_disconnect);
-	lv_label_set_text(ui->config_btn_disconnect_label, "断开连接");
+	lv_label_set_text(ui->config_btn_disconnect_label, r2_device->language?"Disconnect":"断开连接");
 	lv_obj_set_style_pad_all(ui->config_btn_disconnect, 0, LV_STATE_DEFAULT);
 	lv_obj_align(ui->config_btn_disconnect_label, LV_ALIGN_CENTER, 0, 0);
 
 	static const char* config_msgbox_1_btns[] = { "" };
-	ui->config_msgbox_1 = lv_msgbox_create(ui->config, "提示", "网络未连接，请配置网络！", config_msgbox_1_btns, true);
+	ui->config_msgbox_1 = lv_msgbox_create(ui->config, r2_device->language?"Tips": "提示", r2_device->language?"Network not connected, please configure the network!": "网络未连接，请配置网络！", config_msgbox_1_btns, true);
 	lv_obj_set_scrollbar_mode(ui->config_msgbox_1, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_pos(ui->config_msgbox_1, 60, 133);
 	lv_obj_set_size(ui->config_msgbox_1, 360, 184);
@@ -359,7 +361,8 @@ void setup_scr_config(lv_ui* ui) {
 	static lv_style_t style_config_msgbox_1_extra_title_main_default;
 	ui_init_style(&style_config_msgbox_1_extra_title_main_default);
 	lv_style_set_text_color(&style_config_msgbox_1_extra_title_main_default, lv_color_make(0xa6, 0xa6, 0xa6));
-	lv_style_set_text_font(&style_config_msgbox_1_extra_title_main_default, &lv_font_MiSans_Demibold_20);
+
+	lv_style_set_text_font(&style_config_msgbox_1_extra_title_main_default, r2_device->language?&lv_font_montserrat_16: &lv_font_MiSans_Demibold_20);
 	lv_style_set_text_letter_space(&style_config_msgbox_1_extra_title_main_default, 0);
 	lv_style_set_text_line_space(&style_config_msgbox_1_extra_title_main_default, 30);
 	lv_obj_add_style(lv_msgbox_get_title(ui->config_msgbox_1), &style_config_msgbox_1_extra_title_main_default, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -368,7 +371,7 @@ void setup_scr_config(lv_ui* ui) {
 	static lv_style_t style_config_msgbox_1_extra_content_main_default;
 	ui_init_style(&style_config_msgbox_1_extra_content_main_default);
 	lv_style_set_text_color(&style_config_msgbox_1_extra_content_main_default, lv_color_make(0xa8, 0xa8, 0xa8));
-	lv_style_set_text_font(&style_config_msgbox_1_extra_content_main_default, &lv_font_MiSans_Demibold_18);
+	lv_style_set_text_font(&style_config_msgbox_1_extra_content_main_default, r2_device->language?&lv_font_montserrat_16:&lv_font_MiSans_Demibold_18);
 	lv_style_set_text_letter_space(&style_config_msgbox_1_extra_content_main_default, 0);
 	lv_style_set_text_line_space(&style_config_msgbox_1_extra_content_main_default, 10);
 	lv_obj_add_style(lv_msgbox_get_text(ui->config_msgbox_1), &style_config_msgbox_1_extra_content_main_default, LV_PART_MAIN|LV_STATE_DEFAULT);

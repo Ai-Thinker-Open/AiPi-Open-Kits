@@ -183,7 +183,7 @@ aipi_r286_dev_t* aipi_r286_device_init(void)
     easyflash_init();
 
     relays_device_init(&device);
-
+    device.language = AIPI_R286_LANGUAGE_ZH;
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();

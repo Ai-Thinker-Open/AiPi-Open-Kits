@@ -7,7 +7,7 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include "gui_guider.h"
-
+#include "device.h"
 
 void ui_init_style(lv_style_t* style)
 {
@@ -33,7 +33,7 @@ void setup_ui(lv_ui* ui)
 void Create_tips(lv_ui* ui, char* value)
 {
 	static const char* config_msgbox_1_btns[] = { "" };
-	ui->config_msgbox_1 = lv_msgbox_create(ui->config, "提示", value, config_msgbox_1_btns, true);
+	ui->config_msgbox_1 = lv_msgbox_create(ui->config, r2_device->language?"Tips":"提示", value, config_msgbox_1_btns, true);
 	lv_obj_set_scrollbar_mode(ui->config_msgbox_1, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_pos(ui->config_msgbox_1, 60, 133);
 	lv_obj_set_size(ui->config_msgbox_1, 360, 184);
@@ -58,7 +58,7 @@ void Create_tips(lv_ui* ui, char* value)
 	static lv_style_t style_config_msgbox_1_extra_title_main_default;
 	ui_init_style(&style_config_msgbox_1_extra_title_main_default);
 	lv_style_set_text_color(&style_config_msgbox_1_extra_title_main_default, lv_color_make(0xa6, 0xa6, 0xa6));
-	lv_style_set_text_font(&style_config_msgbox_1_extra_title_main_default, &lv_font_MiSans_Demibold_20);
+	lv_style_set_text_font(&style_config_msgbox_1_extra_title_main_default, r2_device->language?&lv_font_montserrat_16: &lv_font_MiSans_Demibold_20);
 	lv_style_set_text_letter_space(&style_config_msgbox_1_extra_title_main_default, 0);
 	lv_style_set_text_line_space(&style_config_msgbox_1_extra_title_main_default, 30);
 	lv_obj_add_style(lv_msgbox_get_title(ui->config_msgbox_1), &style_config_msgbox_1_extra_title_main_default, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -67,7 +67,7 @@ void Create_tips(lv_ui* ui, char* value)
 	static lv_style_t style_config_msgbox_1_extra_content_main_default;
 	ui_init_style(&style_config_msgbox_1_extra_content_main_default);
 	lv_style_set_text_color(&style_config_msgbox_1_extra_content_main_default, lv_color_make(0xa8, 0xa8, 0xa8));
-	lv_style_set_text_font(&style_config_msgbox_1_extra_content_main_default, &lv_font_MiSans_Demibold_18);
+	lv_style_set_text_font(&style_config_msgbox_1_extra_content_main_default, r2_device->language?&lv_font_montserrat_16: &lv_font_MiSans_Demibold_18);
 	lv_style_set_text_letter_space(&style_config_msgbox_1_extra_content_main_default, 0);
 	lv_style_set_text_line_space(&style_config_msgbox_1_extra_content_main_default, 10);
 	lv_obj_add_style(lv_msgbox_get_text(ui->config_msgbox_1), &style_config_msgbox_1_extra_content_main_default, LV_PART_MAIN|LV_STATE_DEFAULT);

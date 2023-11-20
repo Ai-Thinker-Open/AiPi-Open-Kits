@@ -144,6 +144,46 @@ static void screen_imgbtn_on1_event_handler(lv_event_t* e)
 	}
 }
 
+
+static void screen_img_aixingyun_event_handler(lv_event_t* e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	switch (code)
+	{
+		case LV_EVENT_CLICKED:
+		{
+			//如果当前语言是中文,就切换到英文
+			if (r2_device->language==AIPI_R286_LANGUAGE_ZH) {
+				lv_obj_set_style_text_font(guider_ui.screen_ddlist_list1, &lv_font_montserrat_16, LV_PART_MAIN);
+				lv_obj_set_style_text_font(guider_ui.screen_ddlist_list2, &lv_font_montserrat_16, LV_PART_MAIN);
+				lv_obj_set_style_text_font(guider_ui.screen_ddlist_list3, &lv_font_montserrat_16, LV_PART_MAIN);
+				lv_dropdown_set_options(guider_ui.screen_ddlist_list1, "Bedroom\nHall\nKitchen");
+				lv_dropdown_set_options(guider_ui.screen_ddlist_list2, "Bedroom\nHall\nKitchen");
+				lv_dropdown_set_options(guider_ui.screen_ddlist_list3, "Bedroom\nHall\nKitchen");
+				lv_dropdown_set_selected(guider_ui.screen_ddlist_list1, 0);
+				lv_dropdown_set_selected(guider_ui.screen_ddlist_list2, 1);
+				lv_dropdown_set_selected(guider_ui.screen_ddlist_list3, 2);
+				r2_device->language = AIPI_R286_LANGUAGE_EN;
+			}
+			else {
+				//切换到中文
+				lv_obj_set_style_text_font(r2_device->ui->screen_ddlist_list1, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+				lv_obj_set_style_text_font(r2_device->ui->screen_ddlist_list2, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+				lv_obj_set_style_text_font(r2_device->ui->screen_ddlist_list3, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+				lv_dropdown_set_options(r2_device->ui->screen_ddlist_list1, "卧室\n大厅\n厨房");
+				lv_dropdown_set_options(r2_device->ui->screen_ddlist_list2, "卧室\n大厅\n厨房");
+				lv_dropdown_set_options(r2_device->ui->screen_ddlist_list3, "卧室\n大厅\n厨房");
+				lv_dropdown_set_selected(guider_ui.screen_ddlist_list1, 0);
+				lv_dropdown_set_selected(guider_ui.screen_ddlist_list2, 1);
+				lv_dropdown_set_selected(guider_ui.screen_ddlist_list3, 2);
+				r2_device->language = AIPI_R286_LANGUAGE_ZH;
+			}
+		}
+		break;
+		default:
+			break;
+	}
+}
 void events_init_screen(lv_ui* ui)
 {
 	lv_obj_add_event_cb(ui->screen_cont_title, screen_imgbtn_1_event_handler, LV_EVENT_ALL, ui);
@@ -154,6 +194,7 @@ void events_init_screen(lv_ui* ui)
 	lv_obj_add_event_cb(ui->screen_imgbtn_on2, screen_imgbtn_on2_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->screen_imgbtn_sw1, screen_imgbtn_sw1_event_handler, LV_EVENT_ALL, ui);
 	lv_obj_add_event_cb(ui->screen_imgbtn_on1, screen_imgbtn_on1_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_img_aixingyun, screen_img_aixingyun_event_handler, LV_EVENT_ALL, ui);
 }
 
 static void config_btn_wificonfig_event_handler(lv_event_t* e)
@@ -164,7 +205,7 @@ static void config_btn_wificonfig_event_handler(lv_event_t* e)
 	{
 		case LV_EVENT_CLICKED:
 		{
-			Create_tips(ui, "配网程序已启动，请打开手机App进行配网");
+			Create_tips(ui, r2_device->language? "The distribution program has started. Please open the mobile app for distribution": "配网程序已启动，请打开手机App进行配网");
 			aipi_r286_dev_state_update(AIPI_R286_STATE_CONFIG_START);
 		}
 		break;

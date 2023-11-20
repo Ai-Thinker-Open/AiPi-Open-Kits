@@ -12,6 +12,8 @@
 #include "device.h"
 
 static char* wday_str[7] = { "周天","周一","周二","周三","周四","周五","周六" };
+
+static char* wday_str_en[7] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri","Sat" };
 uint16_t yesr = 2023;
 uint16_t mon = 11;
 uint16_t day = 19;
@@ -27,7 +29,7 @@ void screen_digital_clock_1_timer(lv_timer_t* timer)
 	{
 		lv_dclock_set_text_fmt(guider_ui.screen_digital_clock_1, "%02d:%02d", hour, min);
 		lv_label_set_text_fmt(guider_ui.screen_label_day, "%02d/%02d", mon, day);
-		lv_label_set_text(guider_ui.screen_label_wday, wday_str[wday]);
+		lv_label_set_text(guider_ui.screen_label_wday, r2_device->language?  wday_str_en[wday]:wday_str[wday]);
 	}
 }
 
@@ -191,7 +193,11 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_label_wday, 125, 115);
 	lv_obj_set_size(ui->screen_label_wday, 106, 44);
 	lv_obj_set_scrollbar_mode(ui->screen_label_wday, LV_SCROLLBAR_MODE_OFF);
-	lv_label_set_text(ui->screen_label_wday, "周一");
+	if (r2_device!=NULL)
+		lv_label_set_text(ui->screen_label_wday, wday_str_en[1]);
+	else
+		lv_label_set_text(ui->screen_label_wday, "周一");
+
 	lv_label_set_long_mode(ui->screen_label_wday, LV_LABEL_LONG_WRAP);
 
 	//Set style for screen_label_wday. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -325,7 +331,12 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_ddlist_list3, 40, 18);
 	lv_obj_set_size(ui->screen_ddlist_list3, 99, 29);
 	lv_obj_set_scrollbar_mode(ui->screen_ddlist_list3, LV_SCROLLBAR_MODE_OFF);
-	lv_dropdown_set_options(ui->screen_ddlist_list3, "卧室\n大厅\n厨房\n卫生间\n走廊\n前院\n后院\n书房\n主卧\n次卧1\n次卧2\n次卧3");
+
+	if (r2_device!=NULL)
+		lv_dropdown_set_options(ui->screen_ddlist_list3, r2_device->language?"Bedroom\nHall\nKitchen":"卧室\n大厅\n厨房");
+	else
+		lv_dropdown_set_options(ui->screen_ddlist_list3, "卧室\n大厅\n厨房");
+
 	lv_dropdown_set_symbol(ui->screen_ddlist_list3, NULL);
 
 	lv_dropdown_set_selected(ui->screen_ddlist_list3, 2);
@@ -346,7 +357,12 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_style_border_width(ui->screen_ddlist_list3, 1, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui->screen_ddlist_list3, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(ui->screen_ddlist_list3, lv_color_make(0xb7, 0xb7, 0xb7), LV_PART_MAIN|LV_STATE_DEFAULT);
-	lv_obj_set_style_text_font(ui->screen_ddlist_list3, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+
+	if (r2_device!=NULL)
+		lv_obj_set_style_text_font(ui->screen_ddlist_list3, r2_device->language?&lv_font_montserrat_16: &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+	else
+		lv_obj_set_style_text_font(ui->screen_ddlist_list3, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+
 	lv_obj_set_style_pad_left(ui->screen_ddlist_list3, 6, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui->screen_ddlist_list3, 6, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui->screen_ddlist_list3, 8, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -521,7 +537,9 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_ddlist_list2, 40, 18);
 	lv_obj_set_size(ui->screen_ddlist_list2, 99, 29);
 	lv_obj_set_scrollbar_mode(ui->screen_ddlist_list2, LV_SCROLLBAR_MODE_OFF);
-	lv_dropdown_set_options(ui->screen_ddlist_list2, "卧室\n大厅\n厨房\n卫生间\n走廊\n前院\n后院\n书房\n主卧\n次卧1\n次卧2\n次卧3");
+	if (r2_device!=NULL)
+		lv_dropdown_set_options(ui->screen_ddlist_list2, r2_device->language?"Bedroom\nHall\nKitchen":"卧室\n大厅\n厨房");
+	else lv_dropdown_set_options(ui->screen_ddlist_list2, "卧室\n大厅\n厨房");
 	lv_dropdown_set_symbol(ui->screen_ddlist_list2, NULL);
 	lv_dropdown_set_selected(ui->screen_ddlist_list2, 1);
 	//Set style for screen_ddlist_list2. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -540,7 +558,10 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_style_border_width(ui->screen_ddlist_list2, 1, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui->screen_ddlist_list2, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(ui->screen_ddlist_list2, lv_color_make(0xb7, 0xb7, 0xb7), LV_PART_MAIN|LV_STATE_DEFAULT);
-	lv_obj_set_style_text_font(ui->screen_ddlist_list2, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+	if (r2_device!=NULL)
+		lv_obj_set_style_text_font(ui->screen_ddlist_list2, r2_device->language?&lv_font_montserrat_16: &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+	else
+		lv_obj_set_style_text_font(ui->screen_ddlist_list2, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui->screen_ddlist_list2, 6, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui->screen_ddlist_list2, 6, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui->screen_ddlist_list2, 8, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -715,7 +736,9 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_pos(ui->screen_ddlist_list1, 40, 18);
 	lv_obj_set_size(ui->screen_ddlist_list1, 99, 29);
 	lv_obj_set_scrollbar_mode(ui->screen_ddlist_list1, LV_SCROLLBAR_MODE_OFF);
-	lv_dropdown_set_options(ui->screen_ddlist_list1, "卧室\n大厅\n厨房\n卫生间\n走廊\n前院\n后院\n书房\n主卧\n次卧1\n次卧2\n次卧3");
+	if (r2_device!=NULL)
+		lv_dropdown_set_options(ui->screen_ddlist_list1, r2_device->language?"Bedroom\nHall\nKitchen":"卧室\n大厅\n厨房");
+	else lv_dropdown_set_options(ui->screen_ddlist_list1, "卧室\n大厅\n厨房");
 	lv_dropdown_set_symbol(ui->screen_ddlist_list1, NULL);
 
 	//Set style for screen_ddlist_list1. Part: LV_PART_MAIN, State: LV_STATE_DEFAULT
@@ -734,7 +757,10 @@ void setup_scr_screen(lv_ui* ui) {
 	lv_obj_set_style_border_width(ui->screen_ddlist_list1, 1, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui->screen_ddlist_list1, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(ui->screen_ddlist_list1, lv_color_make(0xb7, 0xb7, 0xb7), LV_PART_MAIN|LV_STATE_DEFAULT);
-	lv_obj_set_style_text_font(ui->screen_ddlist_list1, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+	if (r2_device!=NULL)
+		lv_obj_set_style_text_font(ui->screen_ddlist_list1, r2_device->language?&lv_font_montserrat_16: &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
+	else
+		lv_obj_set_style_text_font(ui->screen_ddlist_list1, &lv_font_MiSans_Demibold_20, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui->screen_ddlist_list1, 6, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui->screen_ddlist_list1, 6, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui->screen_ddlist_list1, 8, LV_PART_MAIN|LV_STATE_DEFAULT);

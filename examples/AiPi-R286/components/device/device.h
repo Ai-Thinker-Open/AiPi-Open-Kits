@@ -95,7 +95,10 @@ typedef struct relays_dev {
     void (*off)(struct relays_dev*);
 }relays_dev_t;
 
-
+typedef enum {
+    AIPI_R286_LANGUAGE_ZH = 0,
+    AIPI_R286_LANGUAGE_EN,
+}r286_sys_language_t;
 /**
  * @brief
  *
@@ -111,6 +114,7 @@ typedef struct device_t {
     char* token;
     uint16_t port;
     char mq_data[512];
+    r286_sys_language_t  language;
 }aipi_r286_dev_t;
 
 
