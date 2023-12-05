@@ -151,28 +151,12 @@ static void aiio_receive_bool_cmd(char* msgMid, char* from, uint8_t dpid, bool c
 {
     switch (dpid)
     {
-        case CMD_SW1:
-        {
-            if (cmd)
-            {
-                // aiio_turn_on_led_status(ALL_LED_TURN_ON);
-                powerstate_status = true;
-            }
-            else
-            {
-                //aiio_turn_on_led_status(ALL_LED_TURN_OFF);
-                powerstate_status = false;
-            }
-
-            aiio_report_bool_attibute_status(msgMid, from, dpid, cmd);
-        }
-        break;
 
         // case CMD_LIGHT_SWITCH:
         // {
         //     if (cmd)
         //     {
-        //         //aiio_turn_on_led_status(ALL_LED_TURN_ON);
+        //         aiio_turn_on_led_status(ALL_LED_TURN_ON);
         //         light_switch_status = true;
         //     }
         //     else

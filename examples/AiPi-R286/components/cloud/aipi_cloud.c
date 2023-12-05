@@ -29,7 +29,7 @@ bool wifi_connect = false;                                           /*!< status
 
 bool ble_config_start = false;                                       /*!< Launch state of ble distribution network*/
 bool wifi_config_start = false;
-
+static bool cloud_connect = false;
 static bool wifi_start_connected = false;
 static uint8_t wifi_disconnect_count = 0;                            /*!< The number  of wifi disconnection*/
 static aiio_wifi_info_t wifi_info = { 0 };                           /*!< Information of wifi*/
@@ -292,7 +292,224 @@ static void cb_wifi_event(aiio_input_event_t* event, void* data)
             break;
     }
 }
+static void cloud_rev_cb(aiio_service_rev_event_t* rev_event)
+{
+    aiio_rev_queue_t rev_queue = { 0 };
 
+    if (rev_event == NULL)
+    {
+        aiio_log_i("receive event is NULL \r\n");
+        return;
+    }
+
+    if (rev_event->data)
+    {
+        aiio_log_i("receive data: %s \r\n", rev_event->data);
+    }
+
+    switch (rev_event->service_event)
+    {
+        case AIIO_SERVICE_LANCH_FAIL_EVNET:                                             /* mqtt connection fail*/
+        {
+            aiio_log_i("AIIO_SERVICE_LANCH_FAIL_EVNET \r\n");
+
+            if (wifi_config_start)
+            {
+                if (ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
+
+                rev_queue.common_event = REV_CONFIG_FAIL_EVENT;
+                if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
+                {
+                    aiio_log_i("queue send failed\r\n");
+                }
+                memset(&rev_queue, 0, sizeof(aiio_rev_queue_t));
+            }
+        }
+        break;
+
+        case AIIO_SERVICE_SUBSCRIBE_TIMEOUT:                                            /* The mqtt subscription is timeout*/
+        {
+            aiio_log_i("AIIO_SERVICE_SUBSCRIBE_TIMEOUT \r\n");
+            if (wifi_config_start)
+            {
+                if (ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_FAIL);
+
+                rev_queue.common_event = REV_CONFIG_FAIL_EVENT;
+                if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
+                {
+                    aiio_log_i("queue send failed\r\n");
+                }
+                memset(&rev_queue, 0, sizeof(aiio_rev_queue_t));
+            }
+        }
+        break;
+
+        case AIIO_SERVICE_MQTT_DISCONNECT:
+        {
+            aiio_log_i("AIIO_SERVICE_MQTT_DISCONNECT \r\n");
+            if (wifi_config_start && !cloud_connect)
+            {
+                if (ble_config_start)        aiio_ble_config_response_status(AIIO_BLE_CODE_MQTT_CONN_ERR);
+
+                rev_queue.common_event = REV_CONFIG_FAIL_EVENT;
+                if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
+                {
+                    aiio_log_i("queue send failed\r\n");
+                }
+                memset(&rev_queue, 0, sizeof(aiio_rev_queue_t));
+            }
+            else
+            {
+                rev_queue.common_event = REV_CLOUD_DISCONNECTED;
+                if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
+                {
+                    aiio_log_i("queue send failed\r\n");
+                }
+                memset(&rev_queue, 0, sizeof(aiio_rev_queue_t));
+            }
+            aiio_log_i("AIIO_SERVICE_MQTT_DISCONNECT \r\n");
+            cloud_connect = false;
+        }
+        break;
+
+        case AIIO_SERVICE_MQTT_CONNECTING:
+        {
+            aiio_log_i("AIIO_SERVICE_MQTT_CONNECTING \r\n");
+            if (ble_config_start)
+            {
+                aiio_ble_config_response_status(AIIO_BLE_CODE_MQTT_CONNING);
+            }
+        }
+        break;
+
+        case AIIO_SERVICE_MQTT_CONNECTED:
+        {
+            aiio_log_i("AIIO_SERVICE_MQTT_CONNECTED \r\n");
+
+            aiio_ble_config_response_status(AIIO_BLE_CODE_MQTT_CONN_OK);
+
+        }
+        break;
+
+        case AIIO_SERVICE_ACTIVITY_EVENT:                                                               /*When the device is in the distribution network, it should report the activation data to the cloud. The event is callback cause the device has sent the activation data to the cloud */
+        {
+            aiio_log_i("AIIO_SERVICE_ACTIVITY_EVENT \r\n");
+
+            if (ble_config_start)
+            {
+                aiio_ble_config_response_status(AIIO_BLE_CODE_ACTIVITY_REQ);
+            }
+
+        }
+        break;
+
+        case AIIO_SERVICE_RESTORE_EVENT:
+        {
+            aiio_log_i("AIIO_SERVICE_RESTORE_EVENT \r\n");
+
+            aiio_flash_clear_config_data();
+            rev_queue.common_event = REV_CONFIG_START_EVENT;
+            if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
+            {
+                aiio_log_e("queue send failed\r\n");
+            }
+            memset(&rev_queue, 0, sizeof(aiio_rev_queue_t));
+            cloud_connect = false;
+        }
+        break;
+
+        case AIIO_SERVICE_REBOOT_EVENT:
+        {
+            aiio_log_i("AIIO_SERVICE_REBOOT_EVENT \r\n");
+            aiio_restart();
+        }
+        break;
+
+        case AIIO_SERVICE_INFO_EVENT:                                                           /* The requestion command of device information come from cloud, the device needs to response device information to cloud*/
+        {
+            aiio_log_i("AIIO_SERVICE_INFO_EVENT \r\n");
+        }
+        break;
+
+        case AIIO_SERVICE_CONFIG_EVENT:                                                             /* The configuration command come from cloud, the device needs to be configured for the configuration data*/
+        {
+            aiio_log_i("AIIO_SERVICE_CONFIG_EVENT \r\n");
+        }
+        break;
+
+        case AIIO_SERVICE_UPGRADE_EVENT:                                                          /* The ota command come from cloud, device needs to execure ota function*/
+        {
+            aiio_log_i("AIIO_SERVICE_UPGRADE_EVENT \r\n");
+
+        }
+        break;
+
+        case AIIO_SERVICE_QUERY_EVENT:                                                                      /* The query command of attribute status come from cloud, device needs to report all attribute status to cloud*/
+        {
+            aiio_log_i("AIIO_SERVICE_QUERY_EVENT \r\n");
+            aiio_report_all_attibute_status(rev_event->msgMid, rev_event->from);
+        }
+        break;
+
+        case AIIO_SERVICE_CONTROL_EVENT:
+        {
+            aiio_log_i("AIIO_SERVICE_CONTROL_EVENT \r\n");
+
+            if (rev_event->data)
+            {
+                // aiio_parse_control_data(rev_event->msgMid, rev_event->from, rev_event->data);
+                rev_queue.common_event = REV_CLOUD_CONTRL_DATA_EVENT;
+
+                memset(r2_device->mq_data, 0, 512);
+                memcpy(r2_device->mq_data, rev_event->data, rev_event->data_len);
+                if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
+                {
+                    aiio_log_e("queue send failed\r\n");
+                }
+                memset(&rev_queue, 0, sizeof(aiio_rev_queue_t));
+            }
+
+        }
+        break;
+
+        case AIIO_SERVICE_UTC_EVENT:
+        {
+            aiio_log_i("AIIO_SERVICE_UTC_EVENT \r\n");
+            if (rev_event->data)
+            {
+                aiio_log_i("receive data: %s \r\n", rev_event->data);
+                aiio_online_update_local_time(rev_event->data, aiio_strlen(rev_event->data));
+            }
+
+            aiio_ble_config_response_status(AIIO_BLE_CODE_UTC_REQ);
+
+        }
+        break;
+
+        case AIIO_SERVICE_ONLINE_EVENT:
+        {
+            aiio_log_i("AIIO_SERVICE_ONLINE_EVENT \r\n");
+
+            if (ble_config_start)
+            {
+                aiio_ble_config_response_status(AIIO_BLE_CODE_ONLINE_REQ);
+            }
+
+            rev_queue.common_event = REV_CLOUD_ONLINE_EVENT;
+            if (xQueueSendToBack(cloud_rev_queue_handle, &rev_queue, 100) != pdPASS)
+            {
+                aiio_log_i("queue send failed\r\n");
+            }
+            memset(&rev_queue, 0, sizeof(aiio_rev_queue_t));
+            cloud_connect = true;
+        }
+        break;
+
+        default:
+            aiio_log_i("event id err \r\n");
+            break;
+    }
+}
 static void test_sta_wifi_entry(void* pvParameters)
 {
     int msg_id;
@@ -455,11 +672,11 @@ static void test_sta_wifi_entry(void* pvParameters)
 
                     if (!wifi_config_start)
                     {
-                        aiio_user_service_init(true, &cloud_data);
+                        aiio_user_service_init(true, &cloud_data, cloud_rev_cb);
                     }
                     else
                     {
-                        aiio_user_service_init(false, &cloud_data);
+                        aiio_user_service_init(false, &cloud_data, cloud_rev_cb);
                     }
 
                 }
@@ -618,6 +835,25 @@ static void test_start_entry(void* pvParameters)
         aiio_os_tick_dealy(aiio_os_ms2tick(1000));
     }
 }
+static void rtc_task_start(void* arg)
+{
+    aiio_rtc_time_t* rtc_time = NULL;
+    uint32_t count = 0;
+
+    while (1)
+    {
+        aiio_rtc_loop();
+        count++;
+        if (count > 30)
+        {
+            rtc_time = aiio_get_rtc_time();
+            aiio_log_i("the Date : %02d:%02d:%02d - %02d:%02d:%02d,wday %02d", rtc_time->year, rtc_time->mon, rtc_time->day, rtc_time->hour, rtc_time->minute, rtc_time->second, rtc_time->week);
+            count = 0;
+
+        }
+        aiio_os_tick_dealy(aiio_os_ms2tick(100));
+    }
+}
 
 void aipi_aithinker_cloud_start(void)
 {
@@ -630,7 +866,7 @@ void aipi_aithinker_cloud_start(void)
         return 0;
     }
 
-    aiio_rtc_time_init();
+    aiio_rtc_time_init(rtc_task_start);
     cloud_rev_queue_handle = xQueueCreate(QUEUE_MAX_SIZE, sizeof(aiio_rev_queue_t));
     if (cloud_rev_queue_handle == NULL)
     {
