@@ -19,6 +19,7 @@
 | AiPi-Knob-ClipsTool| 小安派-AiPi-Knob-ClipsTool 剪辑助手源码| [点击查看](AiPi-Knob-ClipsTool/README.md) |
 | AiPi-KVM| 小安派-KVM 三进一出切换器源码| [点击查看](AiPi-KVM/README.md) |
 | AiPi-Radar-WakeUp| 小安派-雷达天气站源码| [点击查看](AiPi-Radar-WakeUp/README_CN.md) |
+|AiPi-UNO-Emac|AiPi-UNO-ET485 测试固件|[点击查看](AiPi-UNO-Emac/README.md)|
 
 ## 一、克隆Ai-Thinker仓库
 在linux的终端下输入
