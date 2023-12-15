@@ -25,6 +25,7 @@ typedef enum {
     DEVICE_STATE_HTTP_GET_WEATHER,
 }device_state_t;
 
+extern char wea[16];
 extern char city[32];
 extern char tem_day[16];
 extern char tem_tem_night[16];

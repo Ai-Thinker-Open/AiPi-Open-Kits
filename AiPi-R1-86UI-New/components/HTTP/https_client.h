@@ -18,6 +18,7 @@ extern "C" {
 #define HTTP_PATH "free/day?unescape=1&appid=17769781&appsecret=5IbudTJx"
 
     extern void* https_Handle;
+
     extern int src_home_digital_date_mont_value;
     extern int src_home_digital_date_wday_value;
     extern int src_home_digital_date_day_value;

@@ -44,7 +44,7 @@ void setup_scr_screen(lv_ui* ui)
 	ui->screen_tileview_home_tile_code = lv_tileview_add_tile(ui->screen_tileview_home, 0, 3, LV_DIR_TOP);
 	lv_obj_set_pos(ui->screen_tileview_home, 0, 0);
 	lv_obj_set_size(ui->screen_tileview_home, 480, 480);
-	lv_obj_set_scrollbar_mode(ui->screen_tileview_home, LV_SCROLLBAR_MODE_ACTIVE);
+	lv_obj_set_scrollbar_mode(ui->screen_tileview_home, LV_SCROLLBAR_MODE_AUTO);
 
 	//Write style for screen_tileview_home, Part: LV_PART_MAIN, State: LV_STATE_DEFAULT.
 	lv_obj_set_style_bg_opa(ui->screen_tileview_home, 255, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -83,8 +83,8 @@ void setup_scr_screen(lv_ui* ui)
 		lv_timer_create(screen_digital_clock_date_timer, 1000, NULL);
 		screen_digital_clock_date_timer_enabled = true;
 	}
-	lv_obj_set_pos(ui->screen_digital_clock_date, 40, 6);
-	lv_obj_set_size(ui->screen_digital_clock_date, 187, 62);
+	lv_obj_set_pos(ui->screen_digital_clock_date, 22, 6);
+	lv_obj_set_size(ui->screen_digital_clock_date, 219, 64);
 
 	//Write style for screen_digital_clock_date, Part: LV_PART_MAIN, State: LV_STATE_DEFAULT.
 	lv_obj_set_style_radius(ui->screen_digital_clock_date, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -123,7 +123,7 @@ void setup_scr_screen(lv_ui* ui)
 	ui->screen_label_wday = lv_label_create(ui->screen_cont_date);
 	lv_label_set_text_fmt(ui->screen_label_wday, "星期%s", wday_strp[src_home_digital_date_wday_value]);
 	lv_label_set_long_mode(ui->screen_label_wday, LV_LABEL_LONG_WRAP);
-	lv_obj_set_pos(ui->screen_label_wday, 154, 87);
+	lv_obj_set_pos(ui->screen_label_wday, 170, 87);
 	lv_obj_set_size(ui->screen_label_wday, 73, 23);
 
 	//Write style for screen_label_wday, Part: LV_PART_MAIN, State: LV_STATE_DEFAULT.
@@ -482,7 +482,8 @@ void setup_scr_screen(lv_ui* ui)
 
 	//Write codes screen_label_7
 	ui->screen_label_7 = lv_label_create(ui->screen_tileview_home_tile_home);
-	lv_label_set_text(ui->screen_label_7, "深圳市");
+	lv_label_set_recolor(ui->screen_label_7, true);
+	lv_label_set_text(ui->screen_label_7, "深圳市：#ffa2c2 晴# ");
 	lv_label_set_long_mode(ui->screen_label_7, LV_LABEL_LONG_WRAP);
 	lv_obj_set_pos(ui->screen_label_7, 14, 350);
 	lv_obj_set_size(ui->screen_label_7, 322, 17);
@@ -1013,6 +1014,7 @@ void setup_scr_screen(lv_ui* ui)
 	lv_textarea_set_password_bullet(ui->screen_ta_SSID, "*");
 	lv_textarea_set_password_mode(ui->screen_ta_SSID, false);
 	lv_textarea_set_one_line(ui->screen_ta_SSID, false);
+
 #if LV_USE_KEYBOARD != 0 || LV_USE_ZH_KEYBOARD != 0
 	lv_obj_add_event_cb(ui->screen_ta_SSID, ta_event_cb, LV_EVENT_ALL, ui->g_kb_screen);
 #endif
@@ -1025,7 +1027,7 @@ void setup_scr_screen(lv_ui* ui)
 	lv_obj_set_style_text_letter_space(ui->screen_ta_SSID, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(ui->screen_ta_SSID, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui->screen_ta_SSID, 175, LV_PART_MAIN|LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(ui->screen_ta_SSID, lv_color_hex(0x151426), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->screen_ta_SSID, lv_color_hex(0x6e717b), LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui->screen_ta_SSID, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui->screen_ta_SSID, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_color(ui->screen_ta_SSID, lv_color_hex(0xe6e6e6), LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -1104,7 +1106,7 @@ void setup_scr_screen(lv_ui* ui)
 	lv_obj_set_style_text_letter_space(ui->screen_ta_PASS, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(ui->screen_ta_PASS, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui->screen_ta_PASS, 175, LV_PART_MAIN|LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(ui->screen_ta_PASS, lv_color_hex(0x151426), LV_PART_MAIN|LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui->screen_ta_PASS, lv_color_hex(0x6e717b), LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui->screen_ta_PASS, 2, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui->screen_ta_PASS, 0, LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_border_color(ui->screen_ta_PASS, lv_color_hex(0xe6e6e6), LV_PART_MAIN|LV_STATE_DEFAULT);

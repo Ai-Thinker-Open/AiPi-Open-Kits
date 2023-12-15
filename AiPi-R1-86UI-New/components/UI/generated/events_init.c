@@ -196,7 +196,7 @@ static void screen_btn_sw_all_event_handler(lv_event_t* e)
 				// 控制继电器
 				relays_on(&relay_sw1);
 				relays_on(&relay_sw2);
-				relays_on(&relay_sw2);
+				relays_on(&relay_sw3);
 				light_all = true;
 				light_1 = true;
 				light_2 = true;
@@ -224,7 +224,7 @@ static void screen_btn_sw_all_event_handler(lv_event_t* e)
 				// 控制继电器
 				relays_off(&relay_sw1);
 				relays_off(&relay_sw2);
-				relays_off(&relay_sw2);
+				relays_off(&relay_sw3);
 
 				light_all = false;
 				light_1 = false;

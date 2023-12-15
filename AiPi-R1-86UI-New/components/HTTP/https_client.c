@@ -111,8 +111,8 @@ char* https_get_request(const char* host, const char* https_url)
     static char* buff;
     char* https_request_handle = pvPortMalloc(512);
     int ret, flags, len;
-    buff = pvPortMalloc(2*1024);
-    memset(buff, 0, 2*1024);
+    buff = pvPortMalloc(1024);
+    memset(buff, 0, 1024);
 
 #ifdef REQUEST_HTTPS
 
@@ -345,11 +345,11 @@ exit:
         goto __exit;
     }
     LOG_I("request send OK", ret);
-    LOG_F("Handler byte=%d\r\n%s", ret, https_request_handle);
+    // LOG_F("Handler byte=%d\r\n%s", ret, https_request_handle);
 
-
-    flags = read(sock_client, buff, 1024*2);
-    LOG_F("\r\n%s", buff);
+    memset(buff, 0, 1024);
+    flags = read(sock_client, buff, 1024);
+    // LOG_F("\r\n%s", buff);
 
     shutdown(sock_client, SHUT_RDWR);
     close(sock_client);
@@ -438,7 +438,7 @@ static char* https_get_data(const char* https_request_data)
     char* request_value = strtok(request_data, "\n");
     for (size_t i = 0; i < 9; i++)
     {
-        LOG_I("%s", request_value);
+        // LOG_I("%s", request_value);
         if (i==2) strcpy(date, request_value);
         memset(request_value, 0, strlen(request_value));
         request_value = strtok(NULL, "\n");
@@ -456,12 +456,19 @@ static void https_get_weather_data(char* json)
         LOG_E("json is NULL");
         return;
     }
+
+    printf("%s\r\n", json);
+
+    // printf("\r\n");
     cJSON* root = cJSON_Parse(json);
+
     if (root==NULL) {
         LOG_E("data is no json");
         return;
     }
+
     cJSON* cjson_city = cJSON_GetObjectItem(root, "city");
+    cJSON* cjson_wea = cJSON_GetObjectItem(root, "wea");
     cJSON* cjson_tem_day = cJSON_GetObjectItem(root, "tem_day");
     cJSON* cjson_tem_night = cJSON_GetObjectItem(root, "tem_night");
     cJSON* cjson_win = cJSON_GetObjectItem(root, "win");
@@ -470,6 +477,7 @@ static void https_get_weather_data(char* json)
     cJSON* cjson_humidity = cJSON_GetObjectItem(root, "humidity");
 
     strcpy(city, cjson_city->valuestring);
+    strcpy(wea, cjson_wea->valuestring);
     strcpy(tem_day, cjson_tem_day->valuestring);
     strcpy(tem_tem_night, cjson_tem_night->valuestring);
     strcpy(win, cjson_win->valuestring);

@@ -30,8 +30,10 @@
 #include "https_client.h"
 
 #define DBG_TAG "device ctrl"
+#define TIMER_STEP 3 //定时3 小时更新一次时间
 
 void* device_task;
+char wea[16] = { 0 };
 char city[32] = { 0 };
 char tem_day[16] = { 0 };
 char tem_tem_night[16] = { 0 };
@@ -39,6 +41,29 @@ char win[16] = { 0 };
 char air[16] = { 0 };
 char humidity[16] = { 0 };
 char pressure[16] = { 0 };
+
+static xTimerHandle http_timer;
+
+static void http_timer_cb(TimerHandle_t xTimer)
+{
+    uint32_t ulCount;
+    BaseType_t xHigherPriorityTaskWoken;
+    ulCount = (uint32_t)pvTimerGetTimerID(xTimer);
+    ulCount++;
+    if (ulCount>=TIMER_STEP) {
+        ulCount = 0;
+
+        vTimerSetTimerID(xTimer, (void*)ulCount);
+        vTaskResume(https_Handle);
+        xTimerStop(xTimer, 0);
+    }
+    else {
+        vTimerSetTimerID(xTimer, (void*)ulCount);
+
+    }
+
+}
+
 
 void device_state_task(void* arg)
 {
@@ -49,11 +74,12 @@ void device_state_task(void* arg)
     static ip_addr_t dns_addr;
     esay_flash_init();
     dns_init();
+    http_timer = xTimerCreate("http timer", pdMS_TO_TICKS(60*60*1000), pdTRUE, 0, http_timer_cb);
 
     xTaskCreate(https_get_weather_task, "http", 1024*3, &guider_ui, 4, (TaskHandle_t*)&https_Handle);
     while (1)
     {
-        xTaskNotifyWait(0x00, 0xffffffff, &device_state, portMAX_DELAY);
+        xTaskNotifyWait(0xffffffff, 0x0, &device_state, portMAX_DELAY);
         switch (device_state)
         {
             case DEVICE_STATE_SYSTEM_START:
@@ -131,13 +157,14 @@ void device_state_task(void* arg)
             {
                 //获取天气的功能在HTTP 源码中
                 LOG_I("DEVICE_STATE_WIFI_DISCONNECT");
-                lv_label_set_text_fmt(ui->screen_label_7, "%s市", city);
+                lv_label_set_text_fmt(ui->screen_label_7, "%s市：#ffa2c2 %s# ", city, wea);
                 lv_label_set_text_fmt(ui->screen_label_temp_day, "白天温度：%s ℃", tem_day);
                 lv_label_set_text_fmt(ui->screen_label_temp_night, "夜间温度：%s ℃", tem_tem_night);
                 lv_label_set_text_fmt(ui->screen_label_win, "风向：%s", win);
                 lv_label_set_text_fmt(ui->screen_label_pre, "气压：%s\n", pressure);
                 lv_label_set_text_fmt(ui->screen_label_air, "空气质量：%s", air);
                 lv_label_set_text_fmt(ui->screen_label_humi, "湿度：%s%", humidity);
+                xTimerStart(http_timer, 0);
             }
             break;
             default:
