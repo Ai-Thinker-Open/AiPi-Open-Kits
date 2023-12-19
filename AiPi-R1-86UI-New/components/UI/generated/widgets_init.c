@@ -83,6 +83,8 @@ void screen_digital_clock_date_timer(lv_timer_t* timer)
     if (lv_obj_is_valid(guider_ui.screen_digital_clock_date))
     {
         lv_dclock_set_text_fmt(guider_ui.screen_digital_clock_date, "%d:%02d:%02d", src_home_digital_clock_1_hour_value, src_home_digital_clock_1_min_value, src_home_digital_clock_1_sec_value);
+        lv_label_set_text_fmt(guider_ui.screen_label_wday, "星期%s", wday_strp[src_home_digital_date_wday_value]);
+        lv_label_set_text_fmt(guider_ui.screen_datetext_date, "%d/%d/%d", src_home_digital_date_yesr_value, src_home_digital_date_mont_value, src_home_digital_date_day_value);
     }
 }
 static lv_obj_t* screen_datetext_date_calendar;
