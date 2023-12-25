@@ -1,4 +1,4 @@
-# AiPi-CAM
+# AiPi-CAM-D200
 
 ## 注意
 cam-D 需将proj.conf文件的CONFIG_CHERRYUSB置0, cam-U则置1
@@ -33,3 +33,13 @@ make
 ```
 make flash COMX=/dev/ttyUSB0
 ```
+## 三、切换到100W 像素或200W像素的办法
+
+进入*bl61x_SDK/os/bsp/common/image_sensor* 路径，打开*gc2145.h* 头文件，把宏定义GC2145_SIZE_USE 进行修改：
+```
+#define GC2145_SIZE_USE       GC2145_SIZE_1600X1200
+```
+> GC2145_SIZE_1280X720 为100W像素
+>
+>GC2145_SIZE_1600X1200 为200W像素
+
