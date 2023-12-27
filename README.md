@@ -37,7 +37,10 @@ git submodule update
 ```
 . export.sh
 ```
-
+更新小安派驱动：
+```
+. update_sdk.sh
+```
 ## 三、编译和烧录
 
 在AiPi-Open-Kits下的*example*目录看见各种小安派的Demo文件夹，使用cd命令进入到需要编译和烧录的Demo下

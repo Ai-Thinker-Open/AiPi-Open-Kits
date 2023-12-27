@@ -2,4 +2,4 @@ mv bl61x_SDK/os/bsp/common bl61x_SDK/os/bsp/common_old
 cp -r bl61x_SDK/AiPi_bsp/common  bl61x_SDK/os/bsp/common
 cp -r bl61x_SDK/AiPi_bsp/dclock bl61x_SDK/os/components/graphics/lvgl/extra/widgets
 rm /bl61x_SDK/os/components/utils/CMakeLists.txt
-mv bl61x_SDK/AiPi_bsp/CMakeLists.txt bl61x_SDK/os/components/utils/
+cp bl61x_SDK/AiPi_bsp/CMakeLists.txt bl61x_SDK/os/components/utils/
