@@ -38,7 +38,7 @@ int main(void)
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();
-    lv_port_fs_init();
+
     setup_ui(&guider_ui);
 
     xTaskCreate(lvgl_tick_task, (char*)"lvgl", 1024, NULL, 2, NULL);
