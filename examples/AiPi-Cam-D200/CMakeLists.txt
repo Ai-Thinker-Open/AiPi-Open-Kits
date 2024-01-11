@@ -29,9 +29,15 @@ target_sources(app PRIVATE
 )
 
 if(CONFIG_CHERRYUSB)
+    if((NOT DEFINED CONFIG_CHERRYUSB_HOST) OR(NOT CONFIG_CHERRYUSB_HOST))
+        message(FATAL_ERROR "UVC(jpeg) need cherry_usb host")
+    endif()
+
     # add_subdirectory(${BL_SDK_BASE}/components/usb/usbh_uvc_uac usbh_uvc_uac)
     # sdk_add_static_library(libusbh_uvc_uac.a libhibooster.a)
     sdk_add_static_library(libusbh_uvc_uac.a)
+    sdk_add_compile_definitions(-D CONFIG_USB_EHCI_ISO)
+    sdk_add_include_directories(usb)
     target_sources(app PRIVATE
         video/usbh_uvc_callback.c
 
@@ -42,4 +48,4 @@ endif()
 # sdk_set_linker_script(bl616_psram.ld)
 sdk_set_main_file(main.c)
 
-project(AiPi-Cam-D200)
+project(image_transmission)

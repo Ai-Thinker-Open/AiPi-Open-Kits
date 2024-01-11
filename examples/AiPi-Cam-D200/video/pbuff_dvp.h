@@ -27,7 +27,7 @@ typedef struct {
 extern volatile uint32_t g_dvp_fps;
 
 extern uint8_t picture_buffer[1][PBUFF_DATA_SIZE];
-extern TaskHandle_t dvp_mjpeg_task_hd;
+// extern TaskHandle_t dvp_mjpeg_task_hd;
 
 int dvp_cam_init(void);
 

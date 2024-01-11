@@ -8,8 +8,7 @@
 #define VIDEO_ISO_INTERVAL (2)
 #define VIDEO_ISO_PACKETS  (8 * VIDEO_ISO_INTERVAL)
 #define VIDEO_EP_MPS       3072
-#define WIDTH              640
-#define HEIGTH             480
+
 
 extern volatile uint16_t g_video_width;
 extern volatile uint16_t g_video_height;
@@ -28,7 +27,7 @@ void usbh_video_fps_record(void);
 void usbh_video_test(void);
 
 #define AUDIO_SAMPLING_FREQ 16000
-#define AUDIO_ISO_PACKETS   3
+#define AUDIO_ISO_PACKETS   4
 #define AUDIO_EP_MPS        512
 
 extern volatile void *g_uac_frame_buff;

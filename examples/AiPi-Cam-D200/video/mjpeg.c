@@ -44,7 +44,7 @@ uint8_t __attribute__((section(".psram_data"), aligned(32))) picture_buffer[PBUF
 /***** mjpeg ctrl *****/
 volatile uint32_t g_mjpeg_fps = 0;
 
-static struct bflb_device_s* mjpeg;
+static struct bflb_device_s *mjpeg;
 static struct bflb_mjpeg_config_s config;
 
 static volatile jpeg_frame_t mjpeg_compress_frame = {
@@ -58,15 +58,15 @@ static TaskHandle_t dvp_task_handle;
 
 volatile uint32_t g_dvp_fps = 0;
 
-static struct bflb_device_s* i2c0;
-static struct bflb_device_s* cam0;
+static struct bflb_device_s *i2c0;
+static struct bflb_device_s *cam0;
 
 static struct bflb_cam_config_s cam_config;
-static struct image_sensor_config_s* sensor_config;
+static struct image_sensor_config_s *sensor_config;
 TaskHandle_t dvp_mjpeg_task_hd;
 
 #if 0
-void mjpeg_dump_hex(uint8_t* data, uint32_t len)
+void mjpeg_dump_hex(uint8_t *data, uint32_t len)
 {
     uint32_t i = 0;
 
@@ -81,14 +81,14 @@ void mjpeg_dump_hex(uint8_t* data, uint32_t len)
     printf("\r\n");
 }
 #endif
-static void cam_isr(int irq, void* arg)
+static void cam_isr(int irq, void *arg)
 {
     static uint64_t time_last = 0;
     static uint16_t cnt = 0;
     pbuff_yuyv_frame_t dvp_frame;
     uint16_t i;
 
-    uint8_t* buff_using;
+    uint8_t *buff_using;
 
     if (time_last == 0) {
         time_last = bflb_mtimer_get_time_us();
@@ -116,7 +116,7 @@ static void cam_isr(int irq, void* arg)
         portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
     }
 }
-static void mjpeg_isr(int irq, void* arg)
+static void mjpeg_isr(int irq, void *arg)
 {
     // uint8_t *pic;
     // uint32_t len;
@@ -177,7 +177,7 @@ static void mjpeg_isr(int irq, void* arg)
 }
 
 
-void dvp_mjpeg_task(void* pvParameters)
+void dvp_mjpeg_task(void *pvParameters)
 {
     int ret;
     uint64_t time_last;
@@ -185,7 +185,7 @@ void dvp_mjpeg_task(void* pvParameters)
 
     // static jpeg_frame_t mjpeg_compress_frame;
 
-    uint8_t* pic;
+    uint8_t *pic;
     uint32_t len;
 
     vTaskDelay(1000);
@@ -204,6 +204,8 @@ void dvp_mjpeg_task(void* pvParameters)
             continue;
         }
 
+       
+
         /* waiting dvp isr */
         ulTaskNotifyTakeIndexed(DVP_ISR_NOTIFY_INDEX, pdTRUE, portMAX_DELAY);
         DVP_JPEG_DBG("DVP_ISR_NOTIFY\r\n");
@@ -220,29 +222,27 @@ void dvp_mjpeg_task(void* pvParameters)
                 return;
             }
 
-            if ((void*)pic != (void*)(mjpeg_compress_frame.frame_address)) {
+            if ((void *)pic != (void *)(mjpeg_compress_frame.frame_address)) {
                 printf("ERROR: mjpeg output address error! 0x%08X -> 0x%08X \r\n", (uint32_t)pic, (uint32_t)mjpeg_compress_frame.frame_address);
                 return;
             }
 
             if (len > MJPEG_MAX_SIZE) {
                 /* frame size over, free the buff */
-                jpeg_frame_free((jpeg_frame_t*)&mjpeg_compress_frame);
+                jpeg_frame_free((jpeg_frame_t *)&mjpeg_compress_frame);
                 printf("ERROR: mjpeg frame size over: %d > %d\r\n", len, MJPEG_MAX_SIZE);
 
-            }
-            else {
+            } else {
                 mjpeg_compress_frame.frame_size = len;
-                jpeg_frame_push((jpeg_frame_t*)&mjpeg_compress_frame);
+                jpeg_frame_push((jpeg_frame_t *)&mjpeg_compress_frame);
                 DVP_JPEG_DBG("frame_size:%d\r\n", len);
             }
         }
         else {
-            jpeg_frame_free((jpeg_frame_t*)&mjpeg_compress_frame);
+            jpeg_frame_free((jpeg_frame_t *)&mjpeg_compress_frame);
             if (mjpeg_status == JPEG_OVER_SIZE) {
                 printf("mjpeg over size, frame drop\r\n");
-            }
-            else {
+            } else {
                 printf("mjpeg unkown error %d\r\n", mjpeg_status);
             }
         }
@@ -262,8 +262,7 @@ int dvp_cam_init(void)
     /* image_sensor init */
     if (image_sensor_scan(i2c0, &sensor_config)) {
         DVP_JPEG_INFO("Sensor name: %s\r\n", sensor_config->name);
-    }
-    else {
+    } else {
         DVP_JPEG_ERR("Error! Can't identify sensor!\r\n");
         return -1;
     }
@@ -335,10 +334,10 @@ void mjpeg_init(uint8_t quality)
     // printf("mjpeg_init:%d\r\n", mjpeg_compress_frame_push(picture_buffer[0]));
     // bflb_mjpeg_start(mjpeg);
 
-    xTaskCreate(dvp_mjpeg_task, (char*)"dvp_mjpeg_task", 512, NULL, 19, &dvp_mjpeg_task_hd);
+    xTaskCreate(dvp_mjpeg_task, (char *)"dvp_mjpeg_task", 512, NULL, 19, &dvp_mjpeg_task_hd);
 }
 
-int mjpeg_compress_frame_push(void* yuv_src)
+int mjpeg_compress_frame_push(void *yuv_src)
 {
     static uint64_t time_last;
     static uint16_t cnt = 0;
@@ -349,7 +348,7 @@ int mjpeg_compress_frame_push(void* yuv_src)
     }
 
     /* allco frame buff */
-    if (jpeg_frame_alloc((jpeg_frame_t*)&mjpeg_compress_frame, 0) < 0) {
+    if (jpeg_frame_alloc((jpeg_frame_t *)&mjpeg_compress_frame, 0) < 0) {
         /* no buff */
         return -2;
     }
@@ -394,7 +393,7 @@ int jpeg_frame_init(void)
     return 0;
 }
 
-int jpeg_frame_alloc(jpeg_frame_t* jpeg_frame_info, uint32_t timeout)
+int jpeg_frame_alloc(jpeg_frame_t *jpeg_frame_info, uint32_t timeout)
 {
     BaseType_t ret;
     BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
@@ -409,23 +408,21 @@ int jpeg_frame_alloc(jpeg_frame_t* jpeg_frame_info, uint32_t timeout)
 
         bflb_irq_restore(flag);
 
-    }
-    else {
+    } else {
         ret = xQueueReceive(jpeg_frame_pool_queue, jpeg_frame_info, timeout);
     }
 
     if (ret == pdTRUE) {
         jpeg_frame_info->frame_size = MJPEG_MAX_SIZE;
         return 0;
-    }
-    else {
+    } else {
         jpeg_frame_info->frame_id = -1;
         jpeg_frame_info->frame_address = NULL;
         return -1;
     }
 }
 
-int jpeg_frame_push(jpeg_frame_t* jpeg_frame_info)
+int jpeg_frame_push(jpeg_frame_t *jpeg_frame_info)
 {
     BaseType_t ret;
     BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
@@ -445,8 +442,7 @@ int jpeg_frame_push(jpeg_frame_t* jpeg_frame_info)
 
         bflb_irq_restore(flag);
 
-    }
-    else {
+    } else {
         ret = xQueueSend(jpeg_frame_queue, jpeg_frame_info, 0);
     }
 
@@ -454,14 +450,13 @@ int jpeg_frame_push(jpeg_frame_t* jpeg_frame_info)
         jpeg_frame_info->frame_id = -1;
         jpeg_frame_info->frame_address = NULL;
         return 0;
-    }
-    else {
+    } else {
         printf("ERROR: jpeg push queue full\r\n");
         return -2;
     }
 }
 
-int jpeg_frame_pop(jpeg_frame_t* jpeg_frame_info, uint32_t timeout)
+int jpeg_frame_pop(jpeg_frame_t *jpeg_frame_info, uint32_t timeout)
 {
     BaseType_t ret;
     BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
@@ -476,22 +471,20 @@ int jpeg_frame_pop(jpeg_frame_t* jpeg_frame_info, uint32_t timeout)
 
         bflb_irq_restore(flag);
 
-    }
-    else {
+    } else {
         ret = xQueueReceive(jpeg_frame_queue, jpeg_frame_info, timeout);
     }
 
     if (ret == pdTRUE) {
         return 0;
-    }
-    else {
+    } else {
         jpeg_frame_info->frame_id = -1;
         jpeg_frame_info->frame_address = NULL;
         return -1;
     }
 }
 
-int jpeg_frame_free(jpeg_frame_t* jpeg_frame_info)
+int jpeg_frame_free(jpeg_frame_t *jpeg_frame_info)
 {
     BaseType_t ret;
     BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
@@ -511,8 +504,7 @@ int jpeg_frame_free(jpeg_frame_t* jpeg_frame_info)
 
         bflb_irq_restore(flag);
 
-    }
-    else {
+    } else {
         ret = xQueueSend(jpeg_frame_pool_queue, jpeg_frame_info, 0);
     }
 
@@ -520,8 +512,7 @@ int jpeg_frame_free(jpeg_frame_t* jpeg_frame_info)
         jpeg_frame_info->frame_id = -1;
         jpeg_frame_info->frame_address = NULL;
         return 0;
-    }
-    else {
+    } else {
         printf("ERROR: jpeg free queue timeout\r\n");
         return -1;
     }

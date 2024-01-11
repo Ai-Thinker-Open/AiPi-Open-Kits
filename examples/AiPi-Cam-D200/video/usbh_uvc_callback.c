@@ -31,7 +31,7 @@ void usbh_video_fps_calcul()
     }
 }
 
-#if defined(TEST_MJPEG) && (TEST_MJPEG == 1)
+#if 1//defined(TEST_MJPEG) && (TEST_MJPEG == 1)
 
 #include "mjpeg.h"
 void usbh_video_one_frame_callback_mjpeg(struct usbh_videostreaming *stream)
@@ -64,6 +64,7 @@ void usbh_video_one_frame_callback_mjpeg(struct usbh_videostreaming *stream)
         g_uvc_frame_buff = NULL;
     } else {
         g_uvc_frame_buff = jpeg_frame.frame_address;
+        stream->buflen = jpeg_frame.frame_size;
     }
 
     if (g_uvc_frame_buff) {

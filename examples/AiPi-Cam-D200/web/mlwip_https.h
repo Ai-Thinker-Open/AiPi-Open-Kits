@@ -1,7 +1,6 @@
 #ifndef __MLWIP_HTTPS_H_
 #define __MLWIP_HTTPS_H_
-// #include "wm_include.h"
-// #include "wm_psram.h"
+
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include <string.h>
