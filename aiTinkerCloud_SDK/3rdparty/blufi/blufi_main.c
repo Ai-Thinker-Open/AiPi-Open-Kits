@@ -94,7 +94,10 @@ static void example_event_callback(_blufi_cb_event_t event, _blufi_cb_param_t* p
             printf("BLUFI ble disconnect\r\n");
             ble_is_connected = false;
             blufi_security_deinit();
-            axk_blufi_adv_start();
+            axk_blufi_profile_deinit();
+            axk_hal_blufi_deinit();
+            axk_blufi_adv_stop();
+            axk_hal_ble_role_set(BLE_ROLE_DEINIT);
             break;
         case AXK_BLUFI_EVENT_SET_WIFI_OPMODE:
             printf("BLUFI Set WIFI opmode %d\r\n", param->wifi_mode.op_mode);
